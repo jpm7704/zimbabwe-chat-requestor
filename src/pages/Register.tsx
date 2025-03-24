@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -25,12 +25,15 @@ const Register = () => {
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear error when user types
+    if (error) setError(null);
   };
 
   const handleRoleChange = (value: string) => {
@@ -44,6 +47,7 @@ const Register = () => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
+      setError("Passwords don't match");
       toast({
         title: "Passwords don't match",
         description: "Please ensure both passwords match.",
@@ -53,6 +57,7 @@ const Register = () => {
     }
     
     if (!agreedToTerms) {
+      setError("You must agree to the terms and conditions");
       toast({
         title: "Terms required",
         description: "You must agree to the terms and conditions.",
@@ -62,10 +67,24 @@ const Register = () => {
     }
     
     setLoading(true);
+    setError(null);
     
-    // Simulate API call with a delay
-    setTimeout(() => {
-      // Mock successful registration
+    try {
+      // Register with Supabase
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            role: formData.role
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
       toast({
         title: "Account created",
         description: `Your BGF Zimbabwe account has been created as ${formData.role}.`
@@ -73,9 +92,17 @@ const Register = () => {
       
       // Redirect to requests page
       navigate("/requests");
-      
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      setError(error.message || "Failed to create account.");
+      toast({
+        title: "Registration failed",
+        description: error.message || "An error occurred during registration.",
+        variant: "destructive"
+      });
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -90,6 +117,11 @@ const Register = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm mb-4">
+                  {error}
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First name</Label>
