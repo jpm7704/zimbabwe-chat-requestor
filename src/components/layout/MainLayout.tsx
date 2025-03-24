@@ -3,12 +3,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import { 
-  SidebarProvider, 
-  SidebarTrigger, 
-  SidebarInset, 
-  SidebarRail 
-} from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from "./AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -25,17 +20,29 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
+  // If user is authenticated, render the sidebar layout
+  if (isAuthenticated) {
+    return (
+      <SidebarProvider defaultOpen={true}>
+        <div className="min-h-screen flex w-full">
+          <AppSidebar />
+          <div className="flex flex-col min-h-screen flex-1">
+            <main className="flex-grow pt-20">
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
+  
+  // For unauthenticated users, render the regular layout
   return (
     <div className="min-h-screen flex flex-col w-full">
-      {isAuthenticated ? <AppSidebar /> : <Navbar />}
+      <Navbar />
       <div className="flex flex-col min-h-screen flex-1">
-        {!isAuthenticated && <Navbar />}
         <main className="flex-grow pt-20">
-          {isAuthenticated && (
-            <SidebarProvider defaultOpen={true}>
-              <SidebarRail />
-            </SidebarProvider>
-          )}
           {children}
         </main>
         <Footer />

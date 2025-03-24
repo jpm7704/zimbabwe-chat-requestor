@@ -7,7 +7,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarProvider
+  SidebarRail
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import RoleMenu from "./RoleMenu";
@@ -18,7 +18,7 @@ export function AppSidebar() {
   const { userProfile, handleLogout, formatRole, loading } = useAuth();
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <>
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center h-14 px-4">
@@ -70,7 +70,8 @@ export function AppSidebar() {
           </div>
         </SidebarFooter>
       </Sidebar>
-    </SidebarProvider>
+      <SidebarRail />
+    </>
   );
 }
 
