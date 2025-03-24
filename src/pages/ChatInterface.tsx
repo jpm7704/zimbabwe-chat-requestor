@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { ChatMessage as ChatMessageType } from "@/types";
+import { ChatMessage as ChatMessageType, RequestType } from "@/types";
 import { 
   Send, 
   PaperclipIcon, 
@@ -31,7 +31,11 @@ const ChatInterface = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [activeTab, setActiveTab] = useState("chat");
   const [showNewRequest, setShowNewRequest] = useState(false);
-  const [requestForm, setRequestForm] = useState({
+  const [requestForm, setRequestForm] = useState<{
+    type: string;
+    title: string;
+    description: string;
+  }>({
     type: "",
     title: "",
     description: ""
@@ -162,8 +166,12 @@ const ChatInterface = () => {
     setSubmitting(true);
     
     try {
-      // Submit the request
-      const result = await createRequest(requestForm);
+      // Cast the string type to RequestType before submitting
+      const result = await createRequest({
+        type: requestForm.type as RequestType,
+        title: requestForm.title,
+        description: requestForm.description
+      });
       
       // In a real app, we would now upload the files
       // For this demo, we'll just simulate success
