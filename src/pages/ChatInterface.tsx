@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useRequestForm } from "@/hooks/useRequestForm";
 import NewRequestForm from "@/components/request/NewRequestForm";
-import { FormFile, Send } from "lucide-react";
+import { FileText, Send } from "lucide-react";
 
 const RequestSubmissionPage = () => {
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ const RequestSubmissionPage = () => {
 
         {!showNewRequest ? (
           <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border rounded-lg space-y-4">
-            <FormFile size={48} className="text-muted-foreground" />
+            <FileText size={48} className="text-muted-foreground" />
             <h2 className="text-xl font-semibold text-center">Create a New Request</h2>
             <p className="text-center text-muted-foreground max-w-md">
               Submit a request for assistance from BGF Zimbabwe. Please provide as much detail as possible to help us process your request effectively.
