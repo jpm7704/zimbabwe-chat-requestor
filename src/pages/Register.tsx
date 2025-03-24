@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, KeyRound, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -21,11 +22,38 @@ const Register = () => {
     lastName: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    adminCode: ""
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
+  const [activeTab, setActiveTab] = useState("user");
+  const [checkingFirstTimeSetup, setCheckingFirstTimeSetup] = useState(true);
+
+  // Check if this is first-time setup (no admin accounts exist)
+  useEffect(() => {
+    const checkForAdmins = async () => {
+      try {
+        const { data, error, count } = await supabase
+          .from('user_profiles')
+          .select('id', { count: 'exact' })
+          .eq('role', 'management');
+
+        if (error) throw error;
+        
+        // If there are no management users, this is first-time setup
+        setIsFirstTimeSetup(count === 0);
+      } catch (error) {
+        console.error("Error checking for admin accounts:", error);
+      } finally {
+        setCheckingFirstTimeSetup(false);
+      }
+    };
+
+    checkForAdmins();
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -68,7 +96,24 @@ const Register = () => {
     setError(null);
     
     try {
-      // All new users are registered with the 'user' role by default
+      // Determine the role based on conditions
+      let userRole = "user"; // Default role
+      
+      // For first-time setup or valid admin code
+      if (activeTab === "admin") {
+        // First-time setup - allow admin registration without code
+        if (isFirstTimeSetup) {
+          userRole = "management";
+        } 
+        // Verify admin code - this is a simplified example
+        else if (formData.adminCode === "BGF-ADMIN-2024") {
+          userRole = "management";
+        } else {
+          throw new Error("Invalid admin verification code");
+        }
+      }
+      
+      // Register the user with the determined role
       const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -76,7 +121,7 @@ const Register = () => {
           data: {
             firstName: formData.firstName,
             lastName: formData.lastName,
-            role: "user" // Default role for all new registrations
+            role: userRole
           }
         }
       });
@@ -84,7 +129,7 @@ const Register = () => {
       if (error) throw error;
       
       toast({
-        title: "Account created",
+        title: userRole === "management" ? "Admin account created" : "Account created",
         description: "Your BGF Zimbabwe account has been created. You can now log in."
       });
       
@@ -113,12 +158,53 @@ const Register = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Tab selector for regular or admin registration */}
+            <Tabs defaultValue="user" value={activeTab} onValueChange={setActiveTab} className="mb-6">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="user" className="flex items-center gap-2">
+                  <User size={16} />
+                  <span>Regular User</span>
+                </TabsTrigger>
+                <TabsTrigger value="admin" className="flex items-center gap-2">
+                  <KeyRound size={16} />
+                  <span>Admin Setup</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm mb-4">
                   {error}
                 </div>
               )}
+
+              {/* First-time setup notice */}
+              {activeTab === "admin" && isFirstTimeSetup && (
+                <div className="p-3 rounded-md bg-blue-100 text-blue-800 text-sm mb-4">
+                  First-time setup detected. You will be registered as the initial admin user.
+                </div>
+              )}
+              
+              {/* Admin verification code input */}
+              {activeTab === "admin" && !isFirstTimeSetup && (
+                <div className="space-y-2">
+                  <Label htmlFor="adminCode">Admin Verification Code</Label>
+                  <Input
+                    id="adminCode"
+                    name="adminCode"
+                    type="text"
+                    placeholder="Enter admin code"
+                    value={formData.adminCode}
+                    onChange={handleChange}
+                    required={activeTab === "admin"}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Please enter the admin verification code provided by the system administrator.
+                  </p>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First name</Label>
@@ -179,9 +265,13 @@ const Register = () => {
                   required
                 />
               </div>
-              <div className="text-sm text-muted-foreground">
-                All new accounts are registered as general requesters. To request staff access, please contact the administrator after registration.
-              </div>
+              
+              {activeTab === "user" && (
+                <div className="text-sm text-muted-foreground">
+                  All new accounts are registered as general requesters. To request staff access, please contact the administrator after registration.
+                </div>
+              )}
+              
               <div className="flex items-center space-x-2">
                 <Checkbox 
                   id="terms" 
@@ -201,9 +291,9 @@ const Register = () => {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loading}
+                disabled={loading || (activeTab === "admin" && !isFirstTimeSetup && !formData.adminCode)}
               >
-                {loading ? "Creating account..." : "Create account"}
+                {loading ? "Creating account..." : activeTab === "admin" ? "Create Admin Account" : "Create User Account"}
               </Button>
             </form>
           </CardContent>
