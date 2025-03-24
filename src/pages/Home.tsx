@@ -33,11 +33,11 @@ const Home = () => {
         <div className="container px-4 mx-auto">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              Business Growth Fund <span className="text-primary">Zimbabwe</span>
+              Humanitarian <span className="text-primary">Assistance</span>
             </h1>
             <p className="mb-8 text-lg md:text-xl text-muted-foreground leading-relaxed">
-              Supporting entrepreneurs and businesses across Zimbabwe through funding, 
-              mentorship, and training to drive economic growth and innovation.
+              Supporting communities across Zimbabwe through medical, educational, financial, 
+              and emergency relief assistance programs.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button asChild size="lg" className="h-12 px-6">
@@ -60,31 +60,31 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="glass dark:glass-dark border-primary/20">
               <CardHeader className="pb-2">
-                <CardTitle className="text-4xl font-bold">$10M+</CardTitle>
+                <CardTitle className="text-4xl font-bold">15,000+</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  In funding provided to Zimbabwean businesses
+                  Individuals assisted through our programs
                 </CardDescription>
               </CardContent>
             </Card>
             <Card className="glass dark:glass-dark border-primary/20">
               <CardHeader className="pb-2">
-                <CardTitle className="text-4xl font-bold">500+</CardTitle>
+                <CardTitle className="text-4xl font-bold">9</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Entrepreneurs supported across Zimbabwe
+                  Types of assistance programs available
                 </CardDescription>
               </CardContent>
             </Card>
             <Card className="glass dark:glass-dark border-primary/20">
               <CardHeader className="pb-2">
-                <CardTitle className="text-4xl font-bold">5</CardTitle>
+                <CardTitle className="text-4xl font-bold">10</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Provinces with active BGF support programs
+                  Provinces with active support operations
                 </CardDescription>
               </CardContent>
             </Card>
@@ -96,16 +96,16 @@ const Home = () => {
       <section className="py-16 md:py-24">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">How We Can Support You</h2>
+            <h2 className="text-3xl font-bold mb-4">Assistance Programs</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              BGF Zimbabwe offers various support programs designed to help businesses at different stages of growth
+              We offer various assistance programs designed to help individuals and communities in need
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading ? (
               // Loading placeholders
-              Array.from({ length: 5 }).map((_, i) => (
+              Array.from({ length: 9 }).map((_, i) => (
                 <Card key={i} className="animate-pulse">
                   <CardHeader>
                     <div className="h-8 bg-muted rounded w-3/4 mb-2"></div>
@@ -203,9 +203,9 @@ const Home = () => {
       <section className="py-16 md:py-24">
         <div className="container px-4 mx-auto">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Ready to Grow Your Business?</h2>
+            <h2 className="text-3xl font-bold mb-4">Need Assistance?</h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Start your application today and take the first step towards growing your business with support from BGF Zimbabwe
+              Start your application today and take the first step towards receiving the support you need
             </p>
             <Button asChild size="lg" className="h-12 px-8">
               <Link to="/chat">

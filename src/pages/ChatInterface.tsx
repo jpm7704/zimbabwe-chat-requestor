@@ -259,11 +259,15 @@ const ChatInterface = () => {
             required
           >
             <option value="">Select Request Type</option>
-            <option value="business_funding">Business Funding</option>
-            <option value="training_support">Training Support</option>
-            <option value="mentorship">Mentorship Program</option>
-            <option value="market_access">Market Access</option>
-            <option value="other">Other Support</option>
+            <option value="medical_assistance">Medical Assistance</option>
+            <option value="educational_support">Educational Support</option>
+            <option value="financial_aid">Financial Aid</option>
+            <option value="food_assistance">Food Assistance</option>
+            <option value="shelter_assistance">Shelter Assistance</option>
+            <option value="water_sanitation">Water & Sanitation</option>
+            <option value="psychosocial_support">Psychosocial Support</option>
+            <option value="disaster_relief">Disaster Relief</option>
+            <option value="other_assistance">Other Assistance</option>
           </select>
         </div>
         
@@ -377,7 +381,7 @@ const ChatInterface = () => {
   return (
     <div className="container px-4 mx-auto max-w-5xl">
       <div className="py-8">
-        <h1 className="text-3xl font-bold mb-2">BGF Zimbabwe Support</h1>
+        <h1 className="text-3xl font-bold mb-2">Humanitarian Assistance</h1>
         <p className="text-muted-foreground mb-6">
           Chat with our support team or submit a new request for assistance
         </p>

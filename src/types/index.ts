@@ -1,4 +1,3 @@
-
 // Request status types
 export type RequestStatus = 
   | "submitted" 
@@ -10,20 +9,35 @@ export type RequestStatus =
   | "rejected";
 
 export type RequestType = 
-  | "business_funding" 
-  | "training_support" 
-  | "mentorship" 
-  | "market_access" 
-  | "other";
+  | "medical_assistance" 
+  | "educational_support" 
+  | "financial_aid" 
+  | "food_assistance" 
+  | "shelter_assistance" 
+  | "water_sanitation" 
+  | "psychosocial_support" 
+  | "disaster_relief" 
+  | "other_assistance";
 
 // Document types
 export type DocumentType = 
   | "id_document" 
-  | "business_plan" 
-  | "financial_statement" 
-  | "tax_clearance" 
-  | "company_registration" 
-  | "bank_statement" 
+  | "medical_records" 
+  | "prescription" 
+  | "medical_referral" 
+  | "educational_records" 
+  | "school_fee_structure" 
+  | "admission_letter" 
+  | "financial_statements" 
+  | "bank_statements" 
+  | "tax_documents" 
+  | "proof_of_income" 
+  | "proof_of_residence" 
+  | "vulnerability_assessment" 
+  | "disaster_assessment" 
+  | "property_documents" 
+  | "referral_letter" 
+  | "supporting_letter" 
   | "other";
 
 // Main Request interface
