@@ -15,12 +15,23 @@ const RequestSubmissionPage = () => {
   // Use the request form hook
   const requestFormProps = useRequestForm(setMessages);
 
-  // Show the request form if 'action=new' is in the URL
+  // Show the request form if 'action=new' is in the URL or if type is specified
   useEffect(() => {
-    if (searchParams.get("action") === "new") {
+    const action = searchParams.get("action");
+    const type = searchParams.get("type");
+    
+    if (action === "new" || type) {
       setShowNewRequest(true);
+      
+      // If type is specified, set it in the form
+      if (type) {
+        requestFormProps.setRequestForm(prev => ({
+          ...prev,
+          type
+        }));
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, requestFormProps.setRequestForm]);
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">
@@ -56,7 +67,7 @@ const RequestSubmissionPage = () => {
               selectedFiles={requestFormProps.selectedFiles}
               setSelectedFiles={requestFormProps.setSelectedFiles}
               submitting={requestFormProps.submitting}
-              setShowNewRequest={setShowNewRequest}
+              setShowNewRequest={requestFormProps.setShowNewRequest}
               handleRequestSubmit={requestFormProps.handleRequestSubmit}
               requestTypeInfo={requestFormProps.requestTypeInfo}
             />

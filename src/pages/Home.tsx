@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle, BarChart3, Users, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +9,7 @@ import { getRequestTypes } from "@/services/requestService";
 const Home = () => {
   const [requestTypes, setRequestTypes] = useState<RequestTypeInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRequestTypes = async () => {
@@ -26,6 +26,10 @@ const Home = () => {
     fetchRequestTypes();
   }, []);
 
+  const handleApplyNow = (type: string) => {
+    navigate(`/submit?type=${type}&action=new`);
+  };
+
   return (
     <div className="animate-fade-in">
       {/* Hero Section */}
@@ -41,7 +45,7 @@ const Home = () => {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button asChild size="lg" className="h-12 px-6">
-                <Link to="/chat">
+                <Link to="/submit?action=new">
                   Start New Request
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -122,7 +126,11 @@ const Home = () => {
             ) : (
               // Actual request types
               requestTypes.map((type) => (
-                <Card key={type.type} className="group hover:border-primary/50 transition-all duration-300">
+                <Card 
+                  key={type.type} 
+                  className="group hover:border-primary/50 transition-all duration-300 cursor-pointer"
+                  onClick={() => handleApplyNow(type.type)}
+                >
                   <CardHeader>
                     <CardTitle>{type.name}</CardTitle>
                     <CardDescription>
@@ -135,11 +143,9 @@ const Home = () => {
                     </p>
                   </CardContent>
                   <CardFooter>
-                    <Button asChild className="w-full group-hover:bg-primary transition-colors duration-300">
-                      <Link to={`/chat?type=${type.type}`}>
-                        Apply Now
-                        <ArrowRight className="ml-2 h-4 w-4 opacity-70" />
-                      </Link>
+                    <Button className="w-full group-hover:bg-primary transition-colors duration-300">
+                      Apply Now
+                      <ArrowRight className="ml-2 h-4 w-4 opacity-70" />
                     </Button>
                   </CardFooter>
                 </Card>
@@ -208,7 +214,7 @@ const Home = () => {
               Start your application today and take the first step towards receiving the support you need
             </p>
             <Button asChild size="lg" className="h-12 px-8">
-              <Link to="/chat">
+              <Link to="/submit?action=new">
                 Start New Request
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>

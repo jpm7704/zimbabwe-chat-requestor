@@ -24,6 +24,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<MainLayout><Home /></MainLayout>} />
           <Route path="/submit" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
+          <Route path="/chat" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
           <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
           <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
           <Route path="/login" element={<Login />} />

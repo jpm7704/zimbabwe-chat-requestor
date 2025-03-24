@@ -1,3 +1,4 @@
+
 // Request status types
 export type RequestStatus = 
   | "submitted" 
@@ -17,6 +18,8 @@ export type RequestType =
   | "water_sanitation" 
   | "psychosocial_support" 
   | "disaster_relief" 
+  | "livelihood_development"
+  | "community_development"
   | "other_assistance";
 
 // Document types
@@ -37,7 +40,10 @@ export type DocumentType =
   | "disaster_assessment" 
   | "property_documents" 
   | "referral_letter" 
-  | "supporting_letter" 
+  | "supporting_letter"
+  | "project_proposal"
+  | "community_letter"
+  | "community_assessment" 
   | "other";
 
 // Main Request interface
