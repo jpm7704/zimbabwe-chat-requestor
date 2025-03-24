@@ -12,6 +12,11 @@ import RequestDetail from "./pages/RequestDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
+import FieldWork from "./pages/FieldWork";
+import Analytics from "./pages/Analytics";
+import Reports from "./pages/Reports";
+import StaffManagement from "./pages/StaffManagement";
+import AdminPanel from "./pages/AdminPanel";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +32,14 @@ const App = () => (
           <Route path="/chat" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
           <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
           <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
+          
+          {/* Role-specific routes */}
+          <Route path="/field-work" element={<MainLayout><FieldWork /></MainLayout>} />
+          <Route path="/analytics" element={<MainLayout><Analytics /></MainLayout>} />
+          <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
+          <Route path="/staff" element={<MainLayout><StaffManagement /></MainLayout>} />
+          <Route path="/admin" element={<MainLayout><AdminPanel /></MainLayout>} />
+          
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
