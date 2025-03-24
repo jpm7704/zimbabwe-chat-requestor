@@ -8,9 +8,10 @@ import { useToast } from '@/hooks/use-toast';
 interface RequirePermissionProps {
   children: ReactNode;
   permission: keyof Permissions;
+  redirectTo?: string;
 }
 
-const RequirePermission = ({ children, permission }: RequirePermissionProps) => {
+const RequirePermission = ({ children, permission, redirectTo = '/' }: RequirePermissionProps) => {
   const { isAuthenticated, userProfile, loading } = useAuth();
   const permissions = usePermissions(userProfile);
   const navigate = useNavigate();
@@ -33,9 +34,19 @@ const RequirePermission = ({ children, permission }: RequirePermissionProps) => 
         description: "You don't have permission to access this page.",
         variant: "destructive",
       });
-      navigate('/');
+      
+      // Redirect based on user role to their appropriate dashboard
+      if (userProfile?.role === 'field_officer') {
+        navigate('/field-work');
+      } else if (userProfile?.role === 'programme_manager') {
+        navigate('/analytics');
+      } else if (userProfile?.role === 'management') {
+        navigate('/admin');
+      } else {
+        navigate(redirectTo);
+      }
     }
-  }, [isAuthenticated, permissions, permission, navigate, loading, toast]);
+  }, [isAuthenticated, permissions, permission, navigate, loading, toast, userProfile, redirectTo]);
 
   // Show nothing while checking permissions
   if (loading || !isAuthenticated || !permissions[permission]) {

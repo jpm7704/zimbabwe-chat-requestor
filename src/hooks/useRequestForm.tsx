@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { RequestType, RequestTypeInfo, ChatMessage as ChatMessageType } from "@/types";
 import { createRequest, getRequestTypeInfo } from "@/services/requestService";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<ChatMessageType[]>>) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { userProfile } = useAuth();
   
   const [showNewRequest, setShowNewRequest] = useState(false);
   const [requestForm, setRequestForm] = useState<{
@@ -42,6 +44,17 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
 
   const handleRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if user is logged in
+    if (!userProfile) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to submit a request.",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
     
     // Validate form
     if (!requestForm.type || !requestForm.title || !requestForm.description) {
@@ -87,7 +100,7 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
         id: Date.now().toString(),
         senderId: "system",
         senderType: "system",
-        content: `Your request has been submitted successfully! Your ticket number is **${result.ticketNumber}**. You can track the status of your request in the Requests section.`,
+        content: `Your request has been submitted successfully! Your ticket number is **${result.ticketNumber}**. This request will now go through our process:\n\n1. Field Officer Verification\n2. Programme Manager Review\n3. Management Approval\n\nYou can track the status of your request in the Requests section.`,
         timestamp: new Date().toISOString(),
       };
       
