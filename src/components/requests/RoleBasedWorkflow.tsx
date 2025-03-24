@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { 
   ClipboardCheck, 
   ListFilter,
-  Clock
+  Clock,
+  Plus
 } from "lucide-react";
 import { UserProfile } from "@/hooks/useAuth";
 import { Permissions } from "@/hooks/usePermissions";
