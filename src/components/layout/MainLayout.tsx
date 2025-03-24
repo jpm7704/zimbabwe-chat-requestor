@@ -26,19 +26,21 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   }, [location.pathname]);
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex flex-col w-full">
-        {isAuthenticated ? <AppSidebar /> : <Navbar />}
-        <div className="flex flex-col min-h-screen flex-1">
-          {!isAuthenticated && <Navbar />}
-          <main className="flex-grow pt-20">
-            {isAuthenticated && <SidebarRail />}
-            {children}
-          </main>
-          <Footer />
-        </div>
+    <div className="min-h-screen flex flex-col w-full">
+      {isAuthenticated ? <AppSidebar /> : <Navbar />}
+      <div className="flex flex-col min-h-screen flex-1">
+        {!isAuthenticated && <Navbar />}
+        <main className="flex-grow pt-20">
+          {isAuthenticated && (
+            <SidebarProvider defaultOpen={true}>
+              <SidebarRail />
+            </SidebarProvider>
+          )}
+          {children}
+        </main>
+        <Footer />
       </div>
-    </SidebarProvider>
+    </div>
   );
 };
 
