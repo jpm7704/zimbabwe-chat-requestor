@@ -3,7 +3,7 @@ import { useRequestsData } from "@/hooks/useRequestsData";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import RequestsHeader from "@/components/requests/RequestsHeader";
 import RequestsSearchFilter from "@/components/requests/RequestsSearchFilter";
 import RequestsList from "@/components/requests/RequestsList";
@@ -14,20 +14,14 @@ const RequestsPage = () => {
   const { userProfile, isAuthenticated } = useAuth();
   const permissions = usePermissions(userProfile);
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState(""); // Add searchTerm state
   const {
     filteredRequests,
     loading,
     activeFilter,
+    searchTerm,
     handleSearch,
     handleFilter
   } = useRequestsData();
-
-  // Handle search with local state
-  const onSearch = (term: string) => {
-    setSearchTerm(term);
-    handleSearch(term);
-  };
 
   // Redirect users to their appropriate dashboard based on role
   useEffect(() => {
@@ -80,7 +74,7 @@ const RequestsPage = () => {
       />
       
       <RequestsSearchFilter 
-        onSearch={onSearch}
+        onSearch={handleSearch}
         onFilter={handleFilter}
         activeFilter={activeFilter}
       />

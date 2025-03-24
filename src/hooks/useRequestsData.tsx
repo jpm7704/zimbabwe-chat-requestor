@@ -10,6 +10,7 @@ export const useRequestsData = () => {
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchRequests();
@@ -32,15 +33,17 @@ export const useRequestsData = () => {
     }
   };
 
-  const handleSearch = async (searchTerm: string) => {
-    if (!searchTerm.trim()) {
+  const handleSearch = async (term: string) => {
+    setSearchTerm(term);
+    
+    if (!term.trim()) {
       setFilteredRequests(requests);
       return;
     }
 
     try {
       setLoading(true);
-      const results = await searchRequests(searchTerm);
+      const results = await searchRequests(term);
       setFilteredRequests(results);
     } catch (error) {
       console.error("Error searching requests:", error);
@@ -83,6 +86,7 @@ export const useRequestsData = () => {
     filteredRequests,
     loading,
     activeFilter,
+    searchTerm,
     handleSearch,
     handleFilter
   };
