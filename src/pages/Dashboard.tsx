@@ -145,7 +145,7 @@ const Dashboard = () => {
                       <div className="font-medium">{request.title || 'Untitled Request'}</div>
                       <div className="text-sm text-muted-foreground">
                         Status updated to <span className="font-medium">{request.status.replace('_', ' ')}</span>
-                        {' • '} {new Date(request.updated_at).toLocaleDateString()}
+                        {' • '} {new Date(request.updatedAt).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
