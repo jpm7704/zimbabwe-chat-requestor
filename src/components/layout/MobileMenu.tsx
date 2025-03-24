@@ -2,19 +2,11 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
-  ClipboardList, 
-  FilePlus, 
-  Settings, 
   LogIn, 
-  LogOut, 
-  Users, 
-  BarChart3, 
-  Clipboard, 
-  FileSpreadsheet,
-  ShieldCheck
+  LogOut
 } from "lucide-react";
 import { useAuth, UserProfile } from "@/hooks/useAuth";
-import { usePermissions } from "@/hooks/usePermissions";
+import RoleMenu from "./RoleMenu";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -25,7 +17,6 @@ interface MobileMenuProps {
 
 const MobileMenu = ({ isOpen, onClose, userProfile, isAuthenticated }: MobileMenuProps) => {
   const { handleLogout, formatRole } = useAuth();
-  const permissions = usePermissions(userProfile);
 
   if (!isOpen) return null;
 
@@ -39,76 +30,9 @@ const MobileMenu = ({ isOpen, onClose, userProfile, isAuthenticated }: MobileMen
           </div>
         )}
 
-        {/* Base links for all users */}
-        <Button variant="ghost" asChild className="justify-start">
-          <Link to="/submit" className="flex items-center gap-2" onClick={onClose}>
-            <FilePlus size={18} />
-            <span>Submit Request</span>
-          </Link>
-        </Button>
-        
+        {/* Use the RoleMenu component for role-based navigation */}
         {isAuthenticated && (
-          <Button variant="ghost" asChild className="justify-start">
-            <Link to="/requests" className="flex items-center gap-2" onClick={onClose}>
-              <ClipboardList size={18} />
-              <span>My Requests</span>
-            </Link>
-          </Button>
-        )}
-
-        {/* Role-specific links */}
-        {permissions.canReviewRequests && (
-          <Button variant="ghost" asChild className="justify-start">
-            <Link to="/field-work" className="flex items-center gap-2" onClick={onClose}>
-              <Clipboard size={18} />
-              <span>Field Work</span>
-            </Link>
-          </Button>
-        )}
-        
-        {permissions.canAccessAnalytics && (
-          <Button variant="ghost" asChild className="justify-start">
-            <Link to="/analytics" className="flex items-center gap-2" onClick={onClose}>
-              <BarChart3 size={18} />
-              <span>Analytics</span>
-            </Link>
-          </Button>
-        )}
-        
-        {permissions.canAccessFieldReports && (
-          <Button variant="ghost" asChild className="justify-start">
-            <Link to="/reports" className="flex items-center gap-2" onClick={onClose}>
-              <FileSpreadsheet size={18} />
-              <span>Reports</span>
-            </Link>
-          </Button>
-        )}
-        
-        {permissions.canManageStaff && (
-          <Button variant="ghost" asChild className="justify-start">
-            <Link to="/staff" className="flex items-center gap-2" onClick={onClose}>
-              <Users size={18} />
-              <span>Staff</span>
-            </Link>
-          </Button>
-        )}
-        
-        {permissions.canAccessAdminPanel && (
-          <Button variant="ghost" asChild className="justify-start">
-            <Link to="/admin" className="flex items-center gap-2" onClick={onClose}>
-              <ShieldCheck size={18} />
-              <span>Admin</span>
-            </Link>
-          </Button>
-        )}
-
-        {isAuthenticated && (
-          <Button variant="ghost" asChild className="justify-start">
-            <Link to="/settings" className="flex items-center gap-2" onClick={onClose}>
-              <Settings size={18} />
-              <span>Settings</span>
-            </Link>
-          </Button>
+          <RoleMenu variant="sidebar" onItemClick={onClose} />
         )}
 
         <div className="pt-2 border-t border-border">

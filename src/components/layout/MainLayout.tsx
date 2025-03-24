@@ -3,6 +3,14 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import { 
+  SidebarProvider, 
+  SidebarTrigger, 
+  SidebarInset, 
+  SidebarRail 
+} from "@/components/ui/sidebar";
+import AppSidebar from "./AppSidebar";
+import { useAuth } from "@/hooks/useAuth";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -10,6 +18,7 @@ interface MainLayoutProps {
 
 const MainLayout = ({ children }: MainLayoutProps) => {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
   
   // Scroll to top on route change
   useEffect(() => {
@@ -17,13 +26,19 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow pt-20">
-        {children}
-      </main>
-      <Footer />
-    </div>
+    <SidebarProvider defaultOpen={true}>
+      <div className="min-h-screen flex flex-col w-full">
+        {isAuthenticated && <AppSidebar />}
+        <div className="flex flex-col min-h-screen flex-1">
+          <Navbar />
+          <main className="flex-grow pt-20">
+            {isAuthenticated && <SidebarRail />}
+            {children}
+          </main>
+          <Footer />
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
