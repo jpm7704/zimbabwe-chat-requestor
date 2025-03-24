@@ -7,7 +7,11 @@ import {
   Document as RequestDocument,
   TimelineEvent
 } from "../types";
-import { generateMockRequests, getMockRequest, requestTypes } from "./mockData";
+import { 
+  generateMockRequests, 
+  getMockRequest, 
+  requestTypes 
+} from "./mockData";
 
 // API simulation with a delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
