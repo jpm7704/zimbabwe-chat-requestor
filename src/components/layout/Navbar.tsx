@@ -50,7 +50,7 @@ const Navbar = () => {
           <img 
             src="/lovable-uploads/a6e9fa53-7698-4f06-bf5e-8103cd940032.png" 
             alt="Bridging Gaps Foundation Logo" 
-            className="h-10"
+            className="h-16 sm:h-20 w-auto"
           />
         </Link>
 

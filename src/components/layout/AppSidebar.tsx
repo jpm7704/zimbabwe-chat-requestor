@@ -24,7 +24,7 @@ export function AppSidebar() {
             <img 
               src="/lovable-uploads/a6e9fa53-7698-4f06-bf5e-8103cd940032.png" 
               alt="Bridging Gaps Foundation Logo" 
-              className="h-8"
+              className="h-12 w-auto" 
             />
           </div>
         </div>
