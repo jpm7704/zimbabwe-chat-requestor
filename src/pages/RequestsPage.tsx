@@ -9,7 +9,6 @@ import RequestsSearchFilter from "@/components/requests/RequestsSearchFilter";
 import RequestsList from "@/components/requests/RequestsList";
 import RoleBasedWorkflow from "@/components/requests/RoleBasedWorkflow";
 import UserStatsSummary from "@/components/requests/UserStatsSummary";
-import { Plus } from "lucide-react";
 
 const RequestsPage = () => {
   const { userProfile, isAuthenticated } = useAuth();
@@ -19,6 +18,7 @@ const RequestsPage = () => {
     filteredRequests,
     loading,
     activeFilter,
+    searchTerm,
     handleSearch,
     handleFilter
   } = useRequestsData();
@@ -82,6 +82,7 @@ const RequestsPage = () => {
       <RequestsList 
         requests={filteredRequests} 
         loading={loading} 
+        searchTerm={searchTerm}
       />
     </div>
   );

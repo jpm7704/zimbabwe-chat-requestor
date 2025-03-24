@@ -18,6 +18,7 @@ import {
 import { UserProfile } from "@/hooks/useAuth";
 import { Permissions } from "@/hooks/usePermissions";
 import { Badge } from "@/components/ui/badge";
+import { useRoles } from "@/hooks/useRoles";
 
 interface RoleBasedWorkflowProps {
   userProfile: UserProfile | null;
@@ -32,16 +33,28 @@ interface RoleBasedWorkflowProps {
 }
 
 const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBasedWorkflowProps) => {
+  const { isAdmin, isProgrammeManager, isFieldOfficer, isRegularUser, getRoleInfo } = useRoles(userProfile);
+  
   if (!userProfile) return null;
   
-  // Field Officer View - explicitly check for role
-  if (userProfile.role === 'field_officer') {
+  const roleInfo = getRoleInfo();
+  
+  // Get the appropriate icon based on role
+  const getRoleIcon = () => {
+    if (isAdmin()) return <Shield className={`h-5 w-5 ${roleInfo.textClass}`} />;
+    if (isProgrammeManager()) return <Users className={`h-5 w-5 ${roleInfo.textClass}`} />;
+    if (isFieldOfficer()) return <User className={`h-5 w-5 ${roleInfo.textClass}`} />;
+    return <User className={`h-5 w-5 ${roleInfo.textClass}`} />;
+  };
+  
+  // Field Officer View
+  if (isFieldOfficer()) {
     return (
-      <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+      <div className={`mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-yellow-100 rounded-full">
-              <User className="h-5 w-5 text-yellow-600" />
+              {getRoleIcon()}
             </div>
             <div>
               <h2 className="text-lg font-medium">
@@ -49,7 +62,7 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
               </h2>
               <div className="flex items-center gap-2">
                 <Badge className="bg-yellow-500 text-white">Field Officer</Badge>
-                <span className="text-sm text-muted-foreground">Verification Specialist</span>
+                <span className="text-sm text-muted-foreground">{roleInfo.description}</span>
               </div>
             </div>
           </div>
@@ -66,11 +79,9 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
             Your Key Responsibilities:
           </h3>
           <ol className="list-decimal ml-6 text-sm text-muted-foreground">
-            <li>Review and assess assistance requests assigned to you</li>
-            <li>Conduct field visits to verify beneficiary information</li>
-            <li>Collect and validate supporting documentation</li>
-            <li>Prepare detailed verification reports for Programme Manager review</li>
-            <li>Complete assessments within assigned timeframes</li>
+            {roleInfo.responsibilities.map((responsibility, index) => (
+              <li key={index}>{responsibility}</li>
+            ))}
           </ol>
         </div>
         
@@ -97,13 +108,13 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
   } 
   
   // Programme Manager View
-  else if (userProfile.role === 'programme_manager') {
+  else if (isProgrammeManager()) {
     return (
       <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-blue-100 rounded-full">
-              <Users className="h-5 w-5 text-blue-600" />
+              {getRoleIcon()}
             </div>
             <div>
               <h2 className="text-lg font-medium">
@@ -111,7 +122,7 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
               </h2>
               <div className="flex items-center gap-2">
                 <Badge className="bg-blue-500 text-white">Programme Manager</Badge>
-                <span className="text-sm text-muted-foreground">Request Coordinator</span>
+                <span className="text-sm text-muted-foreground">{roleInfo.description}</span>
               </div>
             </div>
           </div>
@@ -128,12 +139,9 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
             Your Key Responsibilities:
           </h3>
           <ol className="list-decimal ml-6 text-sm text-muted-foreground">
-            <li>Review all incoming assistance requests</li>
-            <li>Assign requests to appropriate Field Officers based on location and expertise</li>
-            <li>Review verification reports and assessment data</li>
-            <li>Request additional information or clarification when needed</li>
-            <li>Forward verified requests to Management for final approval</li>
-            <li>Monitor overall verification process efficiency</li>
+            {roleInfo.responsibilities.map((responsibility, index) => (
+              <li key={index}>{responsibility}</li>
+            ))}
           </ol>
         </div>
         
@@ -164,13 +172,13 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
   } 
   
   // Management View
-  else if (userProfile.role === 'management') {
+  else if (isAdmin()) {
     return (
       <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-green-100 rounded-full">
-              <Shield className="h-5 w-5 text-green-600" />
+              {getRoleIcon()}
             </div>
             <div>
               <h2 className="text-lg font-medium">
@@ -178,7 +186,7 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
               </h2>
               <div className="flex items-center gap-2">
                 <Badge className="bg-green-500 text-white">Senior Management</Badge>
-                <span className="text-sm text-muted-foreground">Final Approver</span>
+                <span className="text-sm text-muted-foreground">{roleInfo.description}</span>
               </div>
             </div>
           </div>
@@ -195,12 +203,9 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
             Your Key Responsibilities:
           </h3>
           <ol className="list-decimal ml-6 text-sm text-muted-foreground">
-            <li>Review thoroughly verified requests from Programme Managers</li>
-            <li>Evaluate requests against organizational budget and priorities</li>
-            <li>Make final approval or rejection decisions</li>
-            <li>Authorize resource allocation for approved requests</li>
-            <li>Monitor program effectiveness and impact</li>
-            <li>Oversee organizational compliance and governance</li>
+            {roleInfo.responsibilities.map((responsibility, index) => (
+              <li key={index}>{responsibility}</li>
+            ))}
           </ol>
         </div>
         
@@ -230,14 +235,14 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
     );
   } 
   
-  // Regular User View - make sure this is only shown to regular users
-  else if (userProfile.role === 'user') {
+  // Regular User View
+  else if (isRegularUser()) {
     return (
       <div className="mb-6 p-4 bg-primary/5 border border-primary/10 rounded-md">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-primary/10 rounded-full">
-              <User className="h-5 w-5 text-primary" />
+              {getRoleIcon()}
             </div>
             <div>
               <h2 className="text-lg font-medium">
@@ -245,7 +250,7 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
               </h2>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="border-primary/20">Beneficiary</Badge>
-                <span className="text-sm text-muted-foreground">Support Requestor</span>
+                <span className="text-sm text-muted-foreground">{roleInfo.description}</span>
               </div>
             </div>
           </div>
@@ -262,12 +267,9 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
             Request Process Flow:
           </h3>
           <ol className="list-decimal ml-6 text-sm text-muted-foreground">
-            <li>Submit your assistance request with required documentation</li>
-            <li>Request is assigned to a Field Officer for verification</li>
-            <li>Field Officer conducts assessment and verification</li>
-            <li>Programme Manager reviews the verification report</li>
-            <li>Senior Management makes final approval decision</li>
-            <li>You receive notification of request status and next steps</li>
+            {roleInfo.responsibilities.map((responsibility, index) => (
+              <li key={index}>{responsibility}</li>
+            ))}
           </ol>
         </div>
         
