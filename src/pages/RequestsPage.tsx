@@ -16,7 +16,8 @@ import {
   ListFilter,
   Clock,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Plus
 } from "lucide-react";
 import { 
   Card, 
