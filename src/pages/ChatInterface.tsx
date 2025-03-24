@@ -1,127 +1,81 @@
 
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// Custom hooks
-import { useChatMessages } from "@/hooks/useChatMessages";
 import { useRequestForm } from "@/hooks/useRequestForm";
-
-// Components
-import ChatMessages from "@/components/chat/ChatMessages";
-import ChatInput from "@/components/chat/ChatInput";
 import NewRequestForm from "@/components/request/NewRequestForm";
+import { FormFile, Send } from "lucide-react";
 
-const ChatInterface = () => {
-  const location = useLocation();
+const RequestSubmissionPage = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [messages, setMessages] = useState<any[]>([]);
+  const [showNewRequest, setShowNewRequest] = useState(false);
   
-  // Chat functionality
-  const {
-    messages,
-    setMessages,
-    inputMessage,
-    setInputMessage,
-    isTyping,
-    handleSendMessage
-  } = useChatMessages();
-  
-  // Request form functionality
-  const {
-    showNewRequest,
-    setShowNewRequest,
-    requestForm,
-    setRequestForm,
-    selectedFiles,
-    setSelectedFiles,
-    requestTypeInfo,
-    submitting,
-    handleRequestSubmit
-  } = useRequestForm(setMessages);
-  
-  const [activeTab, setActiveTab] = useState("chat");
+  // Use the request form hook
+  const requestFormProps = useRequestForm(setMessages);
 
+  // Show the request form if 'action=new' is in the URL
   useEffect(() => {
-    // Check if there's a request type in the URL
-    const params = new URLSearchParams(location.search);
-    const requestType = params.get("type");
-    if (requestType) {
+    if (searchParams.get("action") === "new") {
       setShowNewRequest(true);
-      setRequestForm(prev => ({ ...prev, type: requestType }));
-      setActiveTab("request");
     }
-  }, [location.search]);
+  }, [searchParams]);
 
   return (
-    <div className="container px-4 mx-auto max-w-5xl">
-      <div className="py-8">
-        <h1 className="text-3xl font-bold mb-2">Humanitarian Assistance</h1>
-        <p className="text-muted-foreground mb-6">
-          Chat with our support team or submit a new request for assistance
-        </p>
+    <div className="container px-4 mx-auto max-w-5xl py-8">
+      <div className="flex flex-col space-y-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Submit Request</h1>
+          <p className="text-muted-foreground">
+            Create a new support request for BGF Zimbabwe assistance
+          </p>
+        </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="chat">Chat Support</TabsTrigger>
-            <TabsTrigger value="request">New Request</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="chat" className="animate-fade-in">
-            <Card className="border rounded-xl overflow-hidden">
-              <div className="h-[60vh] flex flex-col">
-                {/* Chat Messages */}
-                <ChatMessages messages={messages} isTyping={isTyping} />
-                
-                {/* Submit a new request prompt */}
-                {!showNewRequest && (
-                  <div className="mx-4 mb-4">
-                    <Button
-                      variant="outline"
-                      className="w-full border-dashed hover:border-primary/50"
-                      onClick={() => {
-                        setShowNewRequest(true);
-                        setActiveTab("request");
-                      }}
-                    >
-                      Submit a new request
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-                
-                {/* Chat Input */}
-                <ChatInput 
-                  inputMessage={inputMessage}
-                  setInputMessage={setInputMessage}
-                  handleSendMessage={handleSendMessage}
-                />
-              </div>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="request" className="animate-fade-in">
-            <Card className="border rounded-xl overflow-hidden">
-              <div className="p-6">
-                <h2 className="text-xl font-bold mb-4">Submit a New Request</h2>
-                <NewRequestForm 
-                  requestForm={requestForm}
-                  setRequestForm={setRequestForm}
-                  selectedFiles={selectedFiles}
-                  setSelectedFiles={setSelectedFiles}
-                  submitting={submitting}
-                  setShowNewRequest={setShowNewRequest}
-                  handleRequestSubmit={handleRequestSubmit}
-                  requestTypeInfo={requestTypeInfo}
-                />
-              </div>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        {!showNewRequest ? (
+          <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border rounded-lg space-y-4">
+            <FormFile size={48} className="text-muted-foreground" />
+            <h2 className="text-xl font-semibold text-center">Create a New Request</h2>
+            <p className="text-center text-muted-foreground max-w-md">
+              Submit a request for assistance from BGF Zimbabwe. Please provide as much detail as possible to help us process your request effectively.
+            </p>
+            <Button 
+              size="lg" 
+              className="mt-4"
+              onClick={() => setShowNewRequest(true)}
+            >
+              <Send className="mr-2 h-4 w-4" /> Create Request
+            </Button>
+          </div>
+        ) : (
+          <div className="border border-border p-6 rounded-lg">
+            <NewRequestForm
+              requestForm={requestFormProps.requestForm}
+              setRequestForm={requestFormProps.setRequestForm}
+              selectedFiles={requestFormProps.selectedFiles}
+              setSelectedFiles={requestFormProps.setSelectedFiles}
+              submitting={requestFormProps.submitting}
+              setShowNewRequest={setShowNewRequest}
+              handleRequestSubmit={requestFormProps.handleRequestSubmit}
+              requestTypeInfo={requestFormProps.requestTypeInfo}
+            />
+          </div>
+        )}
+        
+        {/* Information about the request process */}
+        <div className="mt-8 bg-secondary/30 p-6 rounded-lg">
+          <h3 className="text-lg font-medium mb-3">Request Submission Process</h3>
+          <ol className="list-decimal ml-5 space-y-2">
+            <li>Complete the request form with accurate information</li>
+            <li>Upload all required documents based on request type</li>
+            <li>Submit your request for review</li>
+            <li>Track your request status from the Requests page</li>
+            <li>You'll be notified when there are updates to your request</li>
+          </ol>
+        </div>
       </div>
     </div>
   );
 };
 
-export default ChatInterface;
+export default RequestSubmissionPage;

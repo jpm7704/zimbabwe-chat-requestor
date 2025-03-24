@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ClipboardList, Settings, LogIn, LogOut } from "lucide-react";
+import { ClipboardList, FilePlus, Settings, LogIn, LogOut } from "lucide-react";
 import { useAuth, UserProfile } from "@/hooks/useAuth";
 
 interface MobileMenuProps {
@@ -26,15 +26,15 @@ const MobileMenu = ({ isOpen, onClose, userProfile, isAuthenticated }: MobileMen
           </div>
         )}
         <Button variant="ghost" asChild className="justify-start">
-          <Link to="/chat" className="flex items-center gap-2" onClick={onClose}>
-            <MessageSquare size={18} />
-            <span>Chat</span>
+          <Link to="/submit" className="flex items-center gap-2" onClick={onClose}>
+            <FilePlus size={18} />
+            <span>Submit Request</span>
           </Link>
         </Button>
         <Button variant="ghost" asChild className="justify-start">
           <Link to="/requests" className="flex items-center gap-2" onClick={onClose}>
             <ClipboardList size={18} />
-            <span>Requests</span>
+            <span>My Requests</span>
           </Link>
         </Button>
         {isAuthenticated && (
