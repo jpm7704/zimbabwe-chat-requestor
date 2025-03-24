@@ -5,7 +5,9 @@ import {
   ClipboardCheck, 
   ListFilter,
   Clock,
-  Plus
+  Plus,
+  FileCheck,
+  Users
 } from "lucide-react";
 import { UserProfile } from "@/hooks/useAuth";
 import { Permissions } from "@/hooks/usePermissions";
@@ -24,14 +26,17 @@ interface RoleBasedWorkflowProps {
 
 const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBasedWorkflowProps) => {
   if (!userProfile) return null;
-    
-  // Field Officer View
-  if (permissions.canReviewRequests && !permissions.canApproveRequests) {
+  
+  // Instead of checking permissions only, we'll check the actual role
+  // to ensure proper differentiation between user types
+  
+  // Field Officer View - explicitly check for role
+  if (userProfile.role === 'field_officer') {
     return (
       <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
         <h2 className="text-lg font-medium mb-2 flex items-center">
-          <ClipboardCheck className="mr-2 h-5 w-5 text-yellow-600" />
-          Field Officer Workflow
+          <FileCheck className="mr-2 h-5 w-5 text-yellow-600" />
+          Field Officer Dashboard
         </h2>
         <p className="text-muted-foreground mb-3">
           Your role is to verify information and conduct necessary due diligence on requests assigned to you.
@@ -59,7 +64,7 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
   } 
   
   // Programme Manager View
-  else if (permissions.canApproveRequests && !permissions.canManageStaff) {
+  else if (userProfile.role === 'programme_manager') {
     return (
       <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
         <h2 className="text-lg font-medium mb-2 flex items-center">
@@ -92,11 +97,11 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
   } 
   
   // Management View
-  else if (permissions.canManageStaff) {
+  else if (userProfile.role === 'management') {
     return (
       <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
         <h2 className="text-lg font-medium mb-2 flex items-center">
-          <ClipboardCheck className="mr-2 h-5 w-5 text-green-600" />
+          <Users className="mr-2 h-5 w-5 text-green-600" />
           Management Workflow
         </h2>
         <p className="text-muted-foreground mb-3">
@@ -124,16 +129,16 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
     );
   } 
   
-  // Regular User View
-  else {
+  // Regular User View - make sure this is only shown to regular users
+  else if (userProfile.role === 'user') {
     return (
       <div className="mb-6 p-4 bg-primary/5 border border-primary/10 rounded-md">
         <h2 className="text-lg font-medium mb-2 flex items-center">
           <ClipboardCheck className="mr-2 h-5 w-5 text-primary" />
-          Request Process
+          Beneficiary Request Process
         </h2>
         <p className="text-muted-foreground mb-3">
-          Your request will go through the following process:
+          As a beneficiary, your request will go through the following process:
         </p>
         <ol className="list-decimal ml-6 text-sm text-muted-foreground mb-4">
           <li>Submit your request with all required information</li>
@@ -149,6 +154,18 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
             </Link>
           </Button>
         </div>
+      </div>
+    );
+  }
+  
+  // Fallback for any undefined role
+  else {
+    return (
+      <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-md">
+        <h2 className="text-lg font-medium mb-2">Welcome to BGF Zimbabwe</h2>
+        <p className="text-muted-foreground">
+          Please contact support to set up your account role correctly.
+        </p>
       </div>
     );
   }
