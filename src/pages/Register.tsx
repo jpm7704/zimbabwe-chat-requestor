@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -7,7 +8,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -21,8 +21,7 @@ const Register = () => {
     lastName: "",
     email: "",
     password: "",
-    confirmPassword: "",
-    role: "user" // Default role
+    confirmPassword: ""
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -40,13 +39,6 @@ const Register = () => {
       [e.target.name]: e.target.value
     });
     if (error) setError(null);
-  };
-
-  const handleRoleChange = (value: string) => {
-    setFormData({
-      ...formData,
-      role: value
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,6 +68,7 @@ const Register = () => {
     setError(null);
     
     try {
+      // All new users are registered with the 'user' role by default
       const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -83,7 +76,7 @@ const Register = () => {
           data: {
             firstName: formData.firstName,
             lastName: formData.lastName,
-            role: formData.role
+            role: "user" // Default role for all new registrations
           }
         }
       });
@@ -92,7 +85,7 @@ const Register = () => {
       
       toast({
         title: "Account created",
-        description: `Your BGF Zimbabwe account has been created as ${formData.role}.`
+        description: "Your BGF Zimbabwe account has been created. You can now log in."
       });
       
       navigate("/requests");
@@ -186,23 +179,8 @@ const Register = () => {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Your role</Label>
-                <Select value={formData.role} onValueChange={handleRoleChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="user">General Requester</SelectItem>
-                    <SelectItem value="field_officer">Field Officer</SelectItem>
-                    <SelectItem value="programme_manager">Programme Manager</SelectItem>
-                    <SelectItem value="management">Management</SelectItem>
-                    <SelectItem value="senior_official">Senior Official</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Select the role that best describes your position in the organization
-                </p>
+              <div className="text-sm text-muted-foreground">
+                All new accounts are registered as general requesters. To request staff access, please contact the administrator after registration.
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox 
