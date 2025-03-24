@@ -44,7 +44,7 @@ const Navbar = () => {
           // Fetch the user profile
           try {
             const { data, error } = await supabase
-              .from('profiles')
+              .from('user_profiles')
               .select('*')
               .eq('id', session.user.id)
               .single();
@@ -69,7 +69,7 @@ const Navbar = () => {
       if (session?.user) {
         // Fetch the user profile
         supabase
-          .from('profiles')
+          .from('user_profiles')
           .select('*')
           .eq('id', session.user.id)
           .single()
