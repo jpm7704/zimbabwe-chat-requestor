@@ -47,10 +47,11 @@ const Navbar = () => {
       <div className="container mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-white font-bold">BGF</span>
-          </div>
-          <span className="font-semibold text-lg hidden sm:block">BGF Zimbabwe</span>
+          <img 
+            src="/lovable-uploads/a6e9fa53-7698-4f06-bf5e-8103cd940032.png" 
+            alt="Bridging Gaps Foundation Logo" 
+            className="h-10"
+          />
         </Link>
 
         {/* Desktop Navigation */}

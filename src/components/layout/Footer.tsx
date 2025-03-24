@@ -10,13 +10,14 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                <span className="text-white font-bold">BGF</span>
-              </div>
-              <span className="font-semibold text-lg">BGF Zimbabwe</span>
+              <img 
+                src="/lovable-uploads/a6e9fa53-7698-4f06-bf5e-8103cd940032.png" 
+                alt="Bridging Gaps Foundation Logo" 
+                className="h-12"
+              />
             </Link>
-            <p className="text-muted-foreground text-sm">
-              Business Growth Fund Zimbabwe offers support to entrepreneurs and businesses across Zimbabwe.
+            <p className="text-muted-foreground text-sm mt-4">
+              Bridging Gaps Foundation Zimbabwe offers support to entrepreneurs and businesses across Zimbabwe.
             </p>
           </div>
 
@@ -96,7 +97,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-muted-foreground text-sm">
-            © {currentYear} Business Growth Fund Zimbabwe. All rights reserved.
+            © {currentYear} Bridging Gaps Foundation Zimbabwe. All rights reserved.
           </p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
