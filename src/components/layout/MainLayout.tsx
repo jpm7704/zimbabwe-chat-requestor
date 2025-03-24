@@ -28,9 +28,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex flex-col w-full">
-        {isAuthenticated && <AppSidebar />}
+        {isAuthenticated ? <AppSidebar /> : <Navbar />}
         <div className="flex flex-col min-h-screen flex-1">
-          <Navbar />
+          {!isAuthenticated && <Navbar />}
           <main className="flex-grow pt-20">
             {isAuthenticated && <SidebarRail />}
             {children}
