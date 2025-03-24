@@ -1,5 +1,5 @@
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   ClipboardList, 
@@ -21,19 +21,31 @@ interface NavLinksProps {
 const NavLinks = ({ isAuthenticated }: NavLinksProps) => {
   const { userProfile } = useAuth();
   const permissions = usePermissions(userProfile);
+  const location = useLocation();
+  
+  // Function to determine if a link is active
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <div className="hidden md:flex items-center gap-1">
       {/* Base links for all users */}
-      <Button variant="ghost" asChild>
-        <Link to="/submit" className="flex items-center gap-2">
-          <FilePlus size={18} />
-          <span>Submit Request</span>
-        </Link>
-      </Button>
+      {(!permissions.canReviewRequests || userProfile?.role === 'user') && (
+        <Button 
+          variant={isActive('/submit') ? "default" : "ghost"} 
+          asChild
+        >
+          <Link to="/submit" className="flex items-center gap-2">
+            <FilePlus size={18} />
+            <span>Submit Request</span>
+          </Link>
+        </Button>
+      )}
       
       {isAuthenticated && (
-        <Button variant="ghost" asChild>
+        <Button 
+          variant={isActive('/requests') ? "default" : "ghost"} 
+          asChild
+        >
           <Link to="/requests" className="flex items-center gap-2">
             <ClipboardList size={18} />
             <span>My Requests</span>
@@ -43,7 +55,10 @@ const NavLinks = ({ isAuthenticated }: NavLinksProps) => {
 
       {/* Role-specific links */}
       {permissions.canReviewRequests && (
-        <Button variant="ghost" asChild>
+        <Button 
+          variant={isActive('/field-work') ? "default" : "ghost"} 
+          asChild
+        >
           <Link to="/field-work" className="flex items-center gap-2">
             <Clipboard size={18} />
             <span>Field Work</span>
@@ -52,7 +67,10 @@ const NavLinks = ({ isAuthenticated }: NavLinksProps) => {
       )}
       
       {permissions.canAccessAnalytics && (
-        <Button variant="ghost" asChild>
+        <Button 
+          variant={isActive('/analytics') ? "default" : "ghost"} 
+          asChild
+        >
           <Link to="/analytics" className="flex items-center gap-2">
             <BarChart3 size={18} />
             <span>Analytics</span>
@@ -61,7 +79,10 @@ const NavLinks = ({ isAuthenticated }: NavLinksProps) => {
       )}
       
       {permissions.canAccessFieldReports && (
-        <Button variant="ghost" asChild>
+        <Button 
+          variant={isActive('/reports') ? "default" : "ghost"} 
+          asChild
+        >
           <Link to="/reports" className="flex items-center gap-2">
             <FileSpreadsheet size={18} />
             <span>Reports</span>
@@ -70,7 +91,10 @@ const NavLinks = ({ isAuthenticated }: NavLinksProps) => {
       )}
       
       {permissions.canManageStaff && (
-        <Button variant="ghost" asChild>
+        <Button 
+          variant={isActive('/staff') ? "default" : "ghost"} 
+          asChild
+        >
           <Link to="/staff" className="flex items-center gap-2">
             <Users size={18} />
             <span>Staff</span>
@@ -79,7 +103,10 @@ const NavLinks = ({ isAuthenticated }: NavLinksProps) => {
       )}
       
       {permissions.canAccessAdminPanel && (
-        <Button variant="ghost" asChild>
+        <Button 
+          variant={isActive('/admin') ? "default" : "ghost"} 
+          asChild
+        >
           <Link to="/admin" className="flex items-center gap-2">
             <ShieldCheck size={18} />
             <span>Admin</span>
@@ -88,7 +115,10 @@ const NavLinks = ({ isAuthenticated }: NavLinksProps) => {
       )}
 
       {isAuthenticated && (
-        <Button variant="ghost" asChild>
+        <Button 
+          variant={isActive('/settings') ? "default" : "ghost"} 
+          asChild
+        >
           <Link to="/settings" className="flex items-center gap-2">
             <Settings size={18} />
             <span>Settings</span>

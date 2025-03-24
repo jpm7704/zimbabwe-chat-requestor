@@ -17,6 +17,7 @@ import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
 import StaffManagement from "./pages/StaffManagement";
 import AdminPanel from "./pages/AdminPanel";
+import RequirePermission from "./components/auth/RequirePermission";
 
 const queryClient = new QueryClient();
 
@@ -33,12 +34,46 @@ const App = () => (
           <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
           <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
           
-          {/* Role-specific routes */}
-          <Route path="/field-work" element={<MainLayout><FieldWork /></MainLayout>} />
-          <Route path="/analytics" element={<MainLayout><Analytics /></MainLayout>} />
-          <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
-          <Route path="/staff" element={<MainLayout><StaffManagement /></MainLayout>} />
-          <Route path="/admin" element={<MainLayout><AdminPanel /></MainLayout>} />
+          {/* Role-specific routes with permission guards */}
+          <Route path="/field-work" element={
+            <MainLayout>
+              <RequirePermission permission="canAccessFieldReports">
+                <FieldWork />
+              </RequirePermission>
+            </MainLayout>
+          } />
+          
+          <Route path="/analytics" element={
+            <MainLayout>
+              <RequirePermission permission="canAccessAnalytics">
+                <Analytics />
+              </RequirePermission>
+            </MainLayout>
+          } />
+          
+          <Route path="/reports" element={
+            <MainLayout>
+              <RequirePermission permission="canAccessFieldReports">
+                <Reports />
+              </RequirePermission>
+            </MainLayout>
+          } />
+          
+          <Route path="/staff" element={
+            <MainLayout>
+              <RequirePermission permission="canManageStaff">
+                <StaffManagement />
+              </RequirePermission>
+            </MainLayout>
+          } />
+          
+          <Route path="/admin" element={
+            <MainLayout>
+              <RequirePermission permission="canAccessAdminPanel">
+                <AdminPanel />
+              </RequirePermission>
+            </MainLayout>
+          } />
           
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
