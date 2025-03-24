@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +9,7 @@ import MobileMenu from "./MobileMenu";
 import NavLinks from "./NavLinks";
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const { isAuthenticated, userProfile, loading } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,6 +22,14 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Redirect authenticated users if they try to access login/register pages
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (isAuthenticated && (path === '/login' || path === '/register')) {
+      navigate('/requests');
+    }
+  }, [isAuthenticated, navigate]);
 
   // Toggle mobile menu
   const toggleMobileMenu = () => {
@@ -49,9 +58,9 @@ const Navbar = () => {
 
         {/* Auth Buttons */}
         <div className="hidden md:flex items-center gap-2">
-          {isAuthenticated ? (
+          {isAuthenticated && !loading ? (
             <UserProfileDropdown userProfile={userProfile} />
-          ) : (
+          ) : (!loading && (
             <>
               <Button 
                 variant="outline" 
@@ -63,7 +72,7 @@ const Navbar = () => {
                 <Link to="/register">Register</Link>
               </Button>
             </>
-          )}
+          ))}
         </div>
 
         {/* Mobile Menu Button */}

@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -10,10 +9,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
   
   const [formData, setFormData] = useState({
     firstName: "",
@@ -27,12 +28,17 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/requests');
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
-    // Clear error when user types
     if (error) setError(null);
   };
 
@@ -70,7 +76,6 @@ const Register = () => {
     setError(null);
     
     try {
-      // Register with Supabase
       const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -90,7 +95,6 @@ const Register = () => {
         description: `Your BGF Zimbabwe account has been created as ${formData.role}.`
       });
       
-      // Redirect to requests page
       navigate("/requests");
     } catch (error: any) {
       console.error("Registration error:", error);
