@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -18,7 +20,8 @@ const Register = () => {
     lastName: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    role: "user" // Default role
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -27,6 +30,13 @@ const Register = () => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
+    });
+  };
+
+  const handleRoleChange = (value: string) => {
+    setFormData({
+      ...formData,
+      role: value
     });
   };
 
@@ -58,7 +68,7 @@ const Register = () => {
       // Mock successful registration
       toast({
         title: "Account created",
-        description: "Your BGF Zimbabwe account has been created successfully."
+        description: `Your BGF Zimbabwe account has been created as ${formData.role}.`
       });
       
       // Redirect to requests page
@@ -139,6 +149,24 @@ const Register = () => {
                   onChange={handleChange}
                   required
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="role">Your role</Label>
+                <Select value={formData.role} onValueChange={handleRoleChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">General Requester</SelectItem>
+                    <SelectItem value="field_officer">Field Officer</SelectItem>
+                    <SelectItem value="programme_manager">Programme Manager</SelectItem>
+                    <SelectItem value="management">Management</SelectItem>
+                    <SelectItem value="senior_official">Senior Official</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Select the role that best describes your position in the organization
+                </p>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox 
