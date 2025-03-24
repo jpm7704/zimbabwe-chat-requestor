@@ -17,6 +17,7 @@ import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
 import StaffManagement from "./pages/StaffManagement";
 import AdminPanel from "./pages/AdminPanel";
+import Dashboard from "./pages/Dashboard";
 import RequirePermission from "./components/auth/RequirePermission";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+          <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
           <Route path="/submit" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
           <Route path="/chat" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
           <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />

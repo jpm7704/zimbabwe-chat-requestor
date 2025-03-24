@@ -9,7 +9,8 @@ import {
   FileSpreadsheet, 
   Users, 
   ShieldCheck,
-  Settings
+  Settings,
+  LayoutDashboard
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -42,6 +43,18 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
 
   return (
     <div className={`flex ${variant === "sidebar" ? "flex-col w-full gap-1" : "items-center gap-1"}`}>
+      {/* Dashboard - available to all authenticated users */}
+      <Button 
+        variant={isActive('/dashboard') ? "default" : buttonVariant} 
+        className={buttonClass}
+        asChild
+      >
+        <Link to="/dashboard" className="flex items-center gap-2" onClick={handleClick}>
+          <LayoutDashboard size={18} />
+          <span>Dashboard</span>
+        </Link>
+      </Button>
+      
       {/* Regular User Routes */}
       {(roles.isRegularUser() || !permissions.canReviewRequests) && (
         <>
