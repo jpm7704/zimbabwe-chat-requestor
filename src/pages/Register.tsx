@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, KeyRound, User } from "lucide-react";
+import { ArrowLeft, KeyRound, User, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -23,7 +24,8 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    adminCode: ""
+    adminCode: "",
+    staffRole: "" // For specific staff roles
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -31,6 +33,7 @@ const Register = () => {
   const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
   const [activeTab, setActiveTab] = useState("user");
   const [checkingFirstTimeSetup, setCheckingFirstTimeSetup] = useState(true);
+  const [selectedStaffType, setSelectedStaffType] = useState<string | null>(null);
 
   // Check if this is first-time setup (no admin accounts exist)
   useEffect(() => {
@@ -69,6 +72,13 @@ const Register = () => {
     if (error) setError(null);
   };
 
+  const staffRoleOptions = {
+    "head_of_programs": "Head of Programs (HOP)",
+    "assistant_project_officer": "Assistant Project Officer",
+    "regional_project_officer": "Regional Project Officer",
+    "director": "Director",
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -99,15 +109,19 @@ const Register = () => {
       // Determine the role based on conditions
       let userRole = "user"; // Default role
       
-      // For first-time setup or valid admin code
+      // For staff registrations
       if (activeTab === "admin") {
         // First-time setup - allow admin registration without code
         if (isFirstTimeSetup) {
-          userRole = "management";
+          userRole = "management"; // Initial admin
         } 
-        // Verify admin code - this is a simplified example
+        // Verify admin code for subsequent admin registrations
         else if (formData.adminCode === "BGF-ADMIN-2024") {
-          userRole = "management";
+          if (selectedStaffType && formData.staffRole) {
+            userRole = formData.staffRole; // Specific staff role
+          } else {
+            userRole = "management"; // Default admin role
+          }
         } else {
           throw new Error("Invalid admin verification code");
         }
@@ -129,7 +143,7 @@ const Register = () => {
       if (error) throw error;
       
       toast({
-        title: userRole === "management" ? "Admin account created" : "Account created",
+        title: userRole === "user" ? "Account created" : `Staff account created (${userRole})`,
         description: "Your BGF Zimbabwe account has been created. You can now log in."
       });
       
@@ -166,8 +180,8 @@ const Register = () => {
                   <span>Regular User</span>
                 </TabsTrigger>
                 <TabsTrigger value="admin" className="flex items-center gap-2">
-                  <KeyRound size={16} />
-                  <span>Admin Setup</span>
+                  <Users size={16} />
+                  <span>Staff Access</span>
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -182,25 +196,54 @@ const Register = () => {
               {/* First-time setup notice */}
               {activeTab === "admin" && isFirstTimeSetup && (
                 <div className="p-3 rounded-md bg-blue-100 text-blue-800 text-sm mb-4">
-                  First-time setup detected. You will be registered as the initial admin user.
+                  First-time setup detected. You will be registered as the initial administrator.
                 </div>
               )}
               
               {/* Admin verification code input */}
               {activeTab === "admin" && !isFirstTimeSetup && (
                 <div className="space-y-2">
-                  <Label htmlFor="adminCode">Admin Verification Code</Label>
+                  <Label htmlFor="adminCode">Staff Verification Code</Label>
                   <Input
                     id="adminCode"
                     name="adminCode"
                     type="text"
-                    placeholder="Enter admin code"
+                    placeholder="Enter staff verification code"
                     value={formData.adminCode}
                     onChange={handleChange}
                     required={activeTab === "admin"}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Please enter the admin verification code provided by the system administrator.
+                    Please enter the staff verification code provided by the system administrator.
+                  </p>
+                </div>
+              )}
+
+              {/* Staff role selection */}
+              {activeTab === "admin" && (formData.adminCode || isFirstTimeSetup) && (
+                <div className="space-y-2">
+                  <Label htmlFor="staffRole">Staff Role</Label>
+                  <Select 
+                    onValueChange={(value) => {
+                      setFormData({...formData, staffRole: value});
+                      setSelectedStaffType(value);
+                    }}
+                    value={formData.staffRole}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your staff role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {isFirstTimeSetup && (
+                        <SelectItem value="management">Director (Management)</SelectItem>
+                      )}
+                      {!isFirstTimeSetup && Object.entries(staffRoleOptions).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Select your role in the organization
                   </p>
                 </div>
               )}
@@ -291,9 +334,9 @@ const Register = () => {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loading || (activeTab === "admin" && !isFirstTimeSetup && !formData.adminCode)}
+                disabled={loading || (activeTab === "admin" && !isFirstTimeSetup && !formData.adminCode) || (activeTab === "admin" && formData.adminCode && !formData.staffRole)}
               >
-                {loading ? "Creating account..." : activeTab === "admin" ? "Create Admin Account" : "Create User Account"}
+                {loading ? "Creating account..." : activeTab === "admin" ? "Create Staff Account" : "Create User Account"}
               </Button>
             </form>
           </CardContent>
