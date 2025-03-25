@@ -37,7 +37,7 @@ const Home = () => {
         <div className="container px-4 mx-auto">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              Humanitarian <span className="text-primary">Assistance</span>
+              Zimbabwe <span className="text-primary">Community Support Initiative</span>
             </h1>
             <p className="mb-8 text-lg md:text-xl text-muted-foreground leading-relaxed">
               Supporting communities across Zimbabwe through medical, educational, financial, 
