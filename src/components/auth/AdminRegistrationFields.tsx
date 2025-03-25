@@ -66,7 +66,11 @@ const AdminRegistrationFields = ({
           <Label htmlFor="staffRole">Staff Role</Label>
           <Select 
             onValueChange={(value) => {
-              setFormData({...formData, staffRole: value});
+              // Fixed: Properly update state by spreading the existing formData
+              setFormData(prevState => ({
+                ...prevState,
+                staffRole: value
+              }));
               setSelectedStaffType(value);
             }}
             value={formData.staffRole}
