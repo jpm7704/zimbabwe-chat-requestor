@@ -106,7 +106,8 @@ export const updateRequestStatus = async (
  */
 export const getStatusHistory = async (requestId: string): Promise<TimelineEvent[]> => {
   try {
-    const { data, error } = await supabase
+    // Fetch status updates
+    const { data: statusUpdates, error: statusError } = await supabase
       .from('status_updates')
       .select(`
         id,
@@ -114,32 +115,60 @@ export const getStatusHistory = async (requestId: string): Promise<TimelineEvent
         status,
         notes,
         timestamp,
-        updated_by,
-        updater:user_profiles!updated_by(id, name, role)
+        updated_by
       `)
       .eq('request_id', requestId)
       .order('timestamp', { ascending: false });
     
-    if (error) {
-      throw error;
+    if (statusError) {
+      throw statusError;
     }
+
+    // If we have no status updates, return empty array
+    if (!statusUpdates || statusUpdates.length === 0) {
+      return [];
+    }
+
+    // Get unique updater IDs
+    const updaterIds = [...new Set(statusUpdates.map(update => update.updated_by))];
+
+    // Fetch user profiles for all updaters
+    const { data: userProfiles, error: userError } = await supabase
+      .from('user_profiles')
+      .select('id, name, role')
+      .in('id', updaterIds);
+
+    if (userError) {
+      console.error("Error fetching user profiles:", userError);
+    }
+
+    // Create a map of user profiles for easy lookup
+    const userProfileMap = (userProfiles || []).reduce((map, profile) => {
+      map[profile.id] = profile;
+      return map;
+    }, {} as Record<string, any>);
     
-    return data.map(update => ({
-      id: update.id,
-      requestId: update.request_id,
-      type: "status_change",
-      description: `Request status updated to ${update.status.replace('_', ' ')}`,
-      createdAt: update.timestamp,
-      createdBy: {
-        id: update.updated_by,
-        name: update.updater ? update.updater.name : "Unknown User",
-        role: update.updater ? update.updater.role : "user"
-      },
-      metadata: {
-        newStatus: update.status,
-        note: update.notes
-      }
-    }));
+    // Transform status updates to timeline events
+    return statusUpdates.map(update => {
+      const userProfile = userProfileMap[update.updated_by];
+      
+      return {
+        id: update.id,
+        requestId: update.request_id,
+        type: "status_change",
+        description: `Request status updated to ${update.status.replace('_', ' ')}`,
+        createdAt: update.timestamp,
+        createdBy: {
+          id: update.updated_by,
+          name: userProfile ? userProfile.name : "Unknown User",
+          role: userProfile ? userProfile.role : "user"
+        },
+        metadata: {
+          newStatus: update.status,
+          note: update.notes
+        }
+      };
+    });
   } catch (error) {
     console.error("Error fetching status history:", error);
     return [];

@@ -94,6 +94,7 @@ export const addNoteToRequest = async (
  */
 export const getRequestNotes = async (requestId: string, includeInternal: boolean = false): Promise<Note[]> => {
   try {
+    // Fetch messages first
     let query = supabase
       .from('messages')
       .select(`
@@ -102,8 +103,7 @@ export const getRequestNotes = async (requestId: string, includeInternal: boolea
         sender_id,
         content,
         timestamp,
-        is_system_message,
-        user:user_profiles(id, name, email, role)
+        is_system_message
       `)
       .eq('request_id', requestId);
     
@@ -111,22 +111,51 @@ export const getRequestNotes = async (requestId: string, includeInternal: boolea
       query = query.eq('is_system_message', false);
     }
     
-    const { data, error } = await query.order('timestamp', { ascending: true });
+    const { data: messages, error: messagesError } = await query.order('timestamp', { ascending: true });
     
-    if (error) {
-      throw error;
+    if (messagesError) {
+      throw messagesError;
     }
+
+    // If we have no messages, return empty array
+    if (!messages || messages.length === 0) {
+      return [];
+    }
+
+    // Get unique sender IDs
+    const senderIds = [...new Set(messages.map(message => message.sender_id))];
+
+    // Fetch user profiles for all senders
+    const { data: userProfiles, error: userError } = await supabase
+      .from('user_profiles')
+      .select('id, name, email, role')
+      .in('id', senderIds);
+
+    if (userError) {
+      console.error("Error fetching user profiles:", userError);
+    }
+
+    // Create a map of user profiles for easy lookup
+    const userProfileMap = (userProfiles || []).reduce((map, profile) => {
+      map[profile.id] = profile;
+      return map;
+    }, {} as Record<string, any>);
     
-    return data.map(message => ({
-      id: message.id,
-      requestId: message.request_id,
-      authorId: message.sender_id,
-      authorName: message.user ? message.user.name : "Unknown User",
-      authorRole: message.user ? message.user.role : "user",
-      content: message.content,
-      createdAt: message.timestamp,
-      isInternal: message.is_system_message || false
-    }));
+    // Transform messages to notes
+    return messages.map(message => {
+      const userProfile = userProfileMap[message.sender_id];
+      
+      return {
+        id: message.id,
+        requestId: message.request_id,
+        authorId: message.sender_id,
+        authorName: userProfile ? userProfile.name : "Unknown User",
+        authorRole: userProfile ? userProfile.role : "user",
+        content: message.content,
+        createdAt: message.timestamp,
+        isInternal: message.is_system_message || false
+      };
+    });
   } catch (error) {
     console.error("Error fetching notes:", error);
     return [];

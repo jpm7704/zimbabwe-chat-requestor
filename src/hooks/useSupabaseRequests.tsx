@@ -21,6 +21,7 @@ export const useSupabaseRequests = (filter?: RequestStatus) => {
       setError(null);
 
       try {
+        // Fetch requests without joining user profiles
         let query = supabase
           .from('requests')
           .select(`
@@ -34,10 +35,7 @@ export const useSupabaseRequests = (filter?: RequestStatus) => {
             updated_at,
             user_id,
             field_officer_id,
-            program_manager_id,
-            user_profiles!user_id(id, name, email, role),
-            field_officer:user_profiles!field_officer_id(id, name, email, role),
-            program_manager:user_profiles!program_manager_id(id, name, email, role)
+            program_manager_id
           `);
 
         // Apply role-based filters
@@ -64,32 +62,70 @@ export const useSupabaseRequests = (filter?: RequestStatus) => {
           throw error;
         }
 
-        // Transform the data to match the Request type
-        const transformedRequests = data.map(item => ({
-          id: item.id,
-          ticketNumber: item.ticket_number,
-          userId: item.user_id,
-          type: item.type as RequestType,
-          title: item.title,
-          description: item.description,
-          status: item.status as RequestStatus,
-          createdAt: item.created_at,
-          updatedAt: item.updated_at,
-          assignedTo: item.field_officer_id || item.program_manager_id,
-          user: item.user_profiles ? {
-            id: item.user_profiles.id,
-            name: item.user_profiles.name,
-            email: item.user_profiles.email,
-            role: item.user_profiles.role
-          } : undefined,
-          fieldOfficer: item.field_officer,
-          programManager: item.program_manager,
-          documents: [], // These will be fetched separately if needed
-          notes: [],     // These will be fetched separately if needed
-          timeline: []   // These will be fetched separately if needed
-        }));
+        // If we have requests, fetch user profiles separately
+        if (data.length > 0) {
+          // Get unique user IDs
+          const userIds = [...new Set([
+            ...data.map(item => item.user_id),
+            ...data.map(item => item.field_officer_id).filter(Boolean),
+            ...data.map(item => item.program_manager_id).filter(Boolean)
+          ])];
 
-        setRequests(transformedRequests);
+          // Fetch all relevant user profiles in one query
+          const { data: userProfiles, error: userError } = await supabase
+            .from('user_profiles')
+            .select('id, name, email, role')
+            .in('id', userIds);
+
+          if (userError) {
+            console.error('Error fetching user profiles:', userError);
+          }
+
+          // Create a map of user profiles for easy lookup
+          const userProfileMap = (userProfiles || []).reduce((map, profile) => {
+            map[profile.id] = profile;
+            return map;
+          }, {} as Record<string, any>);
+
+          // Transform the data to match the Request type
+          const transformedRequests = data.map(item => ({
+            id: item.id,
+            ticketNumber: item.ticket_number,
+            userId: item.user_id,
+            type: item.type as RequestType,
+            title: item.title,
+            description: item.description,
+            status: item.status as RequestStatus,
+            createdAt: item.created_at,
+            updatedAt: item.updated_at,
+            assignedTo: item.field_officer_id || item.program_manager_id,
+            user: userProfileMap[item.user_id] ? {
+              id: userProfileMap[item.user_id].id,
+              name: userProfileMap[item.user_id].name,
+              email: userProfileMap[item.user_id].email,
+              role: userProfileMap[item.user_id].role
+            } : undefined,
+            fieldOfficer: item.field_officer_id ? {
+              id: userProfileMap[item.field_officer_id]?.id,
+              name: userProfileMap[item.field_officer_id]?.name,
+              email: userProfileMap[item.field_officer_id]?.email,
+              role: userProfileMap[item.field_officer_id]?.role
+            } : undefined,
+            programManager: item.program_manager_id ? {
+              id: userProfileMap[item.program_manager_id]?.id,
+              name: userProfileMap[item.program_manager_id]?.name,
+              email: userProfileMap[item.program_manager_id]?.email,
+              role: userProfileMap[item.program_manager_id]?.role
+            } : undefined,
+            documents: [], // These will be fetched separately if needed
+            notes: [],     // These will be fetched separately if needed
+            timeline: []   // These will be fetched separately if needed
+          }));
+
+          setRequests(transformedRequests);
+        } else {
+          setRequests([]);
+        }
       } catch (err: any) {
         console.error('Error fetching requests:', err);
         setError(err);
