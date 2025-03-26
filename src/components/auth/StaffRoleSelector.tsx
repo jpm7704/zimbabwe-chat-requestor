@@ -51,6 +51,7 @@ const StaffRoleSelector = ({
         const { data, error } = await supabase.rpc('get_available_staff_roles');
         if (error) throw error;
         setStaffRoles(data || []);
+        console.log("Fetched staff roles:", data);
       } catch (error) {
         console.error("Error fetching staff roles:", error);
         toast({
@@ -63,8 +64,11 @@ const StaffRoleSelector = ({
       }
     };
 
-    fetchStaffRoles();
-  }, [toast]);
+    // Only fetch roles if it's not the first-time setup
+    if (!isFirstTimeSetup) {
+      fetchStaffRoles();
+    }
+  }, [toast, isFirstTimeSetup]);
 
   const handleStaffRoleChange = (value: string) => {
     setFormData(prevState => ({
@@ -111,11 +115,21 @@ const StaffRoleSelector = ({
               {isFirstTimeSetup ? (
                 <SelectItem value="director">Director (Management)</SelectItem>
               ) : (
-                staffRoles.map((role) => (
-                  <SelectItem key={role.role_key} value={role.role_key}>
-                    {role.display_name}
-                  </SelectItem>
-                ))
+                staffRoles.length > 0 ? (
+                  staffRoles.map((role) => (
+                    <SelectItem key={role.role_key} value={role.role_key}>
+                      {role.display_name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <>
+                    <SelectItem value="director">Director</SelectItem>
+                    <SelectItem value="head_of_programs">Head of Programs</SelectItem>
+                    <SelectItem value="assistant_project_officer">Assistant Project Officer</SelectItem>
+                    <SelectItem value="regional_project_officer">Regional Project Officer</SelectItem>
+                    <SelectItem value="field_officer">Field Officer</SelectItem>
+                  </>
+                )
               )}
             </SelectContent>
           </Select>
