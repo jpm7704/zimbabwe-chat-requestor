@@ -41,7 +41,7 @@ const Navbar = () => {
       <div 
         className={`container mx-auto px-4 transition-all duration-300 ${
           scrolled 
-            ? "glass dark:glass-dark shadow-lg rounded-full max-w-5xl py-2" 
+            ? "glass dark:bg-black/40 shadow-lg rounded-full max-w-5xl py-2 border-none" 
             : "py-4 bg-transparent"
         }`}
       >
