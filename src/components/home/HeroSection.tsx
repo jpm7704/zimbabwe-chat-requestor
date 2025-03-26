@@ -9,10 +9,10 @@ const HeroSection = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="max-w-5xl mx-auto text-center pt-24 md:pt-32">
           <h1 className="mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-            Zimbabwe <span className="text-primary">Community Support Initiative</span>
+            Zimbabwe <span className="text-primary">Healthcare & Education Initiative</span>
           </h1>
           <p className="mb-8 text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Empowering communities across Zimbabwe through our expanded assistance programs with faster processing times and enhanced support services.
+            Improving lives across Zimbabwe through focused medical assistance and educational support programs with streamlined application process.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
             <Button asChild size="lg" className="h-12 px-6 w-full sm:w-auto">
