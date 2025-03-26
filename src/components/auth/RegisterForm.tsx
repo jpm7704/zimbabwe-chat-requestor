@@ -1,26 +1,22 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { KeyRound, User, Users } from "lucide-react";
+import { KeyRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import AdminRegistrationFields from "./AdminRegistrationFields";
+
+// Import refactored components
+import UserTypeSelector from "./UserTypeSelector";
+import PersonalInfoFields from "./PersonalInfoFields";
+import PasswordFields from "./PasswordFields";
+import StaffVerificationCode from "./StaffVerificationCode";
+import StaffRoleSelector from "./StaffRoleSelector";
 import UserAgreement from "./UserAgreement";
 
 interface RegisterFormProps {
   isFirstTimeSetup: boolean;
   checkingFirstTimeSetup: boolean;
-}
-
-interface StaffRole {
-  role_key: string;
-  display_name: string;
-  description: string;
 }
 
 const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterFormProps) => {
@@ -34,7 +30,7 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
     password: "",
     confirmPassword: "",
     adminCode: "",
-    staffRole: "", // For specific staff roles
+    staffRole: "", 
     staffNumber: "",
     region: ""
   });
@@ -43,31 +39,6 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("user");
   const [selectedStaffType, setSelectedStaffType] = useState<string | null>(null);
-  const [staffRoles, setStaffRoles] = useState<StaffRole[]>([]);
-  const [loadingRoles, setLoadingRoles] = useState(false);
-
-  // Fetch staff roles from the database
-  useEffect(() => {
-    const fetchStaffRoles = async () => {
-      setLoadingRoles(true);
-      try {
-        const { data, error } = await supabase.rpc('get_available_staff_roles');
-        if (error) throw error;
-        setStaffRoles(data || []);
-      } catch (error) {
-        console.error("Error fetching staff roles:", error);
-        toast({
-          title: "Failed to load staff roles",
-          description: "Please refresh the page and try again.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoadingRoles(false);
-      }
-    };
-
-    fetchStaffRoles();
-  }, [toast]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -209,32 +180,29 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
         </div>
       )}
 
-      {/* Tab selector for regular or admin registration */}
-      <Tabs defaultValue="user" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="user" className="flex items-center gap-2">
-            <User size={16} />
-            <span>Regular User</span>
-          </TabsTrigger>
-          <TabsTrigger value="admin" className="flex items-center gap-2">
-            <Users size={16} />
-            <span>Staff Access</span>
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      {/* User type selector (regular user or staff) */}
+      <UserTypeSelector 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+      />
 
       {/* Admin-specific fields */}
       {activeTab === "admin" && (
         <>
-          <AdminRegistrationFields 
-            isFirstTimeSetup={isFirstTimeSetup}
-            formData={formData}
+          <StaffVerificationCode
+            adminCode={formData.adminCode}
             handleChange={handleChange}
-            staffRoles={staffRoles}
-            loadingRoles={loadingRoles}
-            setFormData={setFormData}
-            setSelectedStaffType={setSelectedStaffType}
+            isFirstTimeSetup={isFirstTimeSetup}
           />
+          
+          {(formData.adminCode || isFirstTimeSetup) && (
+            <StaffRoleSelector
+              isFirstTimeSetup={isFirstTimeSetup}
+              formData={formData}
+              setFormData={setFormData}
+            />
+          )}
+          
           {!isFirstTimeSetup && (
             <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
               Staff members must register with an official company email address (@bgfzimbabwe.org, @bgf.org.zw, etc).
@@ -243,66 +211,20 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
         </>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="firstName">First name</Label>
-          <Input
-            id="firstName"
-            name="firstName"
-            placeholder="John"
-            value={formData.firstName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="lastName">Last name</Label>
-          <Input
-            id="lastName"
-            name="lastName"
-            placeholder="Doe"
-            value={formData.lastName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="name@example.com"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          placeholder="••••••••"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm password</Label>
-        <Input
-          id="confirmPassword"
-          name="confirmPassword"
-          type="password"
-          placeholder="••••••••"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-        />
-      </div>
+      {/* Personal information fields */}
+      <PersonalInfoFields
+        firstName={formData.firstName}
+        lastName={formData.lastName}
+        email={formData.email}
+        handleChange={handleChange}
+      />
+      
+      {/* Password fields */}
+      <PasswordFields
+        password={formData.password}
+        confirmPassword={formData.confirmPassword}
+        handleChange={handleChange}
+      />
       
       {activeTab === "user" && (
         <div className="text-sm text-muted-foreground">
@@ -310,11 +232,13 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
         </div>
       )}
       
+      {/* Terms and conditions agreement */}
       <UserAgreement 
         agreedToTerms={agreedToTerms} 
         setAgreedToTerms={setAgreedToTerms} 
       />
       
+      {/* Submit button */}
       <Button
         type="submit"
         className="w-full"
