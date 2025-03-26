@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 
 interface StaffRole {
   role_key: string;
@@ -43,21 +44,43 @@ const StaffRoleSelector = ({
   const [staffRoles, setStaffRoles] = useState<StaffRole[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(false);
   
+  // Default staff roles if API fails
+  const defaultRoles: StaffRole[] = [
+    { role_key: "director", display_name: "Director", description: "Head of organization" },
+    { role_key: "head_of_programs", display_name: "Head of Programs", description: "Oversees all programs" },
+    { role_key: "assistant_project_officer", display_name: "Assistant Project Officer", description: "Assists with project management" },
+    { role_key: "regional_project_officer", display_name: "Regional Project Officer", description: "Manages regional projects" },
+    { role_key: "field_officer", display_name: "Field Officer", description: "Field implementation" }
+  ];
+  
   // Fetch staff roles from the database
   useEffect(() => {
     const fetchStaffRoles = async () => {
+      console.log("Attempting to fetch staff roles...");
       setLoadingRoles(true);
+      
       try {
         const { data, error } = await supabase.rpc('get_available_staff_roles');
-        if (error) throw error;
-        setStaffRoles(data || []);
-        console.log("Fetched staff roles:", data);
+        
+        if (error) {
+          console.error("Error fetching from RPC:", error);
+          throw error;
+        }
+        
+        if (data && data.length > 0) {
+          console.log("Successfully fetched staff roles:", data);
+          setStaffRoles(data);
+        } else {
+          console.log("No roles returned from database, using defaults");
+          setStaffRoles(defaultRoles);
+        }
       } catch (error) {
         console.error("Error fetching staff roles:", error);
+        setStaffRoles(defaultRoles);
         toast({
-          title: "Failed to load staff roles",
-          description: "Please refresh the page and try again.",
-          variant: "destructive"
+          title: "Using default roles",
+          description: "Could not fetch roles from database. Using default roles instead.",
+          variant: "default"
         });
       } finally {
         setLoadingRoles(false);
@@ -71,6 +94,7 @@ const StaffRoleSelector = ({
   }, [toast, isFirstTimeSetup]);
 
   const handleStaffRoleChange = (value: string) => {
+    console.log("Selected staff role:", value);
     setFormData(prevState => ({
       ...prevState,
       staffRole: value
@@ -107,29 +131,20 @@ const StaffRoleSelector = ({
           <Select 
             onValueChange={handleStaffRoleChange}
             value={formData.staffRole}
+            defaultValue={formData.staffRole}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Select your staff role" />
             </SelectTrigger>
             <SelectContent>
               {isFirstTimeSetup ? (
                 <SelectItem value="director">Director (Management)</SelectItem>
               ) : (
-                staffRoles.length > 0 ? (
-                  staffRoles.map((role) => (
-                    <SelectItem key={role.role_key} value={role.role_key}>
-                      {role.display_name}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <>
-                    <SelectItem value="director">Director</SelectItem>
-                    <SelectItem value="head_of_programs">Head of Programs</SelectItem>
-                    <SelectItem value="assistant_project_officer">Assistant Project Officer</SelectItem>
-                    <SelectItem value="regional_project_officer">Regional Project Officer</SelectItem>
-                    <SelectItem value="field_officer">Field Officer</SelectItem>
-                  </>
-                )
+                staffRoles.map((role) => (
+                  <SelectItem key={role.role_key} value={role.role_key}>
+                    {role.display_name}
+                  </SelectItem>
+                ))
               )}
             </SelectContent>
           </Select>
