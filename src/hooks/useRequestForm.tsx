@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<ChatMessageType[]>>) => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { userProfile } = useAuth();
+  const { userProfile, isAuthenticated } = useAuth();
   
   const [showNewRequest, setShowNewRequest] = useState(false);
   const [requestForm, setRequestForm] = useState<{
@@ -46,7 +46,7 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
     e.preventDefault();
     
     // Check if user is logged in
-    if (!userProfile) {
+    if (!isAuthenticated) {
       toast({
         title: "Authentication required",
         description: "Please log in to submit a request.",
@@ -132,6 +132,25 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
     }
   };
 
+  // New method to handle request type selection with auth check
+  const handleRequestTypeSelect = (type: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to submit a request.",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+    
+    setShowNewRequest(true);
+    setRequestForm(prev => ({
+      ...prev,
+      type
+    }));
+  };
+
   return {
     showNewRequest,
     setShowNewRequest,
@@ -141,6 +160,7 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
     setSelectedFiles,
     requestTypeInfo,
     submitting,
-    handleRequestSubmit
+    handleRequestSubmit,
+    handleRequestTypeSelect
   };
 };

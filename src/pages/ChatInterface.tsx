@@ -1,14 +1,15 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useRequestForm } from "@/hooks/useRequestForm";
 import NewRequestForm from "@/components/request/NewRequestForm";
 import { FileText, Send, Stethoscope, GraduationCap } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const RequestSubmissionPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const [messages, setMessages] = useState<any[]>([]);
   const [showNewRequest, setShowNewRequest] = useState(false);
   
@@ -21,17 +22,22 @@ const RequestSubmissionPage = () => {
     const type = searchParams.get("type");
     
     if (action === "new" || type) {
-      setShowNewRequest(true);
-      
-      // If type is specified, set it in the form
-      if (type) {
-        requestFormProps.setRequestForm(prev => ({
-          ...prev,
-          type
-        }));
+      if (isAuthenticated) {
+        setShowNewRequest(true);
+        
+        // If type is specified, set it in the form
+        if (type) {
+          requestFormProps.setRequestForm(prev => ({
+            ...prev,
+            type
+          }));
+        }
+      } else if (type) {
+        // If not authenticated and type is specified, redirect to login
+        navigate('/login');
       }
     }
-  }, [searchParams, requestFormProps.setRequestForm]);
+  }, [searchParams, requestFormProps.setRequestForm, isAuthenticated, navigate]);
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">
@@ -46,13 +52,7 @@ const RequestSubmissionPage = () => {
         {!showNewRequest ? (
           <div className="flex flex-col md:flex-row gap-6 mt-8">
             <div 
-              onClick={() => {
-                setShowNewRequest(true);
-                requestFormProps.setRequestForm(prev => ({
-                  ...prev,
-                  type: "medical_assistance"
-                }));
-              }} 
+              onClick={() => requestFormProps.handleRequestTypeSelect("medical_assistance")} 
               className="relative flex-1 border border-primary/30 hover:border-primary transition-all p-8 rounded-lg cursor-pointer group overflow-hidden bg-background"
             >
               <div className="absolute inset-0 bg-primary/5 transform scale-y-0 group-hover:scale-y-100 origin-bottom transition-transform duration-300 ease-out"></div>
@@ -69,13 +69,7 @@ const RequestSubmissionPage = () => {
             </div>
             
             <div 
-              onClick={() => {
-                setShowNewRequest(true);
-                requestFormProps.setRequestForm(prev => ({
-                  ...prev,
-                  type: "educational_support"
-                }));
-              }} 
+              onClick={() => requestFormProps.handleRequestTypeSelect("educational_support")} 
               className="relative flex-1 border border-primary/30 hover:border-primary transition-all p-8 rounded-lg cursor-pointer group overflow-hidden bg-background"
             >
               <div className="absolute inset-0 bg-primary/5 transform scale-y-0 group-hover:scale-y-100 origin-bottom transition-transform duration-300 ease-out"></div>
@@ -107,7 +101,6 @@ const RequestSubmissionPage = () => {
           </div>
         )}
         
-        {/* Information about the request process with elegant styling */}
         <div className="mt-8 bg-secondary/20 p-8 rounded-lg border border-primary/10">
           <h3 className="text-2xl font-serif mb-4 text-elegant">Our Support Process</h3>
           <ol className="space-y-4 font-serif text-lg">
@@ -134,7 +127,6 @@ const RequestSubmissionPage = () => {
           </ol>
         </div>
 
-        {/* Community impact section */}
         <div className="mt-4 bg-primary/5 p-8 rounded-lg border border-primary/10">
           <h3 className="text-2xl font-serif mb-4 text-elegant">Our Impact</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
