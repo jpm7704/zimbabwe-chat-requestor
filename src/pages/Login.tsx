@@ -1,12 +1,11 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, Mail } from "lucide-react";
+import { ArrowRight, ArrowLeft, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -23,7 +22,6 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check for verification success message in URL
   useEffect(() => {
     const verificationSuccess = searchParams.get('verification_success');
     if (verificationSuccess === 'true') {
@@ -34,7 +32,6 @@ const Login = () => {
     }
   }, [searchParams, toast]);
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/requests');
@@ -46,7 +43,6 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-    // Clear error when user types
     if (error) setError(null);
   };
 
@@ -68,12 +64,10 @@ const Login = () => {
         description: "Welcome back to BGF Zimbabwe support portal."
       });
       
-      // Redirect to requests page
       navigate("/requests");
     } catch (error: any) {
       console.error("Login error:", error);
       
-      // Customize error message for email verification issues
       let errorMsg = error.message || "Failed to sign in. Please check your credentials.";
       if (error.message.includes("Email not confirmed")) {
         errorMsg = "Please verify your email before logging in. Check your inbox for the verification link.";
@@ -132,6 +126,18 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md animate-fade-in">
         <Card>
+          <div className="absolute top-4 left-4">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              asChild 
+              className="rounded-full"
+            >
+              <Link to="/">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Sign in to your account</CardTitle>
             <CardDescription className="text-center">

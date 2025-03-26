@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import RegisterForm from "@/components/auth/RegisterForm";
@@ -14,7 +14,6 @@ const Register = () => {
   const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
   const [checkingFirstTimeSetup, setCheckingFirstTimeSetup] = useState(true);
 
-  // Check if this is first-time setup (no admin accounts exist)
   useEffect(() => {
     const checkForAdmins = async () => {
       try {
@@ -25,7 +24,6 @@ const Register = () => {
 
         if (error) throw error;
         
-        // If there are no management users, this is first-time setup
         setIsFirstTimeSetup(count === 0);
       } catch (error) {
         console.error("Error checking for admin accounts:", error);
@@ -47,6 +45,18 @@ const Register = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md animate-fade-in">
         <Card>
+          <div className="absolute top-4 left-4">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              asChild 
+              className="rounded-full"
+            >
+              <Link to="/">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
             <CardDescription className="text-center">
