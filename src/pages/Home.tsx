@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle, BarChart3, Users, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RequestTypeInfo } from "@/types";
 import { getRequestTypes } from "@/services/requestService";
 
@@ -33,13 +33,13 @@ const Home = () => {
   return (
     <div className="animate-fade-in">
       {/* Hero Section */}
-      <section className="relative bg-primary/5 pt-20 pb-16 md:pt-28 md:pb-24">
+      <section className="relative bg-primary/5 pt-20 pb-16 md:pt-28 md:pb-24 min-h-[calc(100vh-80px)] flex items-center">
         <div className="container px-4 mx-auto">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
               Zimbabwe <span className="text-primary">Community Support Initiative</span>
             </h1>
-            <p className="mb-8 text-lg md:text-xl text-muted-foreground leading-relaxed">
+            <p className="mb-8 text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
               Supporting communities across Zimbabwe through medical, educational, financial, 
               and emergency relief assistance programs.
             </p>
@@ -58,43 +58,43 @@ const Home = () => {
             </div>
           </div>
         </div>
-
-        {/* Stats Section */}
-        <div className="container px-4 mx-auto mt-16 md:mt-24">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="glass dark:glass-dark border-primary/20">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-4xl font-bold">15,000+</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
-                  Individuals assisted through our programs
-                </CardDescription>
-              </CardContent>
-            </Card>
-            <Card className="glass dark:glass-dark border-primary/20">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-4xl font-bold">9</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
-                  Types of assistance programs available
-                </CardDescription>
-              </CardContent>
-            </Card>
-            <Card className="glass dark:glass-dark border-primary/20">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-4xl font-bold">10</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
-                  Provinces with active support operations
-                </CardDescription>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
       </section>
+
+      {/* Stats Section */}
+      <div className="container px-4 mx-auto mt-16 md:mt-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="glass dark:glass-dark border-primary/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-4xl font-bold">15,000+</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-base">
+                Individuals assisted through our programs
+              </CardDescription>
+            </CardContent>
+          </Card>
+          <Card className="glass dark:glass-dark border-primary/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-4xl font-bold">9</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-base">
+                Types of assistance programs available
+              </CardDescription>
+            </CardContent>
+          </Card>
+          <Card className="glass dark:glass-dark border-primary/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-4xl font-bold">10</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-base">
+                Provinces with active support operations
+              </CardDescription>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* Support Types Section */}
       <section className="py-16 md:py-24">
@@ -108,7 +108,6 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading ? (
-              // Loading placeholders
               Array.from({ length: 9 }).map((_, i) => (
                 <Card key={i} className="animate-pulse">
                   <CardHeader>
@@ -124,7 +123,6 @@ const Home = () => {
                 </Card>
               ))
             ) : (
-              // Actual request types
               requestTypes.map((type) => (
                 <Card 
                   key={type.type} 
@@ -227,3 +225,4 @@ const Home = () => {
 };
 
 export default Home;
+
