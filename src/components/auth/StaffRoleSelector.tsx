@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -78,15 +77,11 @@ const StaffRoleSelector = ({
             <SelectValue placeholder="Select your staff role" />
           </SelectTrigger>
           <SelectContent>
-            {isFirstTimeSetup ? (
-              <SelectItem value="director">Director (Management)</SelectItem>
-            ) : (
-              STAFF_ROLES.map((role) => (
-                <SelectItem key={role.key} value={role.key}>
-                  {role.name}
-                </SelectItem>
-              ))
-            )}
+            {STAFF_ROLES.map((role) => (
+              <SelectItem key={role.key} value={role.key}>
+                {role.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">
