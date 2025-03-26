@@ -62,7 +62,7 @@ export const updateRequestStatus = async (
     // Get the name of the user who made the update
     const { data: userData, error: userError } = await supabase
       .from('user_profiles')
-      .select('first_name, last_name, role')
+      .select('name, role')
       .eq('id', userId)
       .single();
     
@@ -79,7 +79,7 @@ export const updateRequestStatus = async (
       createdAt: statusUpdateData.timestamp,
       createdBy: {
         id: userId,
-        name: userData ? `${userData.first_name} ${userData.last_name}`.trim() : "Unknown User",
+        name: userData ? userData.name : "Unknown User",
         role: userData ? userData.role : "user"
       },
       metadata: {
@@ -115,7 +115,7 @@ export const getStatusHistory = async (requestId: string): Promise<TimelineEvent
         notes,
         timestamp,
         updated_by,
-        updater:user_profiles!updated_by(id, first_name, last_name, role)
+        updater:user_profiles!updated_by(id, name, role)
       `)
       .eq('request_id', requestId)
       .order('timestamp', { ascending: false });
@@ -132,7 +132,7 @@ export const getStatusHistory = async (requestId: string): Promise<TimelineEvent
       createdAt: update.timestamp,
       createdBy: {
         id: update.updated_by,
-        name: update.updater ? `${update.updater.first_name} ${update.updater.last_name}`.trim() : "Unknown User",
+        name: update.updater ? update.updater.name : "Unknown User",
         role: update.updater ? update.updater.role : "user"
       },
       metadata: {

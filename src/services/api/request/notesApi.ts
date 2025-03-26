@@ -23,7 +23,7 @@ export const addNoteToRequest = async (
     // Get the user's profile
     const { data: userData, error: userError } = await supabase
       .from('user_profiles')
-      .select('first_name, last_name, role')
+      .select('name, role')
       .eq('id', userId)
       .single();
     
@@ -52,7 +52,7 @@ export const addNoteToRequest = async (
       id: messageData.id,
       requestId,
       authorId: userId,
-      authorName: `${userData.first_name} ${userData.last_name}`.trim(),
+      authorName: userData.name,
       authorRole: userData.role,
       content,
       createdAt: messageData.timestamp,
@@ -64,11 +64,11 @@ export const addNoteToRequest = async (
       id: messageData.id,
       requestId,
       type: "note_added",
-      description: `New ${isInternal ? 'internal ' : ''}note added by ${userData.first_name} ${userData.last_name}`.trim(),
+      description: `New ${isInternal ? 'internal ' : ''}note added by ${userData.name}`,
       createdAt: messageData.timestamp,
       createdBy: {
         id: userId,
-        name: `${userData.first_name} ${userData.last_name}`.trim(),
+        name: userData.name,
         role: userData.role
       },
       metadata: {
@@ -103,7 +103,7 @@ export const getRequestNotes = async (requestId: string, includeInternal: boolea
         content,
         timestamp,
         is_system_message,
-        user:user_profiles(id, first_name, last_name, email, role)
+        user:user_profiles(id, name, email, role)
       `)
       .eq('request_id', requestId);
     
@@ -121,7 +121,7 @@ export const getRequestNotes = async (requestId: string, includeInternal: boolea
       id: message.id,
       requestId: message.request_id,
       authorId: message.sender_id,
-      authorName: message.user ? `${message.user.first_name} ${message.user.last_name}`.trim() : "Unknown User",
+      authorName: message.user ? message.user.name : "Unknown User",
       authorRole: message.user ? message.user.role : "user",
       content: message.content,
       createdAt: message.timestamp,

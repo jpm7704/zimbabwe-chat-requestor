@@ -35,9 +35,9 @@ export const useSupabaseRequests = (filter?: RequestStatus) => {
             user_id,
             field_officer_id,
             program_manager_id,
-            user_profiles!user_id(id, first_name, last_name, email, role),
-            field_officer:user_profiles!field_officer_id(id, first_name, last_name, email, role),
-            program_manager:user_profiles!program_manager_id(id, first_name, last_name, email, role)
+            user_profiles!user_id(id, name, email, role),
+            field_officer:user_profiles!field_officer_id(id, name, email, role),
+            program_manager:user_profiles!program_manager_id(id, name, email, role)
           `);
 
         // Apply role-based filters
@@ -78,7 +78,7 @@ export const useSupabaseRequests = (filter?: RequestStatus) => {
           assignedTo: item.field_officer_id || item.program_manager_id,
           user: item.user_profiles ? {
             id: item.user_profiles.id,
-            name: `${item.user_profiles.first_name} ${item.user_profiles.last_name}`.trim(),
+            name: item.user_profiles.name,
             email: item.user_profiles.email,
             role: item.user_profiles.role
           } : undefined,
