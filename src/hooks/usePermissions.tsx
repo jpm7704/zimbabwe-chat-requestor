@@ -2,7 +2,7 @@
 import { UserProfile } from "./useAuth";
 
 // Define role types for better type safety
-export type UserRole = 'user' | 'field_officer' | 'programme_manager' | 'management';
+export type UserRole = 'user' | 'field_officer' | 'regional_project_officer' | 'assistant_project_officer' | 'head_of_programs' | 'director';
 
 // Define permission sets for different features
 export interface Permissions {
@@ -49,18 +49,40 @@ export function usePermissions(userProfile: UserProfile | null) {
         canAccessFieldReports: true,
         canAccessAdminPanel: false,
       };
-    case 'programme_manager':
+    case 'regional_project_officer':
       return {
         canViewRequests: true,
         canAssignRequests: true,
         canReviewRequests: true,
-        canApproveRequests: true,
+        canApproveRequests: false,
+        canManageStaff: false,
+        canAccessAnalytics: false,
+        canAccessFieldReports: true,
+        canAccessAdminPanel: false,
+      };
+    case 'assistant_project_officer':
+      return {
+        canViewRequests: true,
+        canAssignRequests: true,
+        canReviewRequests: true,
+        canApproveRequests: false,
         canManageStaff: false,
         canAccessAnalytics: true,
         canAccessFieldReports: true,
         canAccessAdminPanel: false,
       };
-    case 'management':
+    case 'head_of_programs':
+      return {
+        canViewRequests: true,
+        canAssignRequests: true,
+        canReviewRequests: true,
+        canApproveRequests: true,
+        canManageStaff: true,
+        canAccessAnalytics: true,
+        canAccessFieldReports: true,
+        canAccessAdminPanel: false,
+      };
+    case 'director':
       return {
         canViewRequests: true,
         canAssignRequests: true,

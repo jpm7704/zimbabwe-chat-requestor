@@ -21,27 +21,27 @@ interface RoleBasedWorkflowProps {
 }
 
 const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBasedWorkflowProps) => {
-  const { isAdmin, isProgrammeManager, isFieldOfficer, isRegularUser } = useRoles(userProfile);
+  const roles = useRoles(userProfile);
   
   if (!userProfile) return null;
   
   // Field Officer View
-  if (isFieldOfficer()) {
+  if (roles.isFieldOfficer() || roles.isRegionalProjectOfficer()) {
     return <FieldOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
   } 
   
-  // Programme Manager View
-  else if (isProgrammeManager()) {
+  // Assistant Project Officer / HOP View
+  else if (roles.isAssistantProjectOfficer() || roles.isHeadOfPrograms()) {
     return <ProgrammeManagerView userProfile={userProfile} statusCounts={statusCounts} />;
   } 
   
-  // Management View
-  else if (isAdmin()) {
+  // Director View
+  else if (roles.isAdmin()) {
     return <ManagementView userProfile={userProfile} statusCounts={statusCounts} />;
   } 
   
   // Regular User View
-  else if (isRegularUser()) {
+  else if (roles.isRegularUser()) {
     return <RegularUserView userProfile={userProfile} />;
   }
   

@@ -2,8 +2,10 @@
 import { UserProfile } from "./useAuth";
 
 export function useRoles(userProfile: UserProfile | null) {
-  const isAdmin = () => userProfile?.role === 'management';
-  const isProgrammeManager = () => userProfile?.role === 'programme_manager';
+  const isAdmin = () => userProfile?.role === 'director';
+  const isHeadOfPrograms = () => userProfile?.role === 'head_of_programs';
+  const isAssistantProjectOfficer = () => userProfile?.role === 'assistant_project_officer';
+  const isRegionalProjectOfficer = () => userProfile?.role === 'regional_project_officer';
   const isFieldOfficer = () => userProfile?.role === 'field_officer';
   const isRegularUser = () => userProfile?.role === 'user';
   
@@ -24,16 +26,16 @@ export function useRoles(userProfile: UserProfile | null) {
     }
     
     switch(userProfile.role) {
-      case 'management':
+      case 'director':
         return {
-          title: 'Senior Management',
+          title: 'Director',
           description: 'Final Approver',
           color: 'green',
           iconClass: 'bg-green-100',
           textClass: 'text-green-600',
           badgeClass: 'bg-green-500',
           responsibilities: [
-            'Review thoroughly verified requests from Programme Managers',
+            'Review thoroughly verified requests from Head of Programs',
             'Evaluate requests against organizational budget and priorities',
             'Make final approval or rejection decisions',
             'Authorize resource allocation for approved requests',
@@ -41,21 +43,55 @@ export function useRoles(userProfile: UserProfile | null) {
             'Oversee organizational compliance and governance'
           ]
         };
-      case 'programme_manager':
+      case 'head_of_programs':
         return {
-          title: 'Programme Manager',
-          description: 'Request Coordinator',
+          title: 'Head of Programs',
+          description: 'Program Coordinator',
           color: 'blue',
           iconClass: 'bg-blue-100',
           textClass: 'text-blue-600',
           badgeClass: 'bg-blue-500',
           responsibilities: [
-            'Review all incoming assistance requests',
-            'Assign requests to appropriate Field Officers based on location and expertise',
+            'Review assistance requests from Assistant Project Officers',
+            'Coordinate program implementation across regions',
             'Review verification reports and assessment data',
-            'Request additional information or clarification when needed',
-            'Forward verified requests to Management for final approval',
-            'Monitor overall verification process efficiency'
+            'Forward verified requests to Directors for final approval',
+            'Implement approved programs and allocate resources',
+            'Monitor overall program efficiency and effectiveness'
+          ]
+        };
+      case 'assistant_project_officer':
+        return {
+          title: 'Assistant Project Officer',
+          description: 'Project Facilitator',
+          color: 'indigo',
+          iconClass: 'bg-indigo-100',
+          textClass: 'text-indigo-600',
+          badgeClass: 'bg-indigo-500',
+          responsibilities: [
+            'Receive requests from Regional Project Officers',
+            'Review and assess request documentation',
+            'Coordinate with field staff for implementation',
+            'Prepare detailed reports for Head of Programs',
+            'Monitor project milestones and deliverables',
+            'Ensure compliance with organizational standards'
+          ]
+        };
+      case 'regional_project_officer':
+        return {
+          title: 'Regional Project Officer',
+          description: 'Regional Coordinator',
+          color: 'purple',
+          iconClass: 'bg-purple-100',
+          textClass: 'text-purple-600',
+          badgeClass: 'bg-purple-500',
+          responsibilities: [
+            'Oversee projects in assigned region',
+            'Coordinate with field officers for verification',
+            'Review and compile field assessment data',
+            'Submit verified requests to Assistant Project Officers',
+            'Monitor regional project implementation',
+            'Build relationships with local communities and stakeholders'
           ]
         };
       case 'field_officer':
@@ -70,7 +106,7 @@ export function useRoles(userProfile: UserProfile | null) {
             'Review and assess assistance requests assigned to you',
             'Conduct field visits to verify beneficiary information',
             'Collect and validate supporting documentation',
-            'Prepare detailed verification reports for Programme Manager review',
+            'Prepare detailed verification reports for Regional Officers',
             'Complete assessments within assigned timeframes'
           ]
         };
@@ -97,7 +133,9 @@ export function useRoles(userProfile: UserProfile | null) {
   
   return {
     isAdmin,
-    isProgrammeManager,
+    isHeadOfPrograms,
+    isAssistantProjectOfficer,
+    isRegionalProjectOfficer,
     isFieldOfficer,
     isRegularUser,
     hasRole,

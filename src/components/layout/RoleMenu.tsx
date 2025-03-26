@@ -83,7 +83,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
       )}
 
       {/* Field Officer Routes */}
-      {permissions.canReviewRequests && (
+      {(roles.isFieldOfficer() || roles.isRegionalProjectOfficer()) && (
         <Button 
           variant={isActive('/field-work') ? "default" : buttonVariant} 
           className={buttonClass}
@@ -96,8 +96,8 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {/* Programme Manager Routes */}
-      {permissions.canAccessAnalytics && (
+      {/* Assistant Project Officer & HOP Routes */}
+      {(roles.isAssistantProjectOfficer() || roles.isHeadOfPrograms() || roles.isAdmin()) && (
         <Button 
           variant={isActive('/analytics') ? "default" : buttonVariant} 
           className={buttonClass}
