@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -72,7 +72,7 @@ const StaffRoleSelector = ({
         <Select 
           onValueChange={handleStaffRoleChange}
           value={formData.staffRole}
-          defaultValue={formData.staffRole}
+          defaultValue=""
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select your staff role" />
