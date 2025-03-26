@@ -21,10 +21,10 @@ const MobileMenu = ({ isOpen, onClose, userProfile, isAuthenticated }: MobileMen
   if (!isOpen) return null;
 
   return (
-    <div className="md:hidden glass dark:glass-dark animate-fade-in p-4">
+    <div className="md:hidden glass dark:glass-dark animate-fade-in p-4 mx-4 mt-2 rounded-2xl">
       <div className="flex flex-col space-y-3">
         {isAuthenticated && userProfile && (
-          <div className="p-3 border border-border rounded-md mb-2">
+          <div className="p-3 border border-border rounded-xl mb-2">
             <div className="font-medium">{userProfile?.first_name} {userProfile?.last_name}</div>
             <div className="text-sm text-muted-foreground">{formatRole(userProfile?.role || '')}</div>
           </div>
@@ -43,7 +43,7 @@ const MobileMenu = ({ isOpen, onClose, userProfile, isAuthenticated }: MobileMen
                 handleLogout();
                 onClose();
               }}
-              className="w-full"
+              className="w-full rounded-full"
             >
               <LogOut size={18} className="mr-2" />
               Sign Out
@@ -53,7 +53,7 @@ const MobileMenu = ({ isOpen, onClose, userProfile, isAuthenticated }: MobileMen
               <Button 
                 variant="outline" 
                 asChild
-                className="w-full justify-start"
+                className="w-full justify-start rounded-full"
               >
                 <Link to="/login" onClick={onClose}>
                   <LogIn size={18} className="mr-2" />
@@ -62,7 +62,7 @@ const MobileMenu = ({ isOpen, onClose, userProfile, isAuthenticated }: MobileMen
               </Button>
               <Button 
                 asChild
-                className="w-full"
+                className="w-full rounded-full"
               >
                 <Link to="/register" onClick={onClose}>
                   Register

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogIn } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import UserProfileDropdown from "./UserProfileDropdown";
 import MobileMenu from "./MobileMenu";
@@ -37,54 +37,62 @@ const Navbar = () => {
   };
 
   return (
-    <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? "py-2 glass dark:glass-dark shadow-sm" 
-          : "py-4 bg-transparent"
-      }`}
-    >
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <img 
-            src="/lovable-uploads/a6e9fa53-7698-4f06-bf5e-8103cd940032.png" 
-            alt="Bridging Gaps Foundation Logo" 
-            className="h-16 sm:h-20 w-auto"
-          />
-        </Link>
+    <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4">
+      <div 
+        className={`container mx-auto px-4 transition-all duration-300 ${
+          scrolled 
+            ? "glass dark:glass-dark shadow-lg rounded-full max-w-5xl py-2" 
+            : "py-4 bg-transparent"
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/a6e9fa53-7698-4f06-bf5e-8103cd940032.png" 
+              alt="Bridging Gaps Foundation Logo" 
+              className={`transition-all duration-300 ${
+                scrolled ? "h-12 w-auto" : "h-16 sm:h-20 w-auto"
+              }`}
+            />
+          </Link>
 
-        {/* Desktop Navigation */}
-        <NavLinks isAuthenticated={isAuthenticated} />
+          {/* Desktop Navigation */}
+          <NavLinks isAuthenticated={isAuthenticated} />
 
-        {/* Auth Buttons */}
-        <div className="hidden md:flex items-center gap-2">
-          {isAuthenticated && !loading ? (
-            <UserProfileDropdown userProfile={userProfile} />
-          ) : (!loading && (
-            <>
-              <Button 
-                variant="outline" 
-                asChild
-              >
-                <Link to="/login">Sign In</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/register">Register</Link>
-              </Button>
-            </>
-          ))}
+          {/* Auth Buttons */}
+          <div className="hidden md:flex items-center gap-2">
+            {isAuthenticated && !loading ? (
+              <UserProfileDropdown userProfile={userProfile} />
+            ) : (!loading && (
+              <>
+                <Button 
+                  variant="outline" 
+                  asChild
+                  className="rounded-full"
+                >
+                  <Link to="/login">Sign In</Link>
+                </Button>
+                <Button 
+                  asChild
+                  className="rounded-full"
+                >
+                  <Link to="/register">Register</Link>
+                </Button>
+              </>
+            ))}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden rounded-full" 
+            onClick={toggleMobileMenu}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </Button>
         </div>
-
-        {/* Mobile Menu Button */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="md:hidden" 
-          onClick={toggleMobileMenu}
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </Button>
       </div>
 
       {/* Mobile Menu */}
