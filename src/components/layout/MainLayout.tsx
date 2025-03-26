@@ -6,6 +6,7 @@ import Footer from "./Footer";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from "./AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -32,6 +33,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             </main>
             <Footer />
           </div>
+          <ThemeToggle />
         </div>
       </SidebarProvider>
     );
@@ -47,6 +49,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </main>
         <Footer />
       </div>
+      <ThemeToggle />
     </div>
   );
 };
