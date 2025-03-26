@@ -1,4 +1,6 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -99,28 +101,32 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased overflow-x-hidden;
+    @apply bg-background text-foreground antialiased overflow-x-hidden font-cormorant;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-medium tracking-tight;
+    @apply font-playfair font-medium tracking-tight;
   }
 
   h1 {
-    @apply text-4xl md:text-5xl lg:text-6xl;
+    @apply text-4xl md:text-5xl lg:text-6xl leading-tight;
   }
 
   h2 {
-    @apply text-3xl md:text-4xl;
+    @apply text-3xl md:text-4xl leading-tight;
   }
 
   h3 {
-    @apply text-2xl md:text-3xl;
+    @apply text-2xl md:text-3xl leading-tight;
   }
   
   h4 {
-    @apply text-xl md:text-2xl;
+    @apply text-xl md:text-2xl leading-tight;
+  }
+
+  p {
+    @apply text-base md:text-lg leading-relaxed;
   }
 
   .glass {
@@ -164,6 +170,39 @@
   
   .text-brand-gradient {
     @apply bg-gradient-to-r from-primary via-red-500 to-primary/80 bg-clip-text text-transparent;
+  }
+
+  /* Elegant typography utilities */
+  .text-elegant {
+    @apply font-playfair tracking-wide;
+  }
+
+  .serif-caps {
+    @apply font-playfair uppercase tracking-widest text-sm;
+  }
+
+  .elegant-border {
+    @apply border-b border-primary/30;
+  }
+  
+  .elegant-quote {
+    @apply font-playfair italic text-xl md:text-2xl text-muted-foreground leading-relaxed pl-6 border-l-2 border-primary/50;
+  }
+  
+  .elegant-button {
+    @apply font-playfair tracking-wider uppercase text-sm border-b-2 border-primary/50 hover:border-primary transition-colors duration-300;
+  }
+  
+  .elegant-card {
+    @apply border border-border rounded-sm shadow-sm hover:shadow-md transition-all duration-300;
+  }
+  
+  .elegant-divider {
+    @apply flex items-center justify-center my-8 before:content-[''] before:flex-1 before:border-t before:border-border after:content-[''] after:flex-1 after:border-t after:border-border;
+  }
+  
+  .elegant-divider::before, .elegant-divider::after {
+    @apply mx-4;
   }
 }
 
