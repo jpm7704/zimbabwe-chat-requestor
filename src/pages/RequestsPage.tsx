@@ -20,7 +20,8 @@ const RequestsPage = () => {
     activeFilter,
     searchTerm,
     handleSearch,
-    handleFilter
+    handleFilter,
+    handleSort
   } = useRequestsData();
 
   // Redirect users to their appropriate dashboard based on role
@@ -76,6 +77,7 @@ const RequestsPage = () => {
       <RequestsSearchFilter 
         onSearch={handleSearch}
         onFilter={handleFilter}
+        onSort={handleSort}
         activeFilter={activeFilter}
       />
 
