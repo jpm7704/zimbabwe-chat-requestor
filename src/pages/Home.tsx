@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import HeroSection from "@/components/home/HeroSection";
 import StatsSection from "@/components/home/StatsSection";
 import SupportTypesSection from "@/components/home/SupportTypesSection";
@@ -8,7 +7,7 @@ import CTASection from "@/components/home/CTASection";
 
 const Home = () => {
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in w-full">
       <HeroSection />
       <StatsSection />
       <SupportTypesSection />
