@@ -12,19 +12,18 @@ const HeroSection = () => {
             Zimbabwe <span className="text-primary">Community Support Initiative</span>
           </h1>
           <p className="mb-8 text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Supporting communities across Zimbabwe through medical, educational, financial, 
-            and emergency relief assistance programs.
+            Empowering communities across Zimbabwe through our expanded assistance programs with faster processing times and enhanced support services.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
             <Button asChild size="lg" className="h-12 px-6 w-full sm:w-auto">
               <Link to="/submit?action=new">
-                Start New Request
+                Apply for Assistance
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="h-12 px-6 w-full sm:w-auto">
               <Link to="/requests">
-                Track Existing Request
+                Track Your Application
               </Link>
             </Button>
           </div>
