@@ -3,16 +3,15 @@ import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 
-interface StaffRole {
-  role_key: string;
-  display_name: string;
-  description: string;
-}
+// Define all available staff roles
+const STAFF_ROLES = [
+  { key: "director", name: "Director", description: "Head of organization" },
+  { key: "head_of_programs", name: "Head of Programs", description: "Oversees all programs" },
+  { key: "assistant_project_officer", name: "Assistant Project Officer", description: "Assists with project management" },
+  { key: "regional_project_officer", name: "Regional Project Officer", description: "Manages regional projects" },
+  { key: "field_officer", name: "Field Officer", description: "Field implementation" }
+];
 
 interface StaffRoleSelectorProps {
   isFirstTimeSetup: boolean;
@@ -40,59 +39,7 @@ const StaffRoleSelector = ({
   formData, 
   setFormData
 }: StaffRoleSelectorProps) => {
-  const { toast } = useToast();
-  const [staffRoles, setStaffRoles] = useState<StaffRole[]>([]);
-  const [loadingRoles, setLoadingRoles] = useState(false);
   
-  // Default staff roles if API fails
-  const defaultRoles: StaffRole[] = [
-    { role_key: "director", display_name: "Director", description: "Head of organization" },
-    { role_key: "head_of_programs", display_name: "Head of Programs", description: "Oversees all programs" },
-    { role_key: "assistant_project_officer", display_name: "Assistant Project Officer", description: "Assists with project management" },
-    { role_key: "regional_project_officer", display_name: "Regional Project Officer", description: "Manages regional projects" },
-    { role_key: "field_officer", display_name: "Field Officer", description: "Field implementation" }
-  ];
-  
-  // Fetch staff roles from the database
-  useEffect(() => {
-    const fetchStaffRoles = async () => {
-      console.log("Attempting to fetch staff roles...");
-      setLoadingRoles(true);
-      
-      try {
-        const { data, error } = await supabase.rpc('get_available_staff_roles');
-        
-        if (error) {
-          console.error("Error fetching from RPC:", error);
-          throw error;
-        }
-        
-        if (data && data.length > 0) {
-          console.log("Successfully fetched staff roles:", data);
-          setStaffRoles(data);
-        } else {
-          console.log("No roles returned from database, using defaults");
-          setStaffRoles(defaultRoles);
-        }
-      } catch (error) {
-        console.error("Error fetching staff roles:", error);
-        setStaffRoles(defaultRoles);
-        toast({
-          title: "Using default roles",
-          description: "Could not fetch roles from database. Using default roles instead.",
-          variant: "default"
-        });
-      } finally {
-        setLoadingRoles(false);
-      }
-    };
-
-    // Only fetch roles if it's not the first-time setup
-    if (!isFirstTimeSetup) {
-      fetchStaffRoles();
-    }
-  }, [toast, isFirstTimeSetup]);
-
   const handleStaffRoleChange = (value: string) => {
     console.log("Selected staff role:", value);
     setFormData(prevState => ({
@@ -122,33 +69,26 @@ const StaffRoleSelector = ({
       {/* Staff role selection */}
       <div className="space-y-2">
         <Label htmlFor="staffRole">Staff Role</Label>
-        {loadingRoles ? (
-          <div className="flex items-center space-x-2 h-10 border rounded-md px-3">
-            <Loader2 size={16} className="animate-spin text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Loading roles...</span>
-          </div>
-        ) : (
-          <Select 
-            onValueChange={handleStaffRoleChange}
-            value={formData.staffRole}
-            defaultValue={formData.staffRole}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select your staff role" />
-            </SelectTrigger>
-            <SelectContent>
-              {isFirstTimeSetup ? (
-                <SelectItem value="director">Director (Management)</SelectItem>
-              ) : (
-                staffRoles.map((role) => (
-                  <SelectItem key={role.role_key} value={role.role_key}>
-                    {role.display_name}
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-        )}
+        <Select 
+          onValueChange={handleStaffRoleChange}
+          value={formData.staffRole}
+          defaultValue={formData.staffRole}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select your staff role" />
+          </SelectTrigger>
+          <SelectContent>
+            {isFirstTimeSetup ? (
+              <SelectItem value="director">Director (Management)</SelectItem>
+            ) : (
+              STAFF_ROLES.map((role) => (
+                <SelectItem key={role.key} value={role.key}>
+                  {role.name}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
         <p className="text-xs text-muted-foreground">
           Select your role in the organization
         </p>

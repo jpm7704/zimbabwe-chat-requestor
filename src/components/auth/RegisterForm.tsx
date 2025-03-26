@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { KeyRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 // Import refactored components
@@ -38,7 +37,6 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("user");
-  const [selectedStaffType, setSelectedStaffType] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
