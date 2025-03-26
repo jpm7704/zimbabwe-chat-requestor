@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KeyRound, User, Users } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import AdminRegistrationFields from "./AdminRegistrationFields";
 import UserAgreement from "./UserAgreement";
@@ -16,6 +15,12 @@ import UserAgreement from "./UserAgreement";
 interface RegisterFormProps {
   isFirstTimeSetup: boolean;
   checkingFirstTimeSetup: boolean;
+}
+
+interface StaffRole {
+  role_key: string;
+  display_name: string;
+  description: string;
 }
 
 const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterFormProps) => {
@@ -29,13 +34,40 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
     password: "",
     confirmPassword: "",
     adminCode: "",
-    staffRole: "" // For specific staff roles
+    staffRole: "", // For specific staff roles
+    staffNumber: "",
+    region: ""
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("user");
   const [selectedStaffType, setSelectedStaffType] = useState<string | null>(null);
+  const [staffRoles, setStaffRoles] = useState<StaffRole[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(false);
+
+  // Fetch staff roles from the database
+  useEffect(() => {
+    const fetchStaffRoles = async () => {
+      setLoadingRoles(true);
+      try {
+        const { data, error } = await supabase.rpc('get_available_staff_roles');
+        if (error) throw error;
+        setStaffRoles(data || []);
+      } catch (error) {
+        console.error("Error fetching staff roles:", error);
+        toast({
+          title: "Failed to load staff roles",
+          description: "Please refresh the page and try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoadingRoles(false);
+      }
+    };
+
+    fetchStaffRoles();
+  }, [toast]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -43,13 +75,6 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
       [e.target.name]: e.target.value
     });
     if (error) setError(null);
-  };
-
-  const staffRoleOptions = {
-    "head_of_programs": "Head of Programs (HOP)",
-    "assistant_project_officer": "Assistant Project Officer",
-    "regional_project_officer": "Regional Project Officer",
-    "director": "Director",
   };
 
   // Function to validate staff email domain
@@ -99,25 +124,40 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
       }
     }
     
+    if (activeTab === "admin" && !isFirstTimeSetup && !formData.staffRole) {
+      setError("Please select a staff role");
+      toast({
+        title: "Staff role required",
+        description: "Please select your role in the organization.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     
     try {
       // Determine the role based on conditions
       let userRole = "user"; // Default role
+      let staffNumber = null;
+      let region = null;
       
       // For staff registrations
       if (activeTab === "admin") {
         // First-time setup - allow admin registration without code
         if (isFirstTimeSetup) {
-          userRole = "management"; // Initial admin
+          userRole = "director"; // Initial admin
+          staffNumber = parseInt(formData.staffNumber) || 1;
         } 
         // Verify admin code for subsequent admin registrations
         else if (formData.adminCode === "BGF-ADMIN-2024") {
-          if (selectedStaffType && formData.staffRole) {
+          if (formData.staffRole) {
             userRole = formData.staffRole; // Specific staff role
+            staffNumber = parseInt(formData.staffNumber) || null;
+            region = formData.region || null;
           } else {
-            userRole = "management"; // Default admin role
+            throw new Error("Staff role is required");
           }
         } else {
           throw new Error("Invalid admin verification code");
@@ -132,7 +172,9 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
           data: {
             firstName: formData.firstName,
             lastName: formData.lastName,
-            role: userRole
+            role: userRole,
+            staff_number: staffNumber,
+            region: region
           },
           emailRedirectTo: window.location.origin + "/login"
         }
@@ -188,7 +230,8 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
             isFirstTimeSetup={isFirstTimeSetup}
             formData={formData}
             handleChange={handleChange}
-            staffRoleOptions={staffRoleOptions}
+            staffRoles={staffRoles}
+            loadingRoles={loadingRoles}
             setFormData={setFormData}
             setSelectedStaffType={setSelectedStaffType}
           />

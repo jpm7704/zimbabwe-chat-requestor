@@ -137,6 +137,39 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_roles: {
+        Row: {
+          can_approve: boolean | null
+          can_assign: boolean | null
+          created_at: string | null
+          description: string | null
+          display_name: string
+          hierarchy_level: number
+          id: string
+          role_key: string
+        }
+        Insert: {
+          can_approve?: boolean | null
+          can_assign?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          hierarchy_level: number
+          id?: string
+          role_key: string
+        }
+        Update: {
+          can_approve?: boolean | null
+          can_assign?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          hierarchy_level?: number
+          id?: string
+          role_key?: string
+        }
+        Relationships: []
+      }
       status_updates: {
         Row: {
           id: string
@@ -179,7 +212,9 @@ export type Database = {
           email: string
           id: string
           name: string
+          region: string | null
           role: string
+          staff_number: number | null
           updated_at: string
         }
         Insert: {
@@ -188,7 +223,9 @@ export type Database = {
           email: string
           id: string
           name: string
+          region?: string | null
           role?: string
+          staff_number?: number | null
           updated_at?: string
         }
         Update: {
@@ -197,7 +234,9 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          region?: string | null
           role?: string
+          staff_number?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -207,7 +246,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_available_staff_roles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          role_key: string
+          display_name: string
+          description: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
