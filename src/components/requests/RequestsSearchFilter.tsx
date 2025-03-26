@@ -108,7 +108,7 @@ const RequestsSearchFilter = ({ onSearch, onFilter, onSort, activeFilter }: Requ
         </DropdownMenu>
       </div>
 
-      <Tabs defaultValue="all" value={activeFilter} onValueChange={onFilter}>
+      <Tabs defaultValue={activeFilter} value={activeFilter} onValueChange={onFilter}>
         <TabsList className="grid grid-cols-4">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="active">Active</TabsTrigger>

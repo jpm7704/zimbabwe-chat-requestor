@@ -3,9 +3,12 @@ import { useState, useEffect, useMemo } from "react";
 import { Request, RequestStatus } from "@/types";
 import { getUserRequests, searchRequests } from "@/services/requestService";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export const useRequestsData = () => {
   const { toast } = useToast();
+  const { userProfile } = useAuth();
   const [requests, setRequests] = useState<Request[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,9 +26,59 @@ export const useRequestsData = () => {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const data = await getUserRequests();
-      setRequests(data);
-      applyFiltersAndSort(data, activeFilter, sortConfig.field, sortConfig.direction);
+      
+      // If the user is not logged in, return empty array
+      if (!userProfile) {
+        setRequests([]);
+        setFilteredRequests([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch requests directly from Supabase
+      let query = supabase
+        .from('requests')
+        .select(`
+          id,
+          ticket_number,
+          title,
+          description,
+          type,
+          status,
+          created_at,
+          updated_at,
+          user_id
+        `);
+
+      // Filter by user_id if the user is a regular user
+      if (userProfile.role === 'user') {
+        query = query.eq('user_id', userProfile.id);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      // Transform the data to match our Request type
+      const transformedRequests: Request[] = data.map(request => ({
+        id: request.id,
+        ticketNumber: request.ticket_number,
+        userId: request.user_id,
+        type: request.type,
+        title: request.title,
+        description: request.description,
+        status: request.status,
+        createdAt: request.created_at,
+        updatedAt: request.updated_at,
+        documents: [],
+        notes: [],
+        timeline: []
+      }));
+
+      setRequests(transformedRequests);
+      applyFiltersAndSort(transformedRequests, activeFilter, sortConfig.field, sortConfig.direction);
     } catch (error) {
       console.error("Error fetching requests:", error);
       toast({
@@ -90,7 +143,14 @@ export const useRequestsData = () => {
 
     try {
       setLoading(true);
-      const results = await searchRequests(term);
+      
+      // Filter existing requests based on search term
+      const results = requests.filter(request => 
+        request.ticketNumber.toLowerCase().includes(term.toLowerCase()) ||
+        request.title.toLowerCase().includes(term.toLowerCase()) ||
+        request.description.toLowerCase().includes(term.toLowerCase())
+      );
+      
       applyFiltersAndSort(results, activeFilter, sortConfig.field, sortConfig.direction);
     } catch (error) {
       console.error("Error searching requests:", error);
@@ -131,6 +191,7 @@ export const useRequestsData = () => {
     searchTerm,
     handleSearch,
     handleFilter,
-    handleSort
+    handleSort,
+    refreshRequests: fetchRequests
   };
 };
