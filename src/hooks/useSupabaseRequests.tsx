@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Request, RequestStatus } from '@/types';
+import { Request, RequestStatus, RequestType } from '@/types';
 import { useAuth } from './useAuth';
 
 export const useSupabaseRequests = (filter?: RequestStatus) => {
@@ -35,9 +35,9 @@ export const useSupabaseRequests = (filter?: RequestStatus) => {
             user_id,
             field_officer_id,
             program_manager_id,
-            user:user_profiles!user_id(name, email, role),
-            field_officer:user_profiles!field_officer_id(name, email, role),
-            program_manager:user_profiles!program_manager_id(name, email, role)
+            user_profiles!user_id(id, first_name, last_name, email, role),
+            field_officer:user_profiles!field_officer_id(id, first_name, last_name, email, role),
+            program_manager:user_profiles!program_manager_id(id, first_name, last_name, email, role)
           `);
 
         // Apply role-based filters
@@ -69,18 +69,18 @@ export const useSupabaseRequests = (filter?: RequestStatus) => {
           id: item.id,
           ticketNumber: item.ticket_number,
           userId: item.user_id,
-          type: item.type,
+          type: item.type as RequestType,
           title: item.title,
           description: item.description,
-          status: item.status,
+          status: item.status as RequestStatus,
           createdAt: item.created_at,
           updatedAt: item.updated_at,
           assignedTo: item.field_officer_id || item.program_manager_id,
-          user: item.user ? {
-            id: item.user.id,
-            name: item.user.name,
-            email: item.user.email,
-            role: item.user.role
+          user: item.user_profiles ? {
+            id: item.user_profiles.id,
+            name: `${item.user_profiles.first_name} ${item.user_profiles.last_name}`.trim(),
+            email: item.user_profiles.email,
+            role: item.user_profiles.role
           } : undefined,
           fieldOfficer: item.field_officer,
           programManager: item.program_manager,

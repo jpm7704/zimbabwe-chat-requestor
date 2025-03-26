@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +14,7 @@ import { FileUpload } from './FileUpload';
 import { DocumentType } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RequestChatProps {
   requestId: string;
@@ -38,7 +38,6 @@ export function RequestChat({ requestId, canAddInternalNotes = false }: RequestC
 
   const loadNotes = async () => {
     try {
-      // Staff can see internal notes, regular users cannot
       const canSeeInternalNotes = userProfile?.role !== 'user';
       const fetchedNotes = await getRequestNotes(requestId, canSeeInternalNotes);
       setNotes(fetchedNotes);
@@ -57,7 +56,6 @@ export function RequestChat({ requestId, canAddInternalNotes = false }: RequestC
   useEffect(() => {
     loadNotes();
     
-    // Set up real-time listener for new messages
     const subscription = supabase
       .channel('messages-channel')
       .on('postgres_changes', {
@@ -66,7 +64,6 @@ export function RequestChat({ requestId, canAddInternalNotes = false }: RequestC
         table: 'messages',
         filter: `request_id=eq.${requestId}`,
       }, (payload) => {
-        // Reload messages when a new one is added
         loadNotes();
       })
       .subscribe();
