@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle, BarChart3, Users, MessageSquare } from "lucide-react";
@@ -32,10 +33,10 @@ const Home = () => {
 
   return (
     <div className="animate-fade-in">
-      {/* Hero Section - Adjusted to blend with navbar */}
-      <section className="relative bg-primary/5 pt-0 pb-16 md:pb-24 min-h-[100vh] flex items-center">
+      {/* Hero Section - Fully integrated with navbar background */}
+      <section className="relative bg-primary/5 pt-0 pb-16 md:pb-24 min-h-[100vh] flex items-center -mt-20">
         <div className="container px-4 mx-auto">
-          <div className="max-w-4xl mx-auto text-center pt-16 md:pt-24">
+          <div className="max-w-4xl mx-auto text-center pt-24 md:pt-32">
             <h1 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
               Zimbabwe <span className="text-primary">Community Support Initiative</span>
             </h1>
