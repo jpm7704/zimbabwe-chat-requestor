@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,9 +20,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Jost', 'ui-sans-serif', 'system-ui'],
-				playfair: ['Jost', 'serif'],
-				cormorant: ['Jost', 'serif'],
+				playfair: ['Playfair Display', 'serif'],
+				cormorant: ['Cormorant Garamond', 'serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -121,4 +121,3 @@ export default {
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
-
