@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useMemo } from "react";
-import { Request, RequestStatus } from "@/types";
+import { Request, RequestStatus, RequestType } from "@/types";
 import { getUserRequests, searchRequests } from "@/services/requestService";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,10 +66,10 @@ export const useRequestsData = () => {
         id: request.id,
         ticketNumber: request.ticket_number,
         userId: request.user_id,
-        type: request.type,
+        type: request.type as RequestType, // Explicitly cast to RequestType
         title: request.title,
         description: request.description,
-        status: request.status,
+        status: request.status as RequestStatus, // Also ensure status is correctly typed
         createdAt: request.created_at,
         updatedAt: request.updated_at,
         documents: [],
