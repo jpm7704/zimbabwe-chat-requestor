@@ -1,12 +1,12 @@
 
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -14,6 +14,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
+  const [searchParams] = useSearchParams();
   
   const [formData, setFormData] = useState({
     email: "",
@@ -21,6 +22,17 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Check for verification success message in URL
+  useEffect(() => {
+    const verificationSuccess = searchParams.get('verification_success');
+    if (verificationSuccess === 'true') {
+      toast({
+        title: "Email verified",
+        description: "Your email has been successfully verified. You can now log in.",
+      });
+    }
+  }, [searchParams, toast]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -60,10 +72,55 @@ const Login = () => {
       navigate("/requests");
     } catch (error: any) {
       console.error("Login error:", error);
-      setError(error.message || "Failed to sign in. Please check your credentials.");
+      
+      // Customize error message for email verification issues
+      let errorMsg = error.message || "Failed to sign in. Please check your credentials.";
+      if (error.message.includes("Email not confirmed")) {
+        errorMsg = "Please verify your email before logging in. Check your inbox for the verification link.";
+      }
+      
+      setError(errorMsg);
       toast({
         title: "Login failed",
-        description: error.message || "An error occurred during login.",
+        description: errorMsg,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!formData.email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address to resend verification.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: formData.email,
+        options: {
+          emailRedirectTo: window.location.origin + "/login"
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Verification email sent",
+        description: "Please check your inbox for the verification link.",
+      });
+    } catch (error: any) {
+      console.error("Resend verification error:", error);
+      toast({
+        title: "Failed to resend",
+        description: error.message || "An error occurred while resending verification email.",
         variant: "destructive"
       });
     } finally {
@@ -86,6 +143,17 @@ const Login = () => {
               {error && (
                 <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm mb-4">
                   {error}
+                  {error.includes("verify your email") && (
+                    <Button
+                      type="button" 
+                      variant="link" 
+                      className="px-0 py-1 h-auto text-destructive font-semibold"
+                      onClick={handleResendVerification}
+                      disabled={loading}
+                    >
+                      Resend verification email
+                    </Button>
+                  )}
                 </div>
               )}
               <div className="space-y-2">
@@ -130,6 +198,18 @@ const Login = () => {
                 {loading ? "Signing in..." : "Sign in"}
               </Button>
             </form>
+            
+            <div className="mt-4 pt-4 border-t">
+              <Button 
+                variant="outline" 
+                className="w-full flex items-center gap-2"
+                onClick={handleResendVerification}
+                disabled={loading || !formData.email}
+              >
+                <Mail size={16} />
+                Resend verification email
+              </Button>
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-center text-sm text-muted-foreground">

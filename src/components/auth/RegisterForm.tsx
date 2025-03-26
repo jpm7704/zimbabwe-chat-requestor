@@ -52,6 +52,17 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
     "director": "Director",
   };
 
+  // Function to validate staff email domain
+  const validateStaffEmail = (email: string): boolean => {
+    // List of allowed company domains for staff
+    const allowedDomains = ['bgfzimbabwe.org', 'bgf.org.zw', 'bgf.org', 'bgfzim.org'];
+    
+    if (!email || !email.includes('@')) return false;
+    
+    const domain = email.split('@')[1].toLowerCase();
+    return allowedDomains.includes(domain);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -73,6 +84,19 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
         variant: "destructive"
       });
       return;
+    }
+
+    // Validate staff email domains for admin registrations
+    if (activeTab === "admin" && !isFirstTimeSetup) {
+      if (!validateStaffEmail(formData.email)) {
+        setError("Staff must use company email addresses");
+        toast({
+          title: "Company email required",
+          description: "Staff members must register with an official company email address.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
     
     setLoading(true);
@@ -109,18 +133,19 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
             firstName: formData.firstName,
             lastName: formData.lastName,
             role: userRole
-          }
+          },
+          emailRedirectTo: window.location.origin + "/login"
         }
       });
       
       if (error) throw error;
       
       toast({
-        title: userRole === "user" ? "Account created" : `Staff account created (${userRole})`,
-        description: "Your BGF Zimbabwe account has been created. You can now log in."
+        title: "Verification email sent",
+        description: "Please check your email to verify your account before logging in."
       });
       
-      navigate("/requests");
+      navigate("/login");
     } catch (error: any) {
       console.error("Registration error:", error);
       setError(error.message || "Failed to create account.");
@@ -158,14 +183,21 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
 
       {/* Admin-specific fields */}
       {activeTab === "admin" && (
-        <AdminRegistrationFields 
-          isFirstTimeSetup={isFirstTimeSetup}
-          formData={formData}
-          handleChange={handleChange}
-          staffRoleOptions={staffRoleOptions}
-          setFormData={setFormData}
-          setSelectedStaffType={setSelectedStaffType}
-        />
+        <>
+          <AdminRegistrationFields 
+            isFirstTimeSetup={isFirstTimeSetup}
+            formData={formData}
+            handleChange={handleChange}
+            staffRoleOptions={staffRoleOptions}
+            setFormData={setFormData}
+            setSelectedStaffType={setSelectedStaffType}
+          />
+          {!isFirstTimeSetup && (
+            <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
+              Staff members must register with an official company email address (@bgfzimbabwe.org, @bgf.org.zw, etc).
+            </div>
+          )}
+        </>
       )}
 
       <div className="grid grid-cols-2 gap-4">
@@ -247,6 +279,10 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
       >
         {loading ? "Creating account..." : activeTab === "admin" ? "Create Staff Account" : "Create User Account"}
       </Button>
+      
+      <div className="text-sm text-center text-muted-foreground mt-4">
+        A verification email will be sent to confirm your email address.
+      </div>
     </form>
   );
 };
