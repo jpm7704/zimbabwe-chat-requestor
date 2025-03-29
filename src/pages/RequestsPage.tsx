@@ -9,10 +9,12 @@ import RequestsSearchFilter from "@/components/requests/RequestsSearchFilter";
 import RequestsList from "@/components/requests/RequestsList";
 import RoleBasedWorkflow from "@/components/requests/RoleBasedWorkflow";
 import UserStatsSummary from "@/components/requests/UserStatsSummary";
+import { useRoles } from "@/hooks/useRoles";
 
 const RequestsPage = () => {
   const { userProfile, isAuthenticated } = useAuth();
   const permissions = usePermissions(userProfile);
+  const roles = useRoles(userProfile);
   const navigate = useNavigate();
   const {
     filteredRequests,
@@ -23,19 +25,6 @@ const RequestsPage = () => {
     handleFilter,
     handleSort
   } = useRequestsData();
-
-  // Redirect users to their appropriate dashboard based on role
-  useEffect(() => {
-    if (!loading && isAuthenticated && userProfile) {
-      if (userProfile.role === 'field_officer' && window.location.pathname === '/requests') {
-        navigate('/field-work');
-      } else if (userProfile.role === 'programme_manager' && window.location.pathname === '/requests') {
-        navigate('/analytics');
-      } else if (userProfile.role === 'management' && window.location.pathname === '/requests') {
-        navigate('/admin');
-      }
-    }
-  }, [userProfile, isAuthenticated, loading, navigate]);
 
   // Get counts for different request statuses
   const getStatusCounts = () => {
@@ -51,15 +40,8 @@ const RequestsPage = () => {
 
   const statusCounts = getStatusCounts();
 
-  // If the user should be redirected based on role, show nothing while redirecting
-  if (!loading && isAuthenticated && userProfile) {
-    if ((userProfile.role === 'field_officer' || 
-         userProfile.role === 'programme_manager' || 
-         userProfile.role === 'management') && 
-        window.location.pathname === '/requests') {
-      return null;
-    }
-  }
+  // Remove the problematic redirection logic that was preventing roles from working properly
+  // We want users to stay on the requests page regardless of their role
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">
