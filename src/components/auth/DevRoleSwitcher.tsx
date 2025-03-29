@@ -8,6 +8,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const DevRoleSwitcher = () => {
@@ -31,29 +38,39 @@ const DevRoleSwitcher = () => {
   ];
 
   const handleRoleChange = (newRole: string) => {
+    console.log("Role change requested:", newRole); // Debug log
     setRole(newRole);
   };
 
   const handleLogin = () => {
+    console.log("Login with role:", role); // Debug log
     handleDevLogin(role);
   };
 
+  // Alternative dropdown implementation to avoid z-index issues
   return (
-    <div className="fixed bottom-4 right-4 p-3 bg-slate-100 border border-slate-200 rounded-md shadow-md z-50 flex flex-col gap-2">
+    <div className="fixed bottom-4 right-4 p-3 bg-slate-100 border border-slate-200 rounded-md shadow-md z-[1000] flex flex-col gap-2">
       <p className="text-xs font-medium text-slate-500">Development Mode</p>
       <div className="flex gap-2 items-center">
-        <Select value={role} onValueChange={handleRoleChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select Role" />
-          </SelectTrigger>
-          <SelectContent>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="w-[180px] justify-between">
+              {roleOptions.find(option => option.value === role)?.label || "Select Role"}
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[180px] bg-white">
             {roleOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <DropdownMenuItem 
+                key={option.value}
+                onClick={() => handleRoleChange(option.value)}
+                className="cursor-pointer"
+              >
                 {option.label}
-              </SelectItem>
+              </DropdownMenuItem>
             ))}
-          </SelectContent>
-        </Select>
+          </DropdownMenuContent>
+        </DropdownMenu>
         
         <Button onClick={handleLogin} size="sm" disabled={!devSignedOut && role === selectedRole}>
           {devSignedOut ? "Login" : "Switch"}
@@ -61,7 +78,7 @@ const DevRoleSwitcher = () => {
       </div>
       
       {!devSignedOut && (
-        <p className="text-xs text-slate-500 mt-1">Current role: <span className="font-bold">{selectedRole}</span></p>
+        <p className="text-xs text-slate-500 mt-1">Current role: <span className="font-bold">{roleOptions.find(option => option.value === selectedRole)?.label || selectedRole}</span></p>
       )}
     </div>
   );
