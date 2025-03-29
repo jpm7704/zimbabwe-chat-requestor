@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -117,7 +118,7 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
         region = formData.region || null;
       }
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -126,7 +127,8 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
             lastName: formData.lastName,
             role: userRole,
             staff_number: staffNumber,
-            region: region
+            region: region,
+            needs_verification: activeTab === "admin" && !isFirstTimeSetup
           },
           emailRedirectTo: window.location.origin + "/login"
         }
@@ -134,12 +136,25 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
       
       if (error) throw error;
       
-      toast({
-        title: "Verification email sent",
-        description: "Please check your email to verify your account before logging in."
-      });
-      
-      navigate("/login");
+      // If this is a staff registration, let them know about verification
+      if (activeTab === "admin" && !isFirstTimeSetup) {
+        toast({
+          title: "Account created",
+          description: "Please log in to complete your staff verification."
+        });
+        navigate("/login", { 
+          state: { 
+            requiresVerification: true, 
+            userEmail: formData.email 
+          } 
+        });
+      } else {
+        toast({
+          title: "Verification email sent",
+          description: "Please check your email to verify your account before logging in."
+        });
+        navigate("/login");
+      }
     } catch (error: any) {
       console.error("Registration error:", error);
       setError(error.message || "Failed to create account.");
@@ -183,8 +198,13 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
           )}
           
           {!isFirstTimeSetup && (
-            <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
-              Staff members must register with an official company email address (@bgfzimbabwe.org, @bgf.org.zw, etc).
+            <div className="space-y-2">
+              <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
+                Staff members must register with an official company email address (@bgfzimbabwe.org, @bgf.org.zw, etc).
+              </div>
+              <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
+                After registration, you'll need to verify your staff status. A verification code will be sent to your email.
+              </div>
             </div>
           )}
         </>

@@ -11,6 +11,7 @@ import RequestsPage from "./pages/RequestsPage";
 import RequestDetail from "./pages/RequestDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import StaffVerification from "./pages/StaffVerification";
 import NotFound from "./pages/NotFound";
 import FieldWork from "./pages/FieldWork";
 import Analytics from "./pages/Analytics";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/chat" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
           <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
           <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
+          <Route path="/staff-verification" element={<StaffVerification />} />
           
           {/* Role-specific routes with permission guards */}
           <Route path="/field-work" element={
