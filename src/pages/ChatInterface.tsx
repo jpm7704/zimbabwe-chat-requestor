@@ -13,11 +13,9 @@ const RequestSubmissionPage = () => {
   const { isAuthenticated, userProfile } = useAuth();
   const [messages, setMessages] = useState<any[]>([]);
   
-  // Use the request form hook
   const requestFormProps = useRequestForm(setMessages);
   const { showNewRequest, setShowNewRequest } = requestFormProps;
 
-  // Show the request form if 'action=new' is in the URL or if type is specified
   useEffect(() => {
     const action = searchParams.get("action");
     const type = searchParams.get("type");
@@ -26,7 +24,6 @@ const RequestSubmissionPage = () => {
       if (isAuthenticated) {
         setShowNewRequest(true);
         
-        // If type is specified, set it in the form
         if (type) {
           requestFormProps.setRequestForm(prev => ({
             ...prev,
@@ -34,13 +31,11 @@ const RequestSubmissionPage = () => {
           }));
         }
       } else if (type) {
-        // If not authenticated and type is specified, redirect to login
         navigate('/login');
       }
     }
   }, [searchParams, requestFormProps.setRequestForm, isAuthenticated, navigate, setShowNewRequest]);
 
-  // Show a different message for staff users
   const isStaffUser = userProfile && userProfile.role !== 'user';
 
   return (
@@ -117,74 +112,6 @@ const RequestSubmissionPage = () => {
             />
           </div>
         )}
-        
-        <div className="mt-8 bg-secondary/20 p-8 rounded-lg border border-primary/10">
-          <h3 className="text-2xl font-serif mb-4 text-elegant">Our Support Process</h3>
-          <ol className="space-y-4 font-serif text-lg">
-            <li className="flex items-start">
-              <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary/10 text-primary font-serif mr-3 mt-0.5 flex-shrink-0">1</span>
-              <span>Complete the support request form with accurate and detailed information</span>
-            </li>
-            <li className="flex items-start">
-              <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary/10 text-primary font-serif mr-3 mt-0.5 flex-shrink-0">2</span>
-              <span>Upload all required documents to strengthen your application</span>
-            </li>
-            <li className="flex items-start">
-              <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary/10 text-primary font-serif mr-3 mt-0.5 flex-shrink-0">3</span>
-              <span>Submit your request for assessment by our dedicated team</span>
-            </li>
-            <li className="flex items-start">
-              <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary/10 text-primary font-serif mr-3 mt-0.5 flex-shrink-0">4</span>
-              <span>Our field officers will contact you for verification and further information</span>
-            </li>
-            <li className="flex items-start">
-              <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary/10 text-primary font-serif mr-3 mt-0.5 flex-shrink-0">5</span>
-              <span>Based on the assessment, appropriate support will be provided</span>
-            </li>
-          </ol>
-        </div>
-
-        <div className="mt-4 bg-primary/5 p-8 rounded-lg border border-primary/10">
-          <h3 className="text-2xl font-serif mb-4 text-elegant">Our Impact</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-3">
-              <h4 className="text-xl font-serif text-elegant">Medical Assistance Impact</h4>
-              <p className="text-muted-foreground font-serif">
-                In the past year, our medical assistance program has helped over 500 individuals 
-                access critical healthcare services, life-saving medications, and specialized 
-                treatments across Zimbabwe.
-              </p>
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary">500+</div>
-                  <div className="text-sm text-muted-foreground">Patients Supported</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary">12</div>
-                  <div className="text-sm text-muted-foreground">Healthcare Facilities</div>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-xl font-serif text-elegant">Educational Support Impact</h4>
-              <p className="text-muted-foreground font-serif">
-                Our educational initiatives have enabled 750 students to continue their education 
-                through school fee assistance, learning materials, and educational programs focused 
-                on sustainable development.
-              </p>
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary">750+</div>
-                  <div className="text-sm text-muted-foreground">Students Supported</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary">35</div>
-                  <div className="text-sm text-muted-foreground">Schools Partnered</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
