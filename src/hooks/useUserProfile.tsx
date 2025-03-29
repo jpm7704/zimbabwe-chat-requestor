@@ -9,6 +9,7 @@ export type UserProfile = {
   email?: string;
   role?: string;
   avatar_url?: string;
+  region?: string;
 };
 
 export function useUserProfile(userId: string | null) {
