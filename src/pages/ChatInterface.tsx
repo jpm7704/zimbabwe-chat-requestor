@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -55,7 +54,7 @@ const RequestSubmissionPage = () => {
         </div>
 
         {isStaffUser && (
-          <Alert variant="info" className="bg-blue-50 border-blue-200">
+          <Alert variant="default" className="bg-blue-50 border-blue-200">
             <AlertCircle className="h-5 w-5 text-blue-600" />
             <AlertTitle className="text-blue-800">Staff Account</AlertTitle>
             <AlertDescription className="text-blue-700">
