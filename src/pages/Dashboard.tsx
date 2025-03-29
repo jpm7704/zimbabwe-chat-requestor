@@ -8,11 +8,13 @@ import { Progress } from "@/components/ui/progress";
 import RoleBasedWorkflow from "@/components/requests/RoleBasedWorkflow";
 import { useRequestsData } from "@/hooks/useRequestsData";
 import { useToast } from "@/hooks/use-toast";
-import { Bookmark, Calendar, Clock, FileCheck2, FileQuestion } from "lucide-react";
+import { useRoles } from "@/hooks/useRoles";
+import { Bookmark, Calendar, Clock, FileCheck2, FileQuestion, PieChart, Users, TrendingUp, Building } from "lucide-react";
 
 const Dashboard = () => {
   const { userProfile, isAuthenticated, loading } = useAuth();
   const permissions = usePermissions(userProfile);
+  const roles = useRoles(userProfile);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { filteredRequests } = useRequestsData();
@@ -44,24 +46,285 @@ const Dashboard = () => {
   const statusCounts = getStatusCounts();
   const totalRequests = Object.values(statusCounts).reduce((sum, count) => sum + count, 0);
 
-  return (
-    <div className="container px-4 mx-auto max-w-6xl py-8">
-      <div className="flex flex-col space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back, {userProfile?.first_name || 'User'}
-          </p>
+  // Render appropriate dashboard cards based on user role
+  const renderRoleSpecificCards = () => {
+    // Executive roles (CEO, Patron)
+    if (roles.isCEO() || roles.isPatron()) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <TrendingUp className="mr-2 h-5 w-5 text-purple-500" />
+                Approval Rate
+              </CardTitle>
+              <CardDescription>Executive decisions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">
+                {statusCounts.completed > 0 ? Math.round((statusCounts.completed / (statusCounts.completed + statusCounts.rejected)) * 100) : 0}%
+              </div>
+              <p className="text-sm text-muted-foreground">Requests approved vs rejected</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <FileQuestion className="mr-2 h-5 w-5 text-blue-500" />
+                Pending Approval
+              </CardTitle>
+              <CardDescription>Awaiting review</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{statusCounts.awaitingApproval}</div>
+              <Progress 
+                value={statusCounts.awaitingApproval / (totalRequests || 1) * 100} 
+                className="h-2 mt-2 bg-muted" 
+              />
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Building className="mr-2 h-5 w-5 text-green-500" />
+                Programs
+              </CardTitle>
+              <CardDescription>Active initiatives</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">5</div>
+              <p className="text-sm text-muted-foreground">Strategic programs</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <PieChart className="mr-2 h-5 w-5 text-yellow-500" />
+                Allocation
+              </CardTitle>
+              <CardDescription>Budget utilization</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">68%</div>
+              <p className="text-sm text-muted-foreground">Annual budget deployed</p>
+            </CardContent>
+          </Card>
         </div>
-
-        {/* Role-based workflow component showing role-specific info */}
-        <RoleBasedWorkflow 
-          userProfile={userProfile} 
-          permissions={permissions} 
-          statusCounts={statusCounts} 
-        />
-
-        {/* Dashboard Cards - shown to all users */}
+      );
+    }
+    
+    // Management roles (Director, Head of Programs)
+    else if (roles.isAdmin() || roles.isHeadOfPrograms()) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Users className="mr-2 h-5 w-5 text-blue-500" />
+                Staff Capacity
+              </CardTitle>
+              <CardDescription>Team workload</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">73%</div>
+              <p className="text-sm text-muted-foreground">Current staff utilization</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <FileQuestion className="mr-2 h-5 w-5 text-yellow-500" />
+                Awaiting Approval
+              </CardTitle>
+              <CardDescription>Pending decisions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{statusCounts.awaitingApproval}</div>
+              <p className="text-sm text-muted-foreground">Ready for review</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <FileCheck2 className="mr-2 h-5 w-5 text-green-500" />
+                Processed
+              </CardTitle>
+              <CardDescription>Recently handled</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{statusCounts.completed}</div>
+              <p className="text-sm text-muted-foreground">Completed requests</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Clock className="mr-2 h-5 w-5 text-indigo-500" />
+                Response Rate
+              </CardTitle>
+              <CardDescription>Processing speed</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">4.2 days</div>
+              <p className="text-sm text-muted-foreground">Average processing time</p>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+    
+    // Project and Assistant Project Officers
+    else if (roles.isProjectOfficer() || roles.isAssistantProjectOfficer()) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <FileQuestion className="mr-2 h-5 w-5 text-blue-500" />
+                Assigned
+              </CardTitle>
+              <CardDescription>Your workload</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">
+                {statusCounts.underReview}
+              </div>
+              <Progress 
+                value={statusCounts.underReview / (totalRequests || 1) * 100} 
+                className="h-2 mt-2" 
+              />
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Users className="mr-2 h-5 w-5 text-purple-500" />
+                Field Team
+              </CardTitle>
+              <CardDescription>Officers reporting</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">5</div>
+              <p className="text-sm text-muted-foreground">Active field officers</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <FileCheck2 className="mr-2 h-5 w-5 text-green-500" />
+                Processed
+              </CardTitle>
+              <CardDescription>Your completions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{statusCounts.completed}</div>
+              <Progress 
+                value={statusCounts.completed / (totalRequests || 1) * 100} 
+                className="h-2 mt-2 bg-muted" 
+              />
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Calendar className="mr-2 h-5 w-5 text-yellow-500" />
+                Pending Visits
+              </CardTitle>
+              <CardDescription>Scheduled field work</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{statusCounts.pending}</div>
+              <p className="text-sm text-muted-foreground">Site visits needed</p>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+    
+    // Field Officers
+    else if (roles.isFieldOfficer()) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <FileQuestion className="mr-2 h-5 w-5 text-blue-500" />
+                My Tasks
+              </CardTitle>
+              <CardDescription>Assigned to you</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">
+                {statusCounts.pending + statusCounts.underReview}
+              </div>
+              <Progress 
+                value={(statusCounts.pending + statusCounts.underReview) / 
+                  (totalRequests || 1) * 100} 
+                className="h-2 mt-2" 
+              />
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <FileCheck2 className="mr-2 h-5 w-5 text-green-500" />
+                Verified
+              </CardTitle>
+              <CardDescription>Assessments completed</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{statusCounts.completed}</div>
+              <Progress 
+                value={statusCounts.completed / (totalRequests || 1) * 100} 
+                className="h-2 mt-2 bg-muted" 
+              />
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Clock className="mr-2 h-5 w-5 text-yellow-500" />
+                Response Time
+              </CardTitle>
+              <CardDescription>Your average</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">3.1 days</div>
+              <p className="text-sm text-muted-foreground">Verification speed</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Calendar className="mr-2 h-5 w-5 text-purple-500" />
+                Next Visit
+              </CardTitle>
+              <CardDescription>Upcoming schedule</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{statusCounts.pending > 0 ? "Today" : "None"}</div>
+              <p className="text-sm text-muted-foreground">Planned verification</p>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+    
+    // Default cards for regular users
+    else {
+      return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
@@ -128,6 +391,29 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
+      );
+    }
+  };
+
+  return (
+    <div className="container px-4 mx-auto max-w-6xl py-8">
+      <div className="flex flex-col space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back, {userProfile?.first_name || 'User'}
+          </p>
+        </div>
+
+        {/* Role-based workflow component showing role-specific info */}
+        <RoleBasedWorkflow 
+          userProfile={userProfile} 
+          permissions={permissions} 
+          statusCounts={statusCounts} 
+        />
+
+        {/* Role-specific dashboard cards */}
+        {renderRoleSpecificCards()}
         
         {/* Recent Activity - for all users */}
         <Card>
