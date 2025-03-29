@@ -11,10 +11,10 @@ export function useAuth() {
   const { userProfile: actualProfile, profileLoading, formatRole } = useUserProfile(userId);
 
   // State to track if we're in "signed out" mode for testing different roles
-  const [devSignedOut, setDevSignedOut] = useState(false);
+  const [devSignedOut, setDevSignedOut] = useState(true); // Start in signed out state
   
   // State to track selected role for testing
-  const [selectedRole, setSelectedRole] = useState<string>("director");
+  const [selectedRole, setSelectedRole] = useState<string>("user"); // Default to basic user role
   
   // Override authentication state for development
   const isAuthenticated = !devSignedOut; // Authenticated unless manually signed out
@@ -31,10 +31,16 @@ export function useAuth() {
     region: "All Regions"
   };
 
-  // Custom logout handler for development that completely resets the state
+  // Complete logout handler that fully resets the state
   const handleLogout = () => {
+    // Reset to completely signed out state
     setDevSignedOut(true);
-    setSelectedRole("user"); // Reset to a default role
+    setSelectedRole("user"); // Reset to default basic role
+    
+    // Also trigger the actual logout if in real auth mode
+    if (actualAuth) {
+      originalLogout();
+    }
   };
 
   // Custom login handler for development

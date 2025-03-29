@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useAuth, UserProfile } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserProfileDropdownProps {
   userProfile: UserProfile | null;
@@ -13,6 +14,7 @@ interface UserProfileDropdownProps {
 const UserProfileDropdown = ({ userProfile }: UserProfileDropdownProps) => {
   const { handleLogout, formatRole } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   // Function to get role badge color
   const getRoleBadgeColor = (role?: string) => {
@@ -37,7 +39,16 @@ const UserProfileDropdown = ({ userProfile }: UserProfileDropdownProps) => {
   };
 
   const handleSignOut = () => {
+    const currentRole = userProfile?.role || 'user';
+    
     handleLogout();
+    
+    toast({
+      title: "Signed out successfully",
+      description: `You have been signed out from ${formatRole(currentRole)} role.`,
+      duration: 3000
+    });
+    
     navigate("/login");
   };
 
