@@ -10,7 +10,7 @@ import RegisterForm from "@/components/auth/RegisterForm";
 
 const Register = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, devSignedOut } = useAuth();
   
   const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
   const [checkingFirstTimeSetup, setCheckingFirstTimeSetup] = useState(true);
@@ -36,11 +36,12 @@ const Register = () => {
     checkForAdmins();
   }, []);
 
+  // Only redirect if authenticated and not in dev mode
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !devSignedOut) {
       navigate('/requests');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, devSignedOut]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -65,10 +66,22 @@ const Register = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <RegisterForm 
-              isFirstTimeSetup={isFirstTimeSetup}
-              checkingFirstTimeSetup={checkingFirstTimeSetup}
-            />
+            {devSignedOut ? (
+              <div className="text-center p-4">
+                <p className="mb-4">Development mode is active. Registration is bypassed.</p>
+                <Button 
+                  onClick={() => navigate("/login")}
+                  className="w-full"
+                >
+                  Go to Development Login
+                </Button>
+              </div>
+            ) : (
+              <RegisterForm 
+                isFirstTimeSetup={isFirstTimeSetup}
+                checkingFirstTimeSetup={checkingFirstTimeSetup}
+              />
+            )}
           </CardContent>
           <CardFooter className="flex justify-center">
             <Link
