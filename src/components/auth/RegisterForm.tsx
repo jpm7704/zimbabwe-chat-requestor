@@ -184,21 +184,31 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
         setActiveTab={setActiveTab} 
       />
 
-      {/* Admin-specific fields */}
+      {/* Staff role selector first for admin registrations */}
       {activeTab === "admin" && (
         <>
-          <StaffVerificationCode
-            adminCode={formData.adminCode}
-            handleChange={handleChange}
-            isFirstTimeSetup={isFirstTimeSetup}
-          />
-          
-          {(formData.adminCode || isFirstTimeSetup) && (
-            <StaffRoleSelector
-              isFirstTimeSetup={isFirstTimeSetup}
-              formData={formData}
-              setFormData={setFormData}
-            />
+          {isFirstTimeSetup ? (
+            <div className="p-3 rounded-md bg-blue-100 text-blue-800 text-sm mb-4">
+              First-time setup detected. You will be registered as the initial Director.
+            </div>
+          ) : (
+            <>
+              {/* Show the Staff Role selector first */}
+              <StaffRoleSelector
+                isFirstTimeSetup={isFirstTimeSetup}
+                formData={formData}
+                setFormData={setFormData}
+              />
+              
+              {/* Only show verification code field if a staff role is selected */}
+              {formData.staffRole && (
+                <StaffVerificationCode
+                  adminCode={formData.adminCode}
+                  handleChange={handleChange}
+                  isFirstTimeSetup={isFirstTimeSetup}
+                />
+              )}
+            </>
           )}
           
           {!isFirstTimeSetup && (
@@ -240,7 +250,7 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
       <Button
         type="submit"
         className="w-full"
-        disabled={loading || (activeTab === "admin" && !isFirstTimeSetup && !formData.adminCode) || (activeTab === "admin" && formData.adminCode && !formData.staffRole)}
+        disabled={loading || (activeTab === "admin" && !isFirstTimeSetup && formData.staffRole && !formData.adminCode)}
       >
         {loading ? "Creating account..." : activeTab === "admin" ? "Create Staff Account" : "Create User Account"}
       </Button>

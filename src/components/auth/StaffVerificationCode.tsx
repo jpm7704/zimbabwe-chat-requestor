@@ -14,11 +14,7 @@ const StaffVerificationCode = ({
   isFirstTimeSetup 
 }: StaffVerificationCodeProps) => {
   if (isFirstTimeSetup) {
-    return (
-      <div className="p-3 rounded-md bg-blue-100 text-blue-800 text-sm mb-4">
-        First-time setup detected. You will be registered as the initial Director.
-      </div>
-    );
+    return null; // Don't show verification code in first time setup
   }
 
   return (
