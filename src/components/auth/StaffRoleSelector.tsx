@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -5,11 +6,11 @@ import { Input } from "@/components/ui/input";
 
 // Define all available staff roles
 const STAFF_ROLES = [
-  { key: "director", name: "Director", description: "Head of organization" },
-  { key: "head_of_programs", name: "Head of Programs", description: "Oversees all programs" },
-  { key: "assistant_project_officer", name: "Assistant Project Officer", description: "Assists with project management" },
+  { key: "field_officer", name: "Field Officer", description: "Field implementation" },
   { key: "regional_project_officer", name: "Regional Project Officer", description: "Manages regional projects" },
-  { key: "field_officer", name: "Field Officer", description: "Field implementation" }
+  { key: "assistant_project_officer", name: "Assistant Project Officer", description: "Assists with project management" },
+  { key: "head_of_programs", name: "Head of Programs", description: "Oversees all programs" },
+  { key: "director", name: "Director", description: "Head of organization" }
 ];
 
 interface StaffRoleSelectorProps {

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +21,7 @@ const Register = () => {
         const { data, error, count } = await supabase
           .from('user_profiles')
           .select('id', { count: 'exact' })
-          .eq('role', 'management');
+          .eq('role', 'director');
 
         if (error) throw error;
         

@@ -18,10 +18,14 @@ const UserProfileDropdown = ({ userProfile }: UserProfileDropdownProps) => {
     switch(role) {
       case 'field_officer':
         return 'bg-yellow-500 hover:bg-yellow-600';
-      case 'programme_manager':
+      case 'regional_project_officer':
+        return 'bg-orange-500 hover:bg-orange-600';
+      case 'assistant_project_officer':
         return 'bg-blue-500 hover:bg-blue-600';
-      case 'management':
+      case 'head_of_programs':
         return 'bg-green-500 hover:bg-green-600';
+      case 'director':
+        return 'bg-purple-500 hover:bg-purple-600';
       default:
         return 'bg-gray-500 hover:bg-gray-600';
     }
