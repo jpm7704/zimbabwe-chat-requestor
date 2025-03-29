@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from "./AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import DevRoleSwitcher from "@/components/dev/DevRoleSwitcher";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -34,6 +35,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             {/* Footer removed for authenticated users */}
           </div>
           <ThemeToggle />
+          <DevRoleSwitcher />
         </div>
       </SidebarProvider>
     );
@@ -50,6 +52,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <Footer />
       </div>
       <ThemeToggle />
+      <DevRoleSwitcher />
     </div>
   );
 };

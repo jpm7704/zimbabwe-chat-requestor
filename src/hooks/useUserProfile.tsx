@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 export type UserProfile = {
   id: string;
@@ -13,37 +12,19 @@ export type UserProfile = {
 };
 
 export function useUserProfile(userId: string | null) {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
+  // Create a mock profile for development
+  const mockProfile: UserProfile = {
+    id: userId || "temp-user-id",
+    first_name: "Test",
+    last_name: "User",
+    email: "test@example.com",
+    role: "director", // Default role
+    avatar_url: "",
+    region: "Central"
+  };
 
-  useEffect(() => {
-    // If no userId, clear profile and return
-    if (!userId) {
-      setUserProfile(null);
-      setProfileLoading(false);
-      return;
-    }
-
-    const fetchProfile = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
-          
-        if (error) throw error;
-        setUserProfile(data);
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        setUserProfile(null);
-      } finally {
-        setProfileLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [userId]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(mockProfile);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   // Format role for display
   const formatRole = (role: string) => {
@@ -52,6 +33,15 @@ export function useUserProfile(userId: string | null) {
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
   };
+
+  // Add role switcher for development
+  useEffect(() => {
+    // Check if we have a role in localStorage
+    const savedRole = localStorage.getItem('dev_role');
+    if (savedRole) {
+      setUserProfile(prev => prev ? {...prev, role: savedRole} : null);
+    }
+  }, []);
 
   return {
     userProfile,
