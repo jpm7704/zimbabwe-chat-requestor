@@ -8,6 +8,8 @@ export function useRoles(userProfile: UserProfile | null) {
   const isProjectOfficer = () => userProfile?.role === 'project_officer';
   const isFieldOfficer = () => userProfile?.role === 'field_officer';
   const isRegularUser = () => userProfile?.role === 'user';
+  const isCEO = () => userProfile?.role === 'ceo';
+  const isPatron = () => userProfile?.role === 'patron';
   
   const hasRole = (role: string) => userProfile?.role === role;
   
@@ -29,7 +31,7 @@ export function useRoles(userProfile: UserProfile | null) {
       case 'director':
         return {
           title: 'Director',
-          description: 'Final Approver',
+          description: 'Review & Approval Authority',
           color: 'green',
           iconClass: 'bg-green-100',
           textClass: 'text-green-600',
@@ -37,10 +39,43 @@ export function useRoles(userProfile: UserProfile | null) {
           responsibilities: [
             'Review thoroughly verified requests from Head of Programs',
             'Evaluate requests against organizational budget and priorities',
-            'Make final approval or rejection decisions',
+            'Approve or reject requests as part of the leadership team',
             'Authorize resource allocation for approved requests',
             'Monitor program effectiveness and impact',
             'Oversee organizational compliance and governance'
+          ]
+        };
+      case 'ceo':
+        return {
+          title: 'CEO',
+          description: 'Executive Approval Authority',
+          color: 'purple',
+          iconClass: 'bg-purple-100',
+          textClass: 'text-purple-600',
+          badgeClass: 'bg-purple-500',
+          responsibilities: [
+            'Review requests forwarded by Head of Programs',
+            'Provide executive-level approval for organizational resources',
+            'Ensure alignment with organizational mission and strategy',
+            'Oversee financial implications of approved requests',
+            'Communicate decisions to stakeholders',
+            'Monitor overall program impact and effectiveness'
+          ]
+        };
+      case 'patron':
+        return {
+          title: 'Patron',
+          description: 'Final Endorsement Authority',
+          color: 'red',
+          iconClass: 'bg-red-100',
+          textClass: 'text-red-600',
+          badgeClass: 'bg-red-500',
+          responsibilities: [
+            'Review and endorse requests approved by Director and CEO',
+            'Provide final authorization for significant resource allocations',
+            'Ensure alignment with organizational vision',
+            'Represent the organization to external stakeholders',
+            'Oversee organizational governance at the highest level'
           ]
         };
       case 'head_of_programs':
@@ -55,7 +90,7 @@ export function useRoles(userProfile: UserProfile | null) {
             'Review assistance requests from Assistant Project Officers',
             'Coordinate program implementation across regions',
             'Review verification reports and assessment data',
-            'Forward verified requests to Directors for final approval',
+            'Forward verified requests to Director, CEO and Patron for approval',
             'Implement approved programs and allocate resources',
             'Monitor overall program efficiency and effectiveness'
           ]
@@ -138,6 +173,8 @@ export function useRoles(userProfile: UserProfile | null) {
     isProjectOfficer,
     isFieldOfficer,
     isRegularUser,
+    isCEO,
+    isPatron,
     hasRole,
     getRoleInfo
   };

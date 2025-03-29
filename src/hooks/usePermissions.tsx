@@ -2,7 +2,7 @@
 import { UserProfile } from "./useAuth";
 
 // Define role types for better type safety
-export type UserRole = 'user' | 'field_officer' | 'project_officer' | 'assistant_project_officer' | 'head_of_programs' | 'director';
+export type UserRole = 'user' | 'field_officer' | 'project_officer' | 'assistant_project_officer' | 'head_of_programs' | 'director' | 'ceo' | 'patron';
 
 // Define permission sets for different features
 export interface Permissions {
@@ -76,7 +76,7 @@ export function usePermissions(userProfile: UserProfile | null) {
         canViewRequests: true,
         canAssignRequests: true,
         canReviewRequests: true,
-        canApproveRequests: true,
+        canApproveRequests: false, // Changed to false as HOP no longer makes final decision
         canManageStaff: true,
         canAccessAnalytics: true,
         canAccessFieldReports: true,
@@ -85,13 +85,35 @@ export function usePermissions(userProfile: UserProfile | null) {
     case 'director':
       return {
         canViewRequests: true,
-        canAssignRequests: true,
+        canAssignRequests: false,
         canReviewRequests: true,
         canApproveRequests: true,
         canManageStaff: true,
         canAccessAnalytics: true,
         canAccessFieldReports: true,
         canAccessAdminPanel: true,
+      };
+    case 'ceo':
+      return {
+        canViewRequests: true,
+        canAssignRequests: false,
+        canReviewRequests: true,
+        canApproveRequests: true,
+        canManageStaff: false,
+        canAccessAnalytics: true,
+        canAccessFieldReports: true,
+        canAccessAdminPanel: false,
+      };
+    case 'patron':
+      return {
+        canViewRequests: true,
+        canAssignRequests: false,
+        canReviewRequests: true,
+        canApproveRequests: true,
+        canManageStaff: false,
+        canAccessAnalytics: true,
+        canAccessFieldReports: true,
+        canAccessAdminPanel: false,
       };
     case 'user':
     default:

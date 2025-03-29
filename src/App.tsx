@@ -20,6 +20,7 @@ import StaffManagement from "./pages/StaffManagement";
 import AdminPanel from "./pages/AdminPanel";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
+import ApprovalsPage from "./pages/ApprovalsPage";
 import RequirePermission from "./components/auth/RequirePermission";
 
 const queryClient = new QueryClient();
@@ -77,6 +78,14 @@ const App = () => (
             <MainLayout>
               <RequirePermission permission="canAccessAdminPanel">
                 <AdminPanel />
+              </RequirePermission>
+            </MainLayout>
+          } />
+          
+          <Route path="/approvals" element={
+            <MainLayout>
+              <RequirePermission permission="canApproveRequests">
+                <ApprovalsPage />
               </RequirePermission>
             </MainLayout>
           } />

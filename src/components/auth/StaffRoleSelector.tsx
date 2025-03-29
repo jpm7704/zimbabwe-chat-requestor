@@ -10,7 +10,9 @@ const STAFF_ROLES = [
   { key: "project_officer", name: "Project Officer", description: "Manages projects" },
   { key: "assistant_project_officer", name: "Assistant Project Officer", description: "Assists with project management" },
   { key: "head_of_programs", name: "Head of Programs", description: "Oversees all programs" },
-  { key: "director", name: "Director", description: "Head of organization" }
+  { key: "director", name: "Director", description: "Review & Approval Authority" },
+  { key: "ceo", name: "CEO", description: "Executive Approval Authority" },
+  { key: "patron", name: "Patron", description: "Final Endorsement Authority" }
 ];
 
 interface StaffRoleSelectorProps {
@@ -59,7 +61,9 @@ const StaffRoleSelector = ({
   const shouldShowStaffNumber = formData.staffRole === 'director' || 
     formData.staffRole === 'head_of_programs' || 
     formData.staffRole === 'assistant_project_officer' || 
-    formData.staffRole === 'project_officer';
+    formData.staffRole === 'project_officer' ||
+    formData.staffRole === 'ceo' ||
+    formData.staffRole === 'patron';
   
   // Check if the role is a project officer (needs region input)
   const needsRegionInput = formData.staffRole === 'project_officer';
@@ -101,10 +105,14 @@ const StaffRoleSelector = ({
             min="1"
             max={formData.staffRole === 'director' ? "5" : 
                  formData.staffRole === 'head_of_programs' ? "1" : 
-                 formData.staffRole === 'assistant_project_officer' ? "5" : "4"}
+                 formData.staffRole === 'assistant_project_officer' ? "5" : 
+                 formData.staffRole === 'ceo' ? "1" :
+                 formData.staffRole === 'patron' ? "1" : "4"}
             placeholder={formData.staffRole === 'director' ? "1-5" : 
                         formData.staffRole === 'head_of_programs' ? "1" : 
-                        formData.staffRole === 'assistant_project_officer' ? "1-5" : "1-4"}
+                        formData.staffRole === 'assistant_project_officer' ? "1-5" : 
+                        formData.staffRole === 'ceo' ? "1" :
+                        formData.staffRole === 'patron' ? "1" : "1-4"}
             value={formData.staffNumber}
             onChange={handleInputChange}
           />
@@ -113,6 +121,8 @@ const StaffRoleSelector = ({
             {formData.staffRole === 'head_of_programs' && "Head of Programs position"}
             {formData.staffRole === 'assistant_project_officer' && "Assistant Project Officers are numbered 1-5"}
             {formData.staffRole === 'project_officer' && "Project Officers are numbered 1-4"}
+            {formData.staffRole === 'ceo' && "CEO position"}
+            {formData.staffRole === 'patron' && "Patron position"}
           </p>
         </div>
       )}

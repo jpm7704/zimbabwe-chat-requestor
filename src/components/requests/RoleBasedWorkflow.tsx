@@ -7,6 +7,8 @@ import ProgrammeManagerView from "./role-views/ProgrammeManagerView";
 import ManagementView from "./role-views/ManagementView";
 import RegularUserView from "./role-views/RegularUserView";
 import FallbackView from "./role-views/FallbackView";
+import CEOView from "./role-views/CEOView";
+import PatronView from "./role-views/PatronView";
 
 interface RoleBasedWorkflowProps {
   userProfile: UserProfile | null;
@@ -44,6 +46,16 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
   else if (roles.isAdmin()) {
     return <ManagementView userProfile={userProfile} statusCounts={statusCounts} />;
   } 
+  
+  // CEO View
+  else if (roles.isCEO()) {
+    return <CEOView userProfile={userProfile} statusCounts={statusCounts} />;
+  }
+  
+  // Patron View
+  else if (roles.isPatron()) {
+    return <PatronView userProfile={userProfile} statusCounts={statusCounts} />;
+  }
   
   // Regular User View
   else if (roles.isRegularUser()) {

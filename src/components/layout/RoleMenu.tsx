@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -10,7 +9,9 @@ import {
   Users, 
   ShieldCheck,
   Settings,
-  LayoutDashboard
+  LayoutDashboard,
+  Check,
+  UserCheck
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -27,23 +28,19 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
   const roles = useRoles(userProfile);
   const location = useLocation();
   
-  // Function to determine if a link is active
   const isActive = (path: string) => location.pathname === path;
   
-  // Sidebar styling variations
   const buttonVariant = variant === "sidebar" ? "ghost" : "ghost";
   const buttonClass = variant === "sidebar" 
     ? "justify-start w-full font-normal px-3" 
     : "";
   
-  // Common click handler
   const handleClick = () => {
     if (onItemClick) onItemClick();
   };
 
   return (
     <div className={`flex ${variant === "sidebar" ? "flex-col w-full gap-1" : "items-center gap-1"}`}>
-      {/* Dashboard - available to all authenticated users */}
       <Button 
         variant={isActive('/dashboard') ? "default" : buttonVariant} 
         className={buttonClass}
@@ -55,7 +52,6 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Link>
       </Button>
       
-      {/* Regular User Routes */}
       {(roles.isRegularUser() || !permissions.canReviewRequests) && (
         <>
           <Button 
@@ -82,7 +78,6 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </>
       )}
 
-      {/* Field Officer Routes */}
       {(roles.isFieldOfficer() || roles.isProjectOfficer()) && (
         <Button 
           variant={isActive('/field-work') ? "default" : buttonVariant} 
@@ -96,7 +91,6 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {/* Assistant Project Officer & HOP Routes */}
       {(roles.isAssistantProjectOfficer() || roles.isHeadOfPrograms() || roles.isAdmin()) && (
         <Button 
           variant={isActive('/analytics') ? "default" : buttonVariant} 
@@ -110,7 +104,6 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {/* Report Access Routes */}
       {permissions.canAccessFieldReports && (
         <Button 
           variant={isActive('/reports') ? "default" : buttonVariant} 
@@ -124,7 +117,19 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {/* Management Routes */}
+      {(roles.isAdmin() || roles.isCEO() || roles.isPatron()) && (
+        <Button 
+          variant={isActive('/approvals') ? "default" : buttonVariant} 
+          className={buttonClass}
+          asChild
+        >
+          <Link to="/approvals" className="flex items-center gap-2" onClick={handleClick}>
+            <UserCheck size={18} />
+            <span>Approvals</span>
+          </Link>
+        </Button>
+      )}
+      
       {permissions.canManageStaff && (
         <Button 
           variant={isActive('/staff') ? "default" : buttonVariant} 
@@ -138,7 +143,6 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {/* Admin Routes */}
       {permissions.canAccessAdminPanel && (
         <Button 
           variant={isActive('/admin') ? "default" : buttonVariant} 
@@ -152,7 +156,6 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
 
-      {/* Settings Route - available to all authenticated users */}
       <Button 
         variant={isActive('/settings') ? "default" : buttonVariant} 
         className={buttonClass}

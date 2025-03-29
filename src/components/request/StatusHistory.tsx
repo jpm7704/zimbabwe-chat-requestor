@@ -48,8 +48,12 @@ export function StatusHistory({ requestId }: StatusHistoryProps) {
         return <Users className="h-5 w-5 text-amber-500" />;
       case 'verified':
         return <User className="h-5 w-5 text-green-500" />;
-      case 'manager_review':
+      case 'director_review':
         return <CalendarClock className="h-5 w-5 text-purple-500" />;
+      case 'ceo_review':
+        return <CalendarClock className="h-5 w-5 text-purple-700" />;
+      case 'patron_review':
+        return <CalendarClock className="h-5 w-5 text-red-500" />;
       case 'rejected':
         return <AlertCircle className="h-5 w-5 text-destructive" />;
       case 'completed':
@@ -68,9 +72,15 @@ export function StatusHistory({ requestId }: StatusHistoryProps) {
       case 'under_review':
         return 'Under Review (Field Assessment)';
       case 'verified':
-        return 'Verified by RPO';
+        return 'Verified by Project Officer';
       case 'manager_review':
         return 'Manager Review';
+      case 'director_review':
+        return 'Director Review';
+      case 'ceo_review':
+        return 'CEO Review';
+      case 'patron_review':
+        return 'Patron Review';
       case 'rejected':
         return 'Rejected';
       case 'completed':
@@ -85,13 +95,19 @@ export function StatusHistory({ requestId }: StatusHistoryProps) {
       case 'submitted':
         return 'Awaiting assignment to Assistant Project Officer';
       case 'assigned':
-        return 'APO to review and assign to Regional Project Officer';
+        return 'APO to review and assign to Project Officer';
       case 'under_review':
-        return 'Regional Project Officer conducting field verification';
+        return 'Project Officer conducting field verification';
       case 'verified':
-        return 'Awaiting final review by Assistant Project Officer';
+        return 'Awaiting review by Assistant Project Officer';
       case 'manager_review':
-        return 'Awaiting final decision by Head of Programs';
+        return 'Awaiting review by Head of Programs';
+      case 'director_review':
+        return 'Awaiting review by Director';
+      case 'ceo_review':
+        return 'Awaiting review by CEO';
+      case 'patron_review':
+        return 'Awaiting final approval by Patron';
       default:
         return null;
     }
