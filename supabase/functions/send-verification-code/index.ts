@@ -12,6 +12,24 @@ const generateVerificationCode = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+// Check if email is a business email
+const isBusinessEmail = (email: string): boolean => {
+  if (!email || !email.includes('@')) return false;
+  
+  // Get the domain part of the email
+  const domain = email.split('@')[1].toLowerCase();
+  
+  // Check for common free email providers that shouldn't be allowed
+  const freeEmailProviders = [
+    'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 
+    'aol.com', 'icloud.com', 'mail.com', 'protonmail.com',
+    'zoho.com', 'yandex.com', 'gmx.com'
+  ];
+  
+  // If it's in the free email list, it's not a business email
+  return !freeEmailProviders.includes(domain);
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -29,6 +47,14 @@ serve(async (req) => {
     if (!email) {
       return new Response(
         JSON.stringify({ error: "Email is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check if this is a business email
+    if (!isBusinessEmail(email)) {
+      return new Response(
+        JSON.stringify({ error: "Staff verification requires a business email address" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

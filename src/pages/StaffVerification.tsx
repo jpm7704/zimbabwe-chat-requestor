@@ -19,6 +19,7 @@ const StaffVerification = () => {
   const [verificationCode, setVerificationCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   
   // Redirect if user is already verified or not logged in
   useEffect(() => {
@@ -36,6 +37,8 @@ const StaffVerification = () => {
   }, [userProfile, isAuthenticated, loading, navigate]);
 
   const handleSendVerificationCode = async () => {
+    setErrorMessage("");
+    
     if (!userProfile?.email) {
       toast({
         title: "Error",
@@ -49,7 +52,7 @@ const StaffVerification = () => {
     
     try {
       // Call the edge function to send verification email
-      const { error } = await supabase.functions.invoke("send-verification-code", {
+      const { data, error } = await supabase.functions.invoke("send-verification-code", {
         body: { email: userProfile.email },
       });
       
@@ -62,6 +65,7 @@ const StaffVerification = () => {
       });
     } catch (error: any) {
       console.error("Error sending verification code:", error);
+      setErrorMessage(error.message || "Failed to send verification code");
       toast({
         title: "Error",
         description: error.message || "Failed to send verification code",
@@ -74,6 +78,7 @@ const StaffVerification = () => {
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
     
     if (!verificationCode.trim()) {
       toast({
@@ -109,6 +114,7 @@ const StaffVerification = () => {
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Verification error:", error);
+      setErrorMessage(error.message || "Invalid verification code");
       toast({
         title: "Verification failed",
         description: error.message || "Invalid verification code",
@@ -143,12 +149,18 @@ const StaffVerification = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {errorMessage && (
+              <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md text-sm">
+                {errorMessage}
+              </div>
+            )}
+            
             <form onSubmit={handleVerifyCode} className="space-y-4">
               {!verificationSent ? (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
                     You've registered as a staff member. To complete your registration,
-                    please request a verification code.
+                    please request a verification code that will be sent to your work email address.
                   </p>
                   <Button
                     type="button"

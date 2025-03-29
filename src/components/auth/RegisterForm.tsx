@@ -45,15 +45,33 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
     if (error) setError(null);
   };
 
-  // Function to validate staff email domain
+  // Updated function to validate staff email domain
   const validateStaffEmail = (email: string): boolean => {
-    // List of allowed company domains for staff
-    const allowedDomains = ['bgfzimbabwe.org', 'bgf.org.zw', 'bgf.org', 'bgfzim.org'];
-    
     if (!email || !email.includes('@')) return false;
     
+    // Get the domain part of the email
     const domain = email.split('@')[1].toLowerCase();
-    return allowedDomains.includes(domain);
+    
+    // Check for common free email providers that shouldn't be used for staff accounts
+    const freeEmailProviders = [
+      'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 
+      'aol.com', 'icloud.com', 'mail.com', 'protonmail.com',
+      'zoho.com', 'yandex.com', 'gmx.com'
+    ];
+    
+    // If it's a free email provider, it's not valid for staff
+    if (freeEmailProviders.includes(domain)) {
+      return false;
+    }
+    
+    // Official company domains are always accepted (whitelist)
+    const officialDomains = ['bgfzimbabwe.org', 'bgf.org.zw', 'bgf.org', 'bgfzim.org'];
+    if (officialDomains.includes(domain)) {
+      return true;
+    }
+    
+    // For all other domains, assume it's a business email if not in the free email list
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,10 +100,10 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
     // Validate staff email domains for admin registrations
     if (activeTab === "admin" && !isFirstTimeSetup) {
       if (!validateStaffEmail(formData.email)) {
-        setError("Staff must use company email addresses");
+        setError("Staff must use business email addresses");
         toast({
-          title: "Company email required",
-          description: "Staff members must register with an official company email address.",
+          title: "Business email required",
+          description: "Staff members cannot register with free email providers (Gmail, Yahoo, etc.). Please use a business email address.",
           variant: "destructive"
         });
         return;
