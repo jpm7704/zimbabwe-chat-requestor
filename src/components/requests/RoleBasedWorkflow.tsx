@@ -25,7 +25,19 @@ interface RoleBasedWorkflowProps {
 const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBasedWorkflowProps) => {
   const roles = useRoles(userProfile);
   
-  if (!userProfile) return null;
+  // TEMPORARY: Make sure we always show a view, even if userProfile is null
+  if (!userProfile) {
+    // Use director view as a default when no profile exists
+    return <ManagementView 
+      userProfile={{
+        id: "temporary-id",
+        first_name: "Temporary",
+        last_name: "User",
+        role: "director",
+      }} 
+      statusCounts={statusCounts} 
+    />;
+  }
   
   // Field Officer View
   if (roles.isFieldOfficer()) {

@@ -1,9 +1,7 @@
 
-import { ReactNode, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions, Permissions } from '@/hooks/usePermissions';
-import { useToast } from '@/hooks/use-toast';
 
 interface RequirePermissionProps {
   children: ReactNode;
@@ -11,7 +9,12 @@ interface RequirePermissionProps {
   redirectTo?: string;
 }
 
-const RequirePermission = ({ children, permission, redirectTo = '/' }: RequirePermissionProps) => {
+const RequirePermission = ({ children }: RequirePermissionProps) => {
+  // TEMPORARY: Skip all permission checks and always render children
+  return <>{children}</>;
+  
+  // Original permission checking code is commented out for now
+  /*
   const { isAuthenticated, userProfile, loading } = useAuth();
   const permissions = usePermissions(userProfile);
   const navigate = useNavigate();
@@ -54,6 +57,7 @@ const RequirePermission = ({ children, permission, redirectTo = '/' }: RequirePe
   }
 
   return <>{children}</>;
+  */
 };
 
 export default RequirePermission;
