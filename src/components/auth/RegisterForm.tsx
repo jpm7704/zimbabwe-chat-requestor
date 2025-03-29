@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import UserTypeSelector from "./UserTypeSelector";
 import PersonalInfoFields from "./PersonalInfoFields";
 import PasswordFields from "./PasswordFields";
-import StaffVerificationCode from "./StaffVerificationCode";
 import StaffRoleSelector from "./StaffRoleSelector";
 import UserAgreement from "./UserAgreement";
 
@@ -93,47 +91,32 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
       }
     }
     
-    if (activeTab === "admin" && !isFirstTimeSetup && !formData.staffRole) {
-      setError("Please select a staff role");
-      toast({
-        title: "Staff role required",
-        description: "Please select your role in the organization.",
-        variant: "destructive"
-      });
-      return;
+    if (activeTab === "admin") {
+      if (!formData.staffRole) {
+        setError("Please select a staff role");
+        toast({
+          title: "Staff role required",
+          description: "Please select your role in the organization.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
     
     setLoading(true);
     setError(null);
     
     try {
-      // Determine the role based on conditions
-      let userRole = "user"; // Default role
+      // Simplify role determination
+      let userRole = activeTab === "admin" ? formData.staffRole : "user";
       let staffNumber = null;
       let region = null;
       
-      // For staff registrations
       if (activeTab === "admin") {
-        // First-time setup - allow admin registration without code
-        if (isFirstTimeSetup) {
-          userRole = "director"; // Initial admin
-          staffNumber = parseInt(formData.staffNumber) || 1;
-        } 
-        // Verify admin code for subsequent admin registrations
-        else if (formData.adminCode === "BGF-ADMIN-2024") {
-          if (formData.staffRole) {
-            userRole = formData.staffRole; // Specific staff role
-            staffNumber = parseInt(formData.staffNumber) || null;
-            region = formData.region || null;
-          } else {
-            throw new Error("Staff role is required");
-          }
-        } else {
-          throw new Error("Invalid admin verification code");
-        }
+        staffNumber = parseInt(formData.staffNumber) || null;
+        region = formData.region || null;
       }
       
-      // Register the user with the determined role
       const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -184,7 +167,7 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
         setActiveTab={setActiveTab} 
       />
 
-      {/* Staff role selector first for admin registrations */}
+      {/* Staff role selector for admin registrations */}
       {activeTab === "admin" && (
         <>
           {isFirstTimeSetup ? (
@@ -192,23 +175,11 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
               First-time setup detected. You will be registered as the initial Director.
             </div>
           ) : (
-            <>
-              {/* Show the Staff Role selector first */}
-              <StaffRoleSelector
-                isFirstTimeSetup={isFirstTimeSetup}
-                formData={formData}
-                setFormData={setFormData}
-              />
-              
-              {/* Only show verification code field if a staff role is selected */}
-              {formData.staffRole && (
-                <StaffVerificationCode
-                  adminCode={formData.adminCode}
-                  handleChange={handleChange}
-                  isFirstTimeSetup={isFirstTimeSetup}
-                />
-              )}
-            </>
+            <StaffRoleSelector
+              isFirstTimeSetup={isFirstTimeSetup}
+              formData={formData}
+              setFormData={setFormData}
+            />
           )}
           
           {!isFirstTimeSetup && (
@@ -250,7 +221,7 @@ const RegisterForm = ({ isFirstTimeSetup, checkingFirstTimeSetup }: RegisterForm
       <Button
         type="submit"
         className="w-full"
-        disabled={loading || (activeTab === "admin" && !isFirstTimeSetup && formData.staffRole && !formData.adminCode)}
+        disabled={loading || (activeTab === "admin" && !formData.staffRole)}
       >
         {loading ? "Creating account..." : activeTab === "admin" ? "Create Staff Account" : "Create User Account"}
       </Button>
