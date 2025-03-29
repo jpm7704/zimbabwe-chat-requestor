@@ -19,6 +19,7 @@ import Reports from "./pages/Reports";
 import StaffManagement from "./pages/StaffManagement";
 import AdminPanel from "./pages/AdminPanel";
 import Dashboard from "./pages/Dashboard";
+import Settings from "./pages/Settings";
 import RequirePermission from "./components/auth/RequirePermission";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/chat" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
           <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
           <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
+          <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
           <Route path="/staff-verification" element={<StaffVerification />} />
           
           {/* Role-specific routes with permission guards */}
