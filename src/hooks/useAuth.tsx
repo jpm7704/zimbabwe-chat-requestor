@@ -43,8 +43,9 @@ export function useAuth() {
     }
   };
 
-  // Custom login handler for development
+  // Custom login handler for development - making sure it's updating the role correctly
   const handleDevLogin = (role: string) => {
+    console.log("Dev login with role:", role);
     setSelectedRole(role);
     setDevSignedOut(false);
   };

@@ -9,6 +9,7 @@ import RegularUserView from "./role-views/RegularUserView";
 import FallbackView from "./role-views/FallbackView";
 import CEOView from "./role-views/CEOView";
 import PatronView from "./role-views/PatronView";
+import { useEffect } from "react";
 
 interface RoleBasedWorkflowProps {
   userProfile: UserProfile | null;
@@ -25,18 +26,25 @@ interface RoleBasedWorkflowProps {
 const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBasedWorkflowProps) => {
   const roles = useRoles(userProfile);
   
+  // Debug role detection
+  useEffect(() => {
+    if (userProfile) {
+      console.log("Role-based workflow rendering for role:", userProfile.role);
+      console.log("Is CEO?", roles.isCEO());
+      console.log("Is Field Officer?", roles.isFieldOfficer());
+      console.log("Is Regular User?", roles.isRegularUser());
+    }
+  }, [userProfile, roles]);
+  
   // TEMPORARY: Make sure we always show a view, even if userProfile is null
   if (!userProfile) {
-    // Use director view as a default when no profile exists
-    return <ManagementView 
-      userProfile={{
-        id: "temporary-id",
-        first_name: "Temporary",
-        last_name: "User",
-        role: "director",
-      }} 
-      statusCounts={statusCounts} 
-    />;
+    return <RegularUserView userProfile={{
+      id: "temporary-id",
+      first_name: "Temporary",
+      last_name: "User",
+      role: "user",
+      email: "",
+    }} />;
   }
   
   // Field Officer View
@@ -44,7 +52,7 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
     return <FieldOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
   } 
   
-  // Project Officer View
+  // Regional Project Officer View
   else if (roles.isProjectOfficer()) {
     return <FieldOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
   }
