@@ -52,7 +52,8 @@ const ApprovalsPage = () => {
     setProcessingId(requestId);
     try {
       // In a real app, this would update the database
-      await updateRequestStatus(requestId, "approved", note);
+      // Change from "approved" to "completed" to match the valid RequestStatus type
+      await updateRequestStatus(requestId, "completed", note);
       toast({
         title: "Request approved",
         description: `You have approved request ${requestId}. It will now be processed.`,
