@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Settings, User, LogOut } from "lucide-react";
@@ -39,7 +38,7 @@ const UserProfileDropdown = ({ userProfile }: UserProfileDropdownProps) => {
 
   const handleSignOut = () => {
     handleLogout();
-    navigate("/login"); // Redirect to login after logout
+    navigate("/login");
   };
 
   return (

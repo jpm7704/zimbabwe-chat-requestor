@@ -31,9 +31,10 @@ export function useAuth() {
     region: "All Regions"
   };
 
-  // Custom logout handler for development
+  // Custom logout handler for development that completely resets the state
   const handleLogout = () => {
     setDevSignedOut(true);
+    setSelectedRole("user"); // Reset to a default role
   };
 
   // Custom login handler for development
