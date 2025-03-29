@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { RequestType, RequestTypeInfo, ChatMessage as ChatMessageType } from "@/types";
+import { RequestType, RequestTypeInfo, ChatMessage as ChatMessageType, RequestStatus } from "@/types";
 import { createRequest, getRequestTypeInfo } from "@/services/requestService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -86,6 +86,10 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
         title: requestForm.title,
         description: requestForm.description
       });
+
+      if (!result) {
+        throw new Error("Failed to create request");
+      }
       
       // In a real app, we would now upload the files
       // For this demo, we'll just simulate success
@@ -95,12 +99,12 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
         description: `Your request has been submitted with ticket number ${result.ticketNumber}.`,
       });
       
-      // Add a message to the chat
+      // Add a message to the chat explaining the workflow
       const newMessage: ChatMessageType = {
         id: Date.now().toString(),
         senderId: "system",
         senderType: "system",
-        content: `Your request has been submitted successfully! Your ticket number is **${result.ticketNumber}**. This request will now go through our process:\n\n1. Field Officer Verification\n2. Programme Manager Review\n3. Management Approval\n\nYou can track the status of your request in the Requests section.`,
+        content: `Your request has been submitted successfully! Your ticket number is **${result.ticketNumber}**. \n\nYour request will now go through our review process:\n\n1. Head of Programs Review\n2. Assignment to Assistant Project Officer\n3. Field Assessment by Regional Project Officer\n4. Final Review and Approval\n\nYou can track the status of your request in the Requests section.`,
         timestamp: new Date().toISOString(),
       };
       

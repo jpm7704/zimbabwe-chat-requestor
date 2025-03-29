@@ -1,20 +1,22 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useRequestForm } from "@/hooks/useRequestForm";
 import NewRequestForm from "@/components/request/NewRequestForm";
-import { FileText, Send, Stethoscope, GraduationCap } from "lucide-react";
+import { FileText, Send, Stethoscope, GraduationCap, AlertCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const RequestSubmissionPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userProfile } = useAuth();
   const [messages, setMessages] = useState<any[]>([]);
-  const [showNewRequest, setShowNewRequest] = useState(false);
   
   // Use the request form hook
   const requestFormProps = useRequestForm(setMessages);
+  const { showNewRequest, setShowNewRequest } = requestFormProps;
 
   // Show the request form if 'action=new' is in the URL or if type is specified
   useEffect(() => {
@@ -37,7 +39,10 @@ const RequestSubmissionPage = () => {
         navigate('/login');
       }
     }
-  }, [searchParams, requestFormProps.setRequestForm, isAuthenticated, navigate]);
+  }, [searchParams, requestFormProps.setRequestForm, isAuthenticated, navigate, setShowNewRequest]);
+
+  // Show a different message for staff users
+  const isStaffUser = userProfile && userProfile.role !== 'user';
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">
@@ -49,7 +54,20 @@ const RequestSubmissionPage = () => {
           </p>
         </div>
 
-        {!showNewRequest ? (
+        {isStaffUser && (
+          <Alert variant="info" className="bg-blue-50 border-blue-200">
+            <AlertCircle className="h-5 w-5 text-blue-600" />
+            <AlertTitle className="text-blue-800">Staff Account</AlertTitle>
+            <AlertDescription className="text-blue-700">
+              You are logged in with a staff account. You can view and manage requests in the dashboard instead of submitting new ones.
+            </AlertDescription>
+            <Button variant="outline" className="mt-2" onClick={() => navigate('/dashboard')}>
+              Go to Dashboard
+            </Button>
+          </Alert>
+        )}
+
+        {!showNewRequest && !isStaffUser ? (
           <div className="flex flex-col md:flex-row gap-6 mt-8">
             <div 
               onClick={() => requestFormProps.handleRequestTypeSelect("medical_assistance")} 
@@ -85,7 +103,7 @@ const RequestSubmissionPage = () => {
               </div>
             </div>
           </div>
-        ) : (
+        ) : !isStaffUser && (
           <div className="border border-primary/20 p-8 rounded-lg bg-card/40 shadow-sm">
             <NewRequestForm
               requestForm={requestFormProps.requestForm}
