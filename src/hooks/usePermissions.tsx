@@ -2,7 +2,7 @@
 import { UserProfile } from "./useAuth";
 
 // Define role types for better type safety
-export type UserRole = 'user' | 'field_officer' | 'regional_project_officer' | 'assistant_project_officer' | 'head_of_programs' | 'director';
+export type UserRole = 'user' | 'field_officer' | 'project_officer' | 'assistant_project_officer' | 'head_of_programs' | 'director';
 
 // Define permission sets for different features
 export interface Permissions {
@@ -49,7 +49,7 @@ export function usePermissions(userProfile: UserProfile | null) {
         canAccessFieldReports: true,
         canAccessAdminPanel: false,
       };
-    case 'regional_project_officer':
+    case 'project_officer':
       return {
         canViewRequests: true,
         canAssignRequests: true,

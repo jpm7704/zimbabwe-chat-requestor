@@ -83,7 +83,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
       )}
 
       {/* Field Officer Routes */}
-      {(roles.isFieldOfficer() || roles.isRegionalProjectOfficer()) && (
+      {(roles.isFieldOfficer() || roles.isProjectOfficer()) && (
         <Button 
           variant={isActive('/field-work') ? "default" : buttonVariant} 
           className={buttonClass}

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 // Define all available staff roles
 const STAFF_ROLES = [
   { key: "field_officer", name: "Field Officer", description: "Field implementation" },
-  { key: "regional_project_officer", name: "Regional Project Officer", description: "Manages regional projects" },
+  { key: "project_officer", name: "Project Officer", description: "Manages projects" },
   { key: "assistant_project_officer", name: "Assistant Project Officer", description: "Assists with project management" },
   { key: "head_of_programs", name: "Head of Programs", description: "Oversees all programs" },
   { key: "director", name: "Director", description: "Head of organization" }
@@ -59,10 +59,10 @@ const StaffRoleSelector = ({
   const shouldShowStaffNumber = formData.staffRole === 'director' || 
     formData.staffRole === 'head_of_programs' || 
     formData.staffRole === 'assistant_project_officer' || 
-    formData.staffRole === 'regional_project_officer';
+    formData.staffRole === 'project_officer';
   
-  // Check if the role is a regional officer (needs region input)
-  const isRegionalRole = formData.staffRole === 'regional_project_officer';
+  // Check if the role is a project officer (needs region input)
+  const needsRegionInput = formData.staffRole === 'project_officer';
 
   return (
     <>
@@ -112,13 +112,13 @@ const StaffRoleSelector = ({
             {formData.staffRole === 'director' && "Directors are numbered 1-5"}
             {formData.staffRole === 'head_of_programs' && "Head of Programs position"}
             {formData.staffRole === 'assistant_project_officer' && "Assistant Project Officers are numbered 1-5"}
-            {formData.staffRole === 'regional_project_officer' && "Regional Project Officers are numbered 1-4"}
+            {formData.staffRole === 'project_officer' && "Project Officers are numbered 1-4"}
           </p>
         </div>
       )}
 
-      {/* Region field - only show for regional project officers */}
-      {isRegionalRole && (
+      {/* Region field - only show for project officers */}
+      {needsRegionInput && (
         <div className="space-y-2">
           <Label htmlFor="region">Region</Label>
           <Input

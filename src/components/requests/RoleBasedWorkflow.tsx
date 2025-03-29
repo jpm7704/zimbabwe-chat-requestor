@@ -26,9 +26,14 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
   if (!userProfile) return null;
   
   // Field Officer View
-  if (roles.isFieldOfficer() || roles.isRegionalProjectOfficer()) {
+  if (roles.isFieldOfficer()) {
     return <FieldOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
   } 
+  
+  // Project Officer View
+  else if (roles.isProjectOfficer()) {
+    return <FieldOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
+  }
   
   // Assistant Project Officer / HOP View
   else if (roles.isAssistantProjectOfficer() || roles.isHeadOfPrograms()) {

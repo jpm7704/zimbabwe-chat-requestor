@@ -5,7 +5,7 @@ export function useRoles(userProfile: UserProfile | null) {
   const isAdmin = () => userProfile?.role === 'director';
   const isHeadOfPrograms = () => userProfile?.role === 'head_of_programs';
   const isAssistantProjectOfficer = () => userProfile?.role === 'assistant_project_officer';
-  const isRegionalProjectOfficer = () => userProfile?.role === 'regional_project_officer';
+  const isProjectOfficer = () => userProfile?.role === 'project_officer';
   const isFieldOfficer = () => userProfile?.role === 'field_officer';
   const isRegularUser = () => userProfile?.role === 'user';
   
@@ -69,7 +69,7 @@ export function useRoles(userProfile: UserProfile | null) {
           textClass: 'text-indigo-600',
           badgeClass: 'bg-indigo-500',
           responsibilities: [
-            'Receive requests from Regional Project Officers',
+            'Receive requests from Project Officers',
             'Review and assess request documentation',
             'Coordinate with field staff for implementation',
             'Prepare detailed reports for Head of Programs',
@@ -77,20 +77,20 @@ export function useRoles(userProfile: UserProfile | null) {
             'Ensure compliance with organizational standards'
           ]
         };
-      case 'regional_project_officer':
+      case 'project_officer':
         return {
-          title: 'Regional Project Officer',
-          description: 'Regional Coordinator',
+          title: 'Project Officer',
+          description: 'Project Coordinator',
           color: 'purple',
           iconClass: 'bg-purple-100',
           textClass: 'text-purple-600',
           badgeClass: 'bg-purple-500',
           responsibilities: [
-            'Oversee projects in assigned region',
+            'Oversee projects across assigned areas',
             'Coordinate with field officers for verification',
             'Review and compile field assessment data',
             'Submit verified requests to Assistant Project Officers',
-            'Monitor regional project implementation',
+            'Monitor project implementation',
             'Build relationships with local communities and stakeholders'
           ]
         };
@@ -106,7 +106,7 @@ export function useRoles(userProfile: UserProfile | null) {
             'Review and assess assistance requests assigned to you',
             'Conduct field visits to verify beneficiary information',
             'Collect and validate supporting documentation',
-            'Prepare detailed verification reports for Regional Officers',
+            'Prepare detailed verification reports for Project Officers',
             'Complete assessments within assigned timeframes'
           ]
         };
@@ -135,7 +135,7 @@ export function useRoles(userProfile: UserProfile | null) {
     isAdmin,
     isHeadOfPrograms,
     isAssistantProjectOfficer,
-    isRegionalProjectOfficer,
+    isProjectOfficer,
     isFieldOfficer,
     isRegularUser,
     hasRole,
