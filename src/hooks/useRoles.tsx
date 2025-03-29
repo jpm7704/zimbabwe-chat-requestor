@@ -2,16 +2,29 @@
 import { UserProfile } from "./useAuth";
 
 export function useRoles(userProfile: UserProfile | null) {
-  const isAdmin = () => userProfile?.role === 'director';
-  const isHeadOfPrograms = () => userProfile?.role === 'head_of_programs';
-  const isAssistantProjectOfficer = () => userProfile?.role === 'assistant_project_officer';
-  const isProjectOfficer = () => userProfile?.role === 'project_officer';
-  const isFieldOfficer = () => userProfile?.role === 'field_officer';
-  const isRegularUser = () => userProfile?.role === 'user';
-  const isCEO = () => userProfile?.role === 'ceo';
-  const isPatron = () => userProfile?.role === 'patron';
+  // Basic role check function that safely compares role values
+  const checkRole = (role: string | undefined) => {
+    // If profile doesn't exist, return false
+    if (!userProfile || !userProfile.role) return false;
+    // Case-insensitive comparison for more robust matching
+    return userProfile.role.toLowerCase() === role.toLowerCase();
+  };
   
-  const hasRole = (role: string) => userProfile?.role === role;
+  // Role check functions using the core checkRole method
+  const isAdmin = () => checkRole('director');
+  const isHeadOfPrograms = () => checkRole('head_of_programs');
+  const isAssistantProjectOfficer = () => checkRole('assistant_project_officer');
+  const isProjectOfficer = () => checkRole('project_officer');
+  const isFieldOfficer = () => checkRole('field_officer');
+  const isRegularUser = () => checkRole('user');
+  const isCEO = () => checkRole('ceo');
+  const isPatron = () => checkRole('patron');
+  
+  // Generic role check
+  const hasRole = (role: string) => checkRole(role);
+  
+  // Debug function to help identify role issues
+  const getCurrentRole = () => userProfile?.role || 'unknown';
   
   // Get role display information
   const getRoleInfo = () => {
@@ -27,7 +40,10 @@ export function useRoles(userProfile: UserProfile | null) {
       };
     }
     
-    switch(userProfile.role) {
+    // Convert role to lowercase for case-insensitive matching
+    const role = userProfile.role.toLowerCase();
+    
+    switch(role) {
       case 'director':
         return {
           title: 'Director',
@@ -176,6 +192,7 @@ export function useRoles(userProfile: UserProfile | null) {
     isCEO,
     isPatron,
     hasRole,
-    getRoleInfo
+    getRoleInfo,
+    getCurrentRole  // Added for debugging purposes
   };
 }

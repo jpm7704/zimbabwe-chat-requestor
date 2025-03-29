@@ -11,6 +11,7 @@ import UserStatsSummary from "@/components/requests/UserStatsSummary";
 import { useRoles } from "@/hooks/useRoles";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import DevRoleSwitcher from "@/components/auth/DevRoleSwitcher";
 
 const RequestsPage = () => {
   const { userProfile, isAuthenticated } = useAuth();
@@ -86,6 +87,9 @@ const RequestsPage = () => {
         loading={loading} 
         searchTerm={searchTerm}
       />
+      
+      {/* Development role switcher */}
+      <DevRoleSwitcher />
     </div>
   );
 };

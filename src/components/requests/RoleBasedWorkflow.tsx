@@ -26,13 +26,15 @@ interface RoleBasedWorkflowProps {
 const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBasedWorkflowProps) => {
   const roles = useRoles(userProfile);
   
-  // Debug role detection
+  // Enhanced debugging for role detection
   useEffect(() => {
     if (userProfile) {
       console.log("Role-based workflow rendering for role:", userProfile.role);
+      console.log("Current role from hook:", roles.getCurrentRole());
       console.log("Is CEO?", roles.isCEO());
       console.log("Is Field Officer?", roles.isFieldOfficer());
       console.log("Is Regular User?", roles.isRegularUser());
+      console.log("Role info title:", roles.getRoleInfo().title);
     }
   }, [userProfile, roles]);
   
