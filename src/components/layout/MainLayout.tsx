@@ -31,7 +31,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             <main className="flex-grow pt-24 px-4 container mx-auto max-w-5xl">
               {children}
             </main>
-            <Footer />
+            {/* Footer removed for authenticated users */}
           </div>
           <ThemeToggle />
         </div>
@@ -39,7 +39,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     );
   }
   
-  // For unauthenticated users, render the regular layout
+  // For unauthenticated users, render the regular layout with footer
   return (
     <div className="min-h-screen flex flex-col w-full">
       <Navbar />
