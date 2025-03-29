@@ -1,11 +1,10 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Settings, User, LogOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth, UserProfile } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 
 interface UserProfileDropdownProps {
   userProfile: UserProfile | null;
@@ -13,8 +12,6 @@ interface UserProfileDropdownProps {
 
 const UserProfileDropdown = ({ userProfile }: UserProfileDropdownProps) => {
   const { handleLogout, formatRole } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   
   // Function to get role badge color
   const getRoleBadgeColor = (role?: string) => {
@@ -29,27 +26,9 @@ const UserProfileDropdown = ({ userProfile }: UserProfileDropdownProps) => {
         return 'bg-green-500 hover:bg-green-600';
       case 'director':
         return 'bg-purple-500 hover:bg-purple-600';
-      case 'ceo':
-        return 'bg-red-500 hover:bg-red-600';
-      case 'patron':
-        return 'bg-indigo-500 hover:bg-indigo-600';
       default:
         return 'bg-gray-500 hover:bg-gray-600';
     }
-  };
-
-  const handleSignOut = () => {
-    const currentRole = userProfile?.role || 'user';
-    
-    handleLogout();
-    
-    toast({
-      title: "Signed out successfully",
-      description: `You have been signed out from ${formatRole(currentRole)} role.`,
-      duration: 3000
-    });
-    
-    navigate("/login");
   };
 
   return (
@@ -81,7 +60,7 @@ const UserProfileDropdown = ({ userProfile }: UserProfileDropdownProps) => {
             <span>Settings</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive cursor-pointer">
+        <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sign Out</span>
         </DropdownMenuItem>

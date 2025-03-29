@@ -10,7 +10,7 @@ import NavLinks from "./NavLinks";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, userProfile, loading, devSignedOut } = useAuth();
+  const { isAuthenticated, userProfile, loading } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -26,10 +26,10 @@ const Navbar = () => {
   // Redirect authenticated users if they try to access login/register pages
   useEffect(() => {
     const path = window.location.pathname;
-    if (isAuthenticated && !devSignedOut && (path === '/login' || path === '/register')) {
+    if (isAuthenticated && (path === '/login' || path === '/register')) {
       navigate('/requests');
     }
-  }, [isAuthenticated, navigate, devSignedOut]);
+  }, [isAuthenticated, navigate]);
 
   // Toggle mobile menu
   const toggleMobileMenu = () => {
