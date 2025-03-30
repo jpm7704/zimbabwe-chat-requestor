@@ -126,10 +126,10 @@ export function usePermissions(userProfile: UserProfile | null) {
         canAssignRequests: false,
         canReviewRequests: true,
         canApproveRequests: true,
-        canManageStaff: false,
+        canManageStaff: true, // Giving patron management access like director
         canAccessAnalytics: true,
         canAccessFieldReports: true,
-        canAccessAdminPanel: false,
+        canAccessAdminPanel: true, // Giving patron admin access like director
       };
     case 'user':
     default:

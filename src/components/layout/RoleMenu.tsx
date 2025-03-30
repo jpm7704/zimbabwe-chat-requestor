@@ -130,7 +130,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {permissions.canManageStaff && (
+      {(permissions.canManageStaff) && (
         <Button 
           variant={isActive('/staff') ? "default" : buttonVariant} 
           className={buttonClass}
@@ -143,7 +143,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {permissions.canAccessAdminPanel && (
+      {(permissions.canAccessAdminPanel) && (
         <Button 
           variant={isActive('/admin') ? "default" : buttonVariant} 
           className={buttonClass}
