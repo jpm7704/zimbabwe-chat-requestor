@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Navigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -15,13 +15,18 @@ interface MainLayoutProps {
 
 const MainLayout = ({ children }: MainLayoutProps) => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const isHomePage = location.pathname === "/";
   
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  // Show loading state while auth is determining
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   // If user is authenticated, render the sidebar layout
   if (isAuthenticated) {
@@ -42,20 +47,25 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     );
   }
   
-  // For unauthenticated users, render the regular layout with footer
-  return (
-    <div className="min-h-screen flex flex-col w-full">
-      <Navbar />
-      <div className="flex flex-col min-h-screen flex-1">
-        <main className={`flex-grow ${isHomePage ? "" : "pt-24"} px-4 container mx-auto max-w-5xl`}>
-          {children}
-        </main>
-        <Footer />
+  // For public pages like home, render the regular layout with footer
+  if (isHomePage) {
+    return (
+      <div className="min-h-screen flex flex-col w-full">
+        <Navbar />
+        <div className="flex flex-col min-h-screen flex-1">
+          <main className="flex-grow px-4 container mx-auto max-w-5xl">
+            {children}
+          </main>
+          <Footer />
+        </div>
+        <ThemeToggle />
+        <DevRoleSwitcher />
       </div>
-      <ThemeToggle />
-      <DevRoleSwitcher />
-    </div>
-  );
+    );
+  }
+  
+  // For other non-authenticated routes that aren't the home page, redirect to login
+  return <Navigate to="/login" replace />;
 };
 
 export default MainLayout;

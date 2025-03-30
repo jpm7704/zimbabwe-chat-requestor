@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 import Home from "./pages/Home";
 import RequestSubmissionPage from "./pages/ChatInterface";
@@ -32,13 +32,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Public routes */}
+          {/* Public routes - accessible without authentication */}
           <Route path="/" element={<MainLayout><Home /></MainLayout>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/staff-verification" element={<StaffVerification />} />
+          <Route path="*" element={<NotFound />} />
           
-          {/* Routes that should be wrapped in MainLayout */}
+          {/* Protected routes - require authentication */}
           <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
           <Route path="/submit" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
           <Route path="/enquiry" element={<MainLayout><EnquiryPage /></MainLayout>} />
@@ -87,8 +88,6 @@ const App = () => (
               </RequirePermission>
             </MainLayout>
           } />
-          
-          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
