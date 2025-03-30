@@ -34,6 +34,7 @@ export function usePermissions(userProfile: UserProfile | null) {
 
   // Development mode: always grant ALL permissions to make testing easier
   if (isDevelopment) {
+    console.log('Development mode: granting all permissions for testing');
     return {
       canViewRequests: true,
       canAssignRequests: true,

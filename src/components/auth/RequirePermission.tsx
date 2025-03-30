@@ -31,10 +31,10 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
   });
   
   useEffect(() => {
-    // In development mode, always allow access
+    // Always allow access in development mode
     if (isDevelopment) return;
 
-    // If user doesn't have permission, redirect and show a toast
+    // Only redirect if not in development and the user doesn't have permission
     if (!hasPermission) {
       toast({
         title: "Access Restricted",
@@ -45,8 +45,8 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
     }
   }, [hasPermission, navigate, redirectTo, toast, permission, isDevelopment]);
   
-  // Always render children - in both dev mode and when user has permission
-  // For production, the useEffect will handle redirecting if needed
+  // In development, ALWAYS render children regardless of permission
+  // In production, child will render but useEffect will redirect if needed
   return <>{children}</>;
 };
 
