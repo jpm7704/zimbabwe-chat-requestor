@@ -36,7 +36,9 @@ export const useRequestsData = () => {
         return;
       }
 
-      // Use a safer approach that doesn't rely on complex RLS policies
+      console.log("Fetching requests for user role:", userProfile.role);
+
+      // Use a safer approach with proper error handling
       let query = supabase
         .from('requests')
         .select(`
@@ -62,7 +64,7 @@ export const useRequestsData = () => {
         console.error("Error fetching requests:", error);
         
         // Special handling for the infinite recursion RLS error
-        if (error.code === '42P17') {
+        if (error.code === '42P17' || error.message?.includes('infinite recursion')) {
           throw new Error("Database policy error. Please contact your administrator to fix the Row Level Security policy on the requests table.");
         }
         
@@ -74,6 +76,8 @@ export const useRequestsData = () => {
         setFilteredRequests([]);
         return;
       }
+
+      console.log(`Successfully fetched ${data.length} requests`);
 
       // Transform the data to match our Request type
       const transformedRequests: Request[] = data.map(request => ({
@@ -96,13 +100,6 @@ export const useRequestsData = () => {
     } catch (error: any) {
       console.error("Error fetching requests:", error);
       setError(error);
-      
-      // Show a more informative toast message
-      toast({
-        title: "Error loading requests",
-        description: error.message || "Failed to load requests. Please try again or contact support if this persists.",
-        variant: "destructive",
-      });
       
       // Set empty arrays to prevent UI from breaking
       setRequests([]);

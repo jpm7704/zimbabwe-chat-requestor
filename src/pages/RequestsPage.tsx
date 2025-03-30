@@ -9,11 +9,13 @@ import RequestsSearchFilter from "@/components/requests/RequestsSearchFilter";
 import RequestsList from "@/components/requests/RequestsList";
 import RoleBasedWorkflow from "@/components/requests/RoleBasedWorkflow";
 import UserStatsSummary from "@/components/requests/UserStatsSummary";
+import { useToast } from "@/hooks/use-toast";
 
 const RequestsPage = () => {
   const { userProfile, isAuthenticated } = useAuth();
   const permissions = usePermissions(userProfile);
   const navigate = useNavigate();
+  const { toast } = useToast();
   const {
     filteredRequests,
     loading,
@@ -22,8 +24,21 @@ const RequestsPage = () => {
     searchTerm,
     handleSearch,
     handleFilter,
-    handleSort
+    handleSort,
+    refreshRequests
   } = useRequestsData();
+
+  // Show toast if there's an error with database policies
+  useEffect(() => {
+    if (error && error.message?.includes('policy')) {
+      toast({
+        title: "Database configuration issue",
+        description: "Our team has been notified and is working to resolve this. Some features may be limited temporarily.",
+        variant: "destructive",
+        duration: 6000,
+      });
+    }
+  }, [error, toast]);
 
   // Redirect users to their appropriate dashboard based on role
   useEffect(() => {
@@ -87,6 +102,7 @@ const RequestsPage = () => {
         loading={loading} 
         searchTerm={searchTerm}
         error={error}
+        onRetry={refreshRequests}
       />
     </div>
   );
