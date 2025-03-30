@@ -32,75 +32,89 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes - accessible without authentication */}
-          <Route path="/" element={<MainLayout><Home /></MainLayout>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/staff-verification" element={<StaffVerification />} />
-          
-          {/* Protected routes - require authentication */}
-          <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
-          <Route path="/submit" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
-          <Route path="/enquiry" element={<MainLayout><EnquiryPage /></MainLayout>} />
-          <Route path="/chat" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
-          <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
-          <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
-          <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
-          
-          {/* Role-specific routes with permission guards */}
-          <Route path="/field-work" element={
-            <MainLayout>
-              <RequirePermission permission="canAccessFieldReports">
-                <FieldWork />
-              </RequirePermission>
-            </MainLayout>
-          } />
-          
-          <Route path="/analytics" element={
-            <MainLayout>
-              <RequirePermission permission="canAccessAnalytics">
-                <Analytics />
-              </RequirePermission>
-            </MainLayout>
-          } />
-          
-          <Route path="/reports" element={
-            <MainLayout>
-              <RequirePermission permission="canAccessFieldReports">
-                <Reports />
-              </RequirePermission>
-            </MainLayout>
-          } />
-          
-          {/* Admin route - only for admin role */}
-          <Route path="/admin" element={
-            <MainLayout>
-              {/* Use the special case check in RequirePermission */}
-              <AdminPanel />
-            </MainLayout>
-          } />
-          
-          <Route path="/approvals" element={
-            <MainLayout>
-              <RequirePermission permission="canApproveRequests">
-                <ApprovalsPage />
-              </RequirePermission>
-            </MainLayout>
-          } />
-          
-          {/* Fallback route for not found pages */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Check if we're in development mode and using admin role
+  const isDevelopment = import.meta.env.DEV;
+  const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
+  const isDevAdmin = isDevelopment && devRole === 'admin';
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes - accessible without authentication */}
+            <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/staff-verification" element={<StaffVerification />} />
+            
+            {/* Protected routes - require authentication */}
+            <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
+            <Route path="/submit" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
+            <Route path="/enquiry" element={<MainLayout><EnquiryPage /></MainLayout>} />
+            <Route path="/chat" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
+            <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
+            <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
+            <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
+            
+            {/* Role-specific routes with permission guards - bypass in dev mode for admin */}
+            <Route path="/field-work" element={
+              <MainLayout>
+                {isDevAdmin ? <FieldWork /> : (
+                  <RequirePermission permission="canAccessFieldReports">
+                    <FieldWork />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            <Route path="/analytics" element={
+              <MainLayout>
+                {isDevAdmin ? <Analytics /> : (
+                  <RequirePermission permission="canAccessAnalytics">
+                    <Analytics />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            <Route path="/reports" element={
+              <MainLayout>
+                {isDevAdmin ? <Reports /> : (
+                  <RequirePermission permission="canAccessFieldReports">
+                    <Reports />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            {/* Admin route - bypass permission check in dev mode for admin */}
+            <Route path="/admin" element={
+              <MainLayout>
+                {isDevAdmin ? <AdminPanel /> : <RequirePermission permission="canAccessAdminPanel"><AdminPanel /></RequirePermission>}
+              </MainLayout>
+            } />
+            
+            <Route path="/approvals" element={
+              <MainLayout>
+                {isDevAdmin ? <ApprovalsPage /> : (
+                  <RequirePermission permission="canApproveRequests">
+                    <ApprovalsPage />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            {/* Fallback route for not found pages */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

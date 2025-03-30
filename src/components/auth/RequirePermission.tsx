@@ -20,23 +20,34 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
   // Check if we're in development mode
   const isDevelopment = import.meta.env.DEV;
   
+  // Get dev role from localStorage (for development mode role switching)
+  const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
+  
   // Special case for admin panel
   const isAdminPage = permission === 'canAccessAdminPanel';
-  const hasPermission = isAdminPage ? userProfile?.role === 'admin' : permissions[permission];
+  
+  // In development mode, admin role should bypass all permission checks
+  const isDevAdmin = isDevelopment && (devRole === 'admin' || userProfile?.role === 'admin');
+  
+  // Determine if user has permission - admins in dev mode always have permission
+  const hasPermission = isDevAdmin ? true : 
+    isAdminPage ? userProfile?.role === 'admin' : permissions[permission];
   
   // Log permission check for debugging
   console.log(`Permission check for ${permission}: ${hasPermission}`, {
     userRole: userProfile?.role,
+    devRole,
     permissionValue: permissions[permission],
     isDevelopment,
-    isAdminPage
+    isAdminPage,
+    isDevAdmin
   });
   
   useEffect(() => {
-    // Always allow access in development mode
-    if (isDevelopment) return;
+    // Always allow access in development mode for admin role
+    if (isDevAdmin) return;
 
-    // Only redirect if not in development and the user doesn't have permission
+    // Only redirect if not in development as admin and the user doesn't have permission
     if (!hasPermission) {
       toast({
         title: "Access Restricted",
@@ -45,10 +56,9 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
       });
       navigate(redirectTo);
     }
-  }, [hasPermission, navigate, redirectTo, toast, permission, isDevelopment]);
+  }, [hasPermission, navigate, redirectTo, toast, permission, isDevelopment, isDevAdmin]);
   
-  // In development, ALWAYS render children regardless of permission
-  // In production, child will render but useEffect will redirect if needed
+  // In development with admin role, or if user has permission, render children
   return <>{children}</>;
 };
 
