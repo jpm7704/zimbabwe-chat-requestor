@@ -32,7 +32,7 @@ export function usePermissions(userProfile: UserProfile | null) {
     canAccessAdminPanel: false,
   };
 
-  // Development mode: always grant ALL permissions to make testing easier
+  // Development mode: always grant ALL permissions for testing easier
   if (isDevelopment) {
     console.log('Development mode: granting all permissions for testing');
     return {
@@ -110,7 +110,7 @@ export function usePermissions(userProfile: UserProfile | null) {
         canManageStaff: true,
         canAccessAnalytics: true,
         canAccessFieldReports: true,
-        canAccessAdminPanel: true,
+        canAccessAdminPanel: true, // Only director has admin access
       };
     case 'ceo':
       return {
@@ -121,7 +121,7 @@ export function usePermissions(userProfile: UserProfile | null) {
         canManageStaff: false,
         canAccessAnalytics: true,
         canAccessFieldReports: true,
-        canAccessAdminPanel: false,
+        canAccessAdminPanel: false, // CEO no longer has admin access
       };
     case 'patron':
       return {
@@ -132,7 +132,7 @@ export function usePermissions(userProfile: UserProfile | null) {
         canManageStaff: true,
         canAccessFieldReports: true,
         canAccessAnalytics: true,
-        canAccessAdminPanel: true,
+        canAccessAdminPanel: true, // Patron still has admin access
       };
     case 'user':
     default:

@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -129,7 +130,8 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {(permissions.canAccessAdminPanel) && (
+      {/* Admin Panel - Only visible to users with canAccessAdminPanel permission */}
+      {permissions.canAccessAdminPanel && (
         <Button 
           variant={isActive('/admin') ? "default" : buttonVariant} 
           className={buttonClass}

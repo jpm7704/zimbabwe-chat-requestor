@@ -58,12 +58,14 @@ const ManagementView = ({ userProfile, statusCounts }: ManagementViewProps) => {
       </div>
       
       <div className="flex flex-wrap gap-3 mt-3">
-        <Button variant="outline" size="sm" asChild>
-          <Link to="/admin" className="flex items-center gap-2">
-            <ListFilter className="h-4 w-4" />
-            Administration
-          </Link>
-        </Button>
+        {userProfile.role === 'director' && (
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/admin" className="flex items-center gap-2">
+              <ListFilter className="h-4 w-4" />
+              Administration
+            </Link>
+          </Button>
+        )}
         <Button variant="default" size="sm">
           <Clock className="mr-2 h-4 w-4" />
           Awaiting Approval ({statusCounts.awaitingApproval})

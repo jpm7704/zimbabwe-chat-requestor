@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, LineChart, ResponsiveContainer, XAxis, YAxis, Bar, Line, Tooltip, Legend } from "recharts";
 import { Settings, Database, Shield, Server, Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminPanel = () => {
   const { userProfile, isAuthenticated } = useAuth();
   const permissions = usePermissions(userProfile);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Redirect if user doesn't have permission to view this page
   useEffect(() => {
@@ -21,9 +23,15 @@ const AdminPanel = () => {
     }
     
     if (!permissions.canAccessAdminPanel) {
-      navigate('/');
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to access the Admin Panel.",
+        variant: "destructive",
+      });
+      navigate('/dashboard');
+      return;
     }
-  }, [isAuthenticated, permissions, navigate]);
+  }, [isAuthenticated, permissions, navigate, toast]);
 
   // Sample data for chart
   const systemActivityData = [
