@@ -23,14 +23,7 @@ import Settings from "./pages/Settings";
 import ApprovalsPage from "./pages/ApprovalsPage";
 import RequirePermission from "./components/auth/RequirePermission";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -44,6 +37,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/staff-verification" element={<StaffVerification />} />
+          <Route path="*" element={<NotFound />} />
           
           {/* Protected routes - require authentication */}
           <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
@@ -94,9 +88,6 @@ const App = () => (
               </RequirePermission>
             </MainLayout>
           } />
-          
-          {/* Catch all not found route */}
-          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
