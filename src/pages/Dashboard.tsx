@@ -992,4 +992,5 @@ import {
   MultiSelectDemo7,
 } from "@/components/ui/multi-select-demo7"
 import {
-  InputWithButtonDemo
+  InputWithButtonDemo,
+} from "@/components/ui/input-with-button-demo"
