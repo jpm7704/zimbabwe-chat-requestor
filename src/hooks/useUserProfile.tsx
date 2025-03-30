@@ -31,7 +31,7 @@ export function useUserProfile(userId: string | null) {
         
         const { data, error } = await supabase
           .from('user_profiles')
-          .select('id, first_name, last_name, email, role, avatar_url, region')
+          .select('id, name, email, role, avatar_url, region')
           .eq('id', userId)
           .single();
         
@@ -44,7 +44,16 @@ export function useUserProfile(userId: string | null) {
             throw error;
           }
         } else if (data) {
-          setUserProfile(data);
+          // Map the database fields to our UserProfile type
+          setUserProfile({
+            id: data.id,
+            first_name: data.name?.split(' ')[0] || '',
+            last_name: data.name?.split(' ').slice(1).join(' ') || '',
+            email: data.email,
+            role: data.role,
+            avatar_url: data.avatar_url,
+            region: data.region
+          });
         }
       } catch (error: any) {
         setProfileError(error);
