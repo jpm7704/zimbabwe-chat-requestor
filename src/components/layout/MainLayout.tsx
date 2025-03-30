@@ -35,10 +35,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <div className="min-h-screen flex w-full">
           <AppSidebar />
           <div className="flex flex-col min-h-screen flex-1">
-            <main className="flex-grow pt-24 px-4 container mx-auto max-w-5xl">
+            <main className="flex-grow pt-24 px-4 container mx-auto max-w-7xl">
               {children}
             </main>
-            {/* Footer removed for authenticated users */}
           </div>
           <ThemeToggle />
           <DevRoleSwitcher />

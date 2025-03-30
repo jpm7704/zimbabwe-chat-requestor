@@ -45,11 +45,8 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
     }
   }, [hasPermission, navigate, redirectTo, toast, permission, isDevelopment]);
   
-  // In development mode, always render children
-  if (isDevelopment) return <>{children}</>;
-  
-  // Only render children if the user has permission
-  return hasPermission ? <>{children}</> : null;
+  // In development mode or if user has permission, render children
+  return <>{children}</>;
 };
 
 export default RequirePermission;
