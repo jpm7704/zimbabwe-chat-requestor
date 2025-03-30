@@ -38,6 +38,8 @@ const App = () => {
   const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
   const isDevAdmin = isDevelopment && devRole === 'admin';
   
+  console.log('App rendering, isDevelopment:', isDevelopment, 'devRole:', devRole, 'isDevAdmin:', isDevAdmin);
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -60,7 +62,7 @@ const App = () => {
             <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
             
-            {/* Role-specific routes with permission guards - bypass in dev mode for admin */}
+            {/* Role-specific routes - dev admin can access all */}
             <Route path="/field-work" element={
               <MainLayout>
                 {isDevAdmin ? <FieldWork /> : (
@@ -91,10 +93,14 @@ const App = () => {
               </MainLayout>
             } />
             
-            {/* Admin route - bypass permission check in dev mode for admin */}
+            {/* Admin route - dev admin has automatic access */}
             <Route path="/admin" element={
               <MainLayout>
-                {isDevAdmin ? <AdminPanel /> : <RequirePermission permission="canAccessAdminPanel"><AdminPanel /></RequirePermission>}
+                {isDevAdmin ? <AdminPanel /> : (
+                  <RequirePermission permission="canAccessAdminPanel">
+                    <AdminPanel />
+                  </RequirePermission>
+                )}
               </MainLayout>
             } />
             

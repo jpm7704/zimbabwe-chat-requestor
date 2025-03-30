@@ -23,15 +23,20 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
   // Get dev role from localStorage (for development mode role switching)
   const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
   
+  // In development mode, admin role should bypass ALL permission checks
+  const isDevAdmin = isDevelopment && devRole === 'admin';
+  
+  // If we're in dev admin mode, skip all permission checks
+  if (isDevAdmin) {
+    console.log('Dev admin mode: bypassing permission check for', permission);
+    return <>{children}</>;
+  }
+  
   // Special case for admin panel
   const isAdminPage = permission === 'canAccessAdminPanel';
   
-  // In development mode, admin role should bypass all permission checks
-  const isDevAdmin = isDevelopment && (devRole === 'admin' || userProfile?.role === 'admin');
-  
-  // Determine if user has permission - admins in dev mode always have permission
-  const hasPermission = isDevAdmin ? true : 
-    isAdminPage ? userProfile?.role === 'admin' : permissions[permission];
+  // Determine if user has permission - for normal users
+  const hasPermission = isAdminPage ? userProfile?.role === 'admin' : permissions[permission];
   
   // Log permission check for debugging
   console.log(`Permission check for ${permission}: ${hasPermission}`, {
@@ -39,15 +44,14 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
     devRole,
     permissionValue: permissions[permission],
     isDevelopment,
-    isAdminPage,
-    isDevAdmin
+    isAdminPage
   });
   
   useEffect(() => {
-    // Always allow access in development mode for admin role
+    // Skip all permission checks for dev admin users
     if (isDevAdmin) return;
 
-    // Only redirect if not in development as admin and the user doesn't have permission
+    // Only redirect if the user doesn't have permission
     if (!hasPermission) {
       toast({
         title: "Access Restricted",
@@ -56,9 +60,9 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
       });
       navigate(redirectTo);
     }
-  }, [hasPermission, navigate, redirectTo, toast, permission, isDevelopment, isDevAdmin]);
+  }, [hasPermission, navigate, redirectTo, toast, permission, isDevAdmin]);
   
-  // In development with admin role, or if user has permission, render children
+  // Only render children if user has permission or is dev admin
   return <>{children}</>;
 };
 
