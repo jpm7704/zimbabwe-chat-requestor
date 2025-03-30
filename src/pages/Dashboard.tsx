@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -10,9 +11,22 @@ import { useToast } from "@/hooks/use-toast";
 import { useRoles } from "@/hooks/useRoles";
 import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Bookmark, Calendar, Clock, FileCheck2, FileQuestion, PieChart, 
-  Users, TrendingUp, Building, Settings, Database, Shield, Server 
+  Users, TrendingUp, Building, Settings, Database, Shield, Server, 
+  AlertCircle, Check, RefreshCw
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -28,6 +42,14 @@ const Dashboard = () => {
   const isDevAdmin = isDevelopment && devRole === 'admin';
   
   const isAdmin = isDevAdmin || userProfile?.role === 'admin';
+
+  // State for dialogs and functionality
+  const [showSystemDialog, setShowSystemDialog] = useState(false);
+  const [showUserDialog, setShowUserDialog] = useState(false);
+  const [showRestartDialog, setShowRestartDialog] = useState(false);
+  const [selectedAction, setSelectedAction] = useState("");
+  const [systemStatus, setSystemStatus] = useState("operational");
+  const [lastBackup, setLastBackup] = useState("Today");
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -64,6 +86,69 @@ const Dashboard = () => {
   const statusCounts = getStatusCounts();
   const totalRequests = Object.values(statusCounts).reduce((sum, count) => sum + count, 0);
 
+  // Handle system actions
+  const handleSystemAction = (action: string) => {
+    setSelectedAction(action);
+    setShowSystemDialog(true);
+  };
+
+  // Handle user management actions
+  const handleUserAction = (action: string) => {
+    setSelectedAction(action);
+    setShowUserDialog(true);
+  };
+
+  // Complete an action
+  const completeAction = () => {
+    // Simulate action execution
+    toast({
+      title: "Action completed",
+      description: `${selectedAction} was successfully executed`,
+    });
+    
+    // Update system status based on action
+    if (selectedAction === "Database Management") {
+      setLastBackup("Just now");
+      toast({
+        title: "Database backup created",
+        description: "A new backup has been created and stored securely.",
+      });
+    } else if (selectedAction === "System Settings") {
+      toast({
+        title: "System settings updated",
+        description: "Your configuration changes have been saved.",
+      });
+    } else if (selectedAction === "Security Settings") {
+      toast({
+        title: "Security audit completed",
+        description: "No security vulnerabilities were found.",
+      });
+    }
+    
+    // Close dialogs
+    setShowSystemDialog(false);
+    setShowUserDialog(false);
+  };
+
+  const performSystemRestart = () => {
+    setShowRestartDialog(false);
+    
+    // Show loading toast
+    toast({
+      title: "System restarting",
+      description: "Please wait while the system restarts...",
+    });
+    
+    // Simulate restart
+    setTimeout(() => {
+      setSystemStatus("operational");
+      toast({
+        title: "System restarted",
+        description: "The system has been successfully restarted.",
+      });
+    }, 3000);
+  };
+
   const renderAdminContent = () => {
     if (!isAdmin) return null;
     
@@ -99,8 +184,28 @@ const Dashboard = () => {
                 <CardDescription>Current performance</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-xl font-bold text-green-600">All Systems Operational</div>
-                <p className="text-sm text-muted-foreground">99.98% uptime</p>
+                <div className="flex items-center gap-2">
+                  <div className={`text-xl font-bold ${systemStatus === "operational" ? "text-green-600" : "text-yellow-600"}`}>
+                    {systemStatus === "operational" ? "All Systems Operational" : "Maintenance Mode"}
+                  </div>
+                  <Badge 
+                    variant={systemStatus === "operational" ? "default" : "outline"} 
+                    className={systemStatus === "operational" ? "bg-green-500 hover:bg-green-600" : "border-yellow-500 text-yellow-500"}
+                  >
+                    {systemStatus === "operational" ? "LIVE" : "MAINTENANCE"}
+                  </Badge>
+                </div>
+                <div className="flex justify-between mt-2">
+                  <p className="text-sm text-muted-foreground">99.98% uptime</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setShowRestartDialog(true)}
+                    className="text-xs"
+                  >
+                    <RefreshCw className="h-3 w-3 mr-1" /> Restart
+                  </Button>
+                </div>
               </CardContent>
             </Card>
             <Card>
@@ -110,7 +215,10 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-4xl font-bold">1.2GB</div>
-                <p className="text-sm text-muted-foreground">+120MB this month</p>
+                <div className="mt-2">
+                  <Progress value={65} className="h-2" />
+                  <p className="text-sm text-muted-foreground mt-1">65% of allocated space</p>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -143,28 +251,44 @@ const Dashboard = () => {
                 <CardDescription>Manage system configuration and settings</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button className="w-full flex justify-between items-center" variant="outline">
+                <Button 
+                  className="w-full flex justify-between items-center" 
+                  variant="outline"
+                  onClick={() => handleSystemAction("System Settings")}
+                >
                   <div className="flex items-center">
                     <Settings className="mr-2 h-4 w-4" />
                     <span>System Settings</span>
                   </div>
                   <span className="text-xs text-muted-foreground">Last updated: 2 days ago</span>
                 </Button>
-                <Button className="w-full flex justify-between items-center" variant="outline">
+                <Button 
+                  className="w-full flex justify-between items-center" 
+                  variant="outline"
+                  onClick={() => handleSystemAction("Database Management")}
+                >
                   <div className="flex items-center">
                     <Database className="mr-2 h-4 w-4" />
                     <span>Database Management</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">Last backup: Today</span>
+                  <span className="text-xs text-muted-foreground">Last backup: {lastBackup}</span>
                 </Button>
-                <Button className="w-full flex justify-between items-center" variant="outline">
+                <Button 
+                  className="w-full flex justify-between items-center" 
+                  variant="outline"
+                  onClick={() => handleSystemAction("Security Settings")}
+                >
                   <div className="flex items-center">
                     <Shield className="mr-2 h-4 w-4" />
                     <span>Security Settings</span>
                   </div>
                   <span className="text-xs text-muted-foreground">Last audit: 5 days ago</span>
                 </Button>
-                <Button className="w-full flex justify-between items-center" variant="outline">
+                <Button 
+                  className="w-full flex justify-between items-center" 
+                  variant="outline"
+                  onClick={() => handleSystemAction("API Configuration")}
+                >
                   <div className="flex items-center">
                     <Server className="mr-2 h-4 w-4" />
                     <span>API Configuration</span>
@@ -180,28 +304,44 @@ const Dashboard = () => {
                 <CardDescription>Manage users and permissions</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button className="w-full flex justify-between items-center" variant="outline">
+                <Button 
+                  className="w-full flex justify-between items-center" 
+                  variant="outline"
+                  onClick={() => handleUserAction("User Management")}
+                >
                   <div className="flex items-center">
                     <Users className="mr-2 h-4 w-4" />
                     <span>User Management</span>
                   </div>
                   <span className="text-xs text-muted-foreground">856 total users</span>
                 </Button>
-                <Button className="w-full flex justify-between items-center" variant="outline">
+                <Button 
+                  className="w-full flex justify-between items-center" 
+                  variant="outline"
+                  onClick={() => handleUserAction("Role Management")}
+                >
                   <div className="flex items-center">
                     <Shield className="mr-2 h-4 w-4" />
                     <span>Role Management</span>
                   </div>
                   <span className="text-xs text-muted-foreground">5 roles configured</span>
                 </Button>
-                <Button className="w-full flex justify-between items-center" variant="outline">
+                <Button 
+                  className="w-full flex justify-between items-center" 
+                  variant="outline"
+                  onClick={() => handleUserAction("Staff Directory")}
+                >
                   <div className="flex items-center">
                     <Users className="mr-2 h-4 w-4" />
                     <span>Staff Directory</span>
                   </div>
                   <span className="text-xs text-muted-foreground">33 staff members</span>
                 </Button>
-                <Button className="w-full flex justify-between items-center" variant="outline">
+                <Button 
+                  className="w-full flex justify-between items-center" 
+                  variant="outline"
+                  onClick={() => handleUserAction("Permission Settings")}
+                >
                   <div className="flex items-center">
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Permission Settings</span>
@@ -212,6 +352,80 @@ const Dashboard = () => {
             </Card>
           </div>
         </div>
+
+        {/* System Action Dialog */}
+        <Dialog open={showSystemDialog} onOpenChange={setShowSystemDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{selectedAction}</DialogTitle>
+              <DialogDescription>
+                {selectedAction === "System Settings" && "Configure core system settings and preferences."}
+                {selectedAction === "Database Management" && "Manage database operations, backups, and maintenance."}
+                {selectedAction === "Security Settings" && "Configure security policies, access controls, and audit settings."}
+                {selectedAction === "API Configuration" && "Manage API endpoints, keys, and integration settings."}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-4">
+              <p className="mb-2 font-medium">Are you sure you want to proceed with this action?</p>
+              <p className="text-sm text-muted-foreground">
+                This action will apply changes to the system configuration.
+              </p>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSystemDialog(false)}>Cancel</Button>
+              <Button onClick={completeAction}>Proceed</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* User Action Dialog */}
+        <Dialog open={showUserDialog} onOpenChange={setShowUserDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{selectedAction}</DialogTitle>
+              <DialogDescription>
+                {selectedAction === "User Management" && "Add, edit, or remove user accounts."}
+                {selectedAction === "Role Management" && "Configure user roles and their permissions."}
+                {selectedAction === "Staff Directory" && "View and manage staff members and their information."}
+                {selectedAction === "Permission Settings" && "Configure detailed permission settings for the application."}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-4">
+              <p className="mb-2 font-medium">Continue to {selectedAction.toLowerCase()}?</p>
+              <p className="text-sm text-muted-foreground">
+                This will take you to the {selectedAction.toLowerCase()} interface.
+              </p>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUserDialog(false)}>Cancel</Button>
+              <Button onClick={completeAction}>Continue</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* System Restart Alert Dialog */}
+        <AlertDialog open={showRestartDialog} onOpenChange={setShowRestartDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-red-500" /> System Restart
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to restart all system services? This will temporarily interrupt access for all users.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={performSystemRestart} className="bg-red-600 hover:bg-red-700">
+                Restart
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </>
     );
   };

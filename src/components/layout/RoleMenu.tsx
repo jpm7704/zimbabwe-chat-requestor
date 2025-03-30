@@ -9,8 +9,10 @@ import {
   FileSpreadsheet, 
   Settings,
   LayoutDashboard,
-  Check,
-  UserCheck
+  UserCheck,
+  Users,
+  Shield,
+  Database
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -37,6 +39,12 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
   const handleClick = () => {
     if (onItemClick) onItemClick();
   };
+
+  // Check if user is admin (either dev admin or regular admin)
+  const isDevelopment = import.meta.env.DEV;
+  const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
+  const isDevAdmin = isDevelopment && devRole === 'admin';
+  const isAdmin = isDevAdmin || roles.isAdmin();
 
   return (
     <div className={`flex ${variant === "sidebar" ? "flex-col w-full gap-1" : "items-center gap-1"}`}>
@@ -127,6 +135,43 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
             <span>Approvals</span>
           </Link>
         </Button>
+      )}
+
+      {isAdmin && (
+        <>
+          <Button 
+            variant={isActive('/users') ? "default" : buttonVariant} 
+            className={buttonClass}
+            asChild
+          >
+            <Link to="/users" className="flex items-center gap-2" onClick={handleClick}>
+              <Users size={18} />
+              <span>Users</span>
+            </Link>
+          </Button>
+          
+          <Button 
+            variant={isActive('/roles') ? "default" : buttonVariant} 
+            className={buttonClass}
+            asChild
+          >
+            <Link to="/roles" className="flex items-center gap-2" onClick={handleClick}>
+              <Shield size={18} />
+              <span>Roles</span>
+            </Link>
+          </Button>
+          
+          <Button 
+            variant={isActive('/system') ? "default" : buttonVariant} 
+            className={buttonClass}
+            asChild
+          >
+            <Link to="/system" className="flex items-center gap-2" onClick={handleClick}>
+              <Database size={18} />
+              <span>System</span>
+            </Link>
+          </Button>
+        </>
       )}
 
       <Button 

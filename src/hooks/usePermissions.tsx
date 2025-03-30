@@ -74,8 +74,8 @@ export function usePermissions(userProfile: UserProfile | null) {
   // Get the user's role
   const userRole = userProfile.role as UserRole;
 
-  // Always grant admin access to admin panel
-  if (userRole === 'admin') {
+  // Always grant all permissions to admin users
+  if (userRole === 'admin' || userRole === 'director') {
     return {
       canViewRequests: true,
       canAssignRequests: true,
@@ -133,17 +133,6 @@ export function usePermissions(userProfile: UserProfile | null) {
         canAccessAnalytics: true,
         canAccessFieldReports: true,
         canAccessAdminPanel: false,
-      };
-    case 'director':
-      return {
-        canViewRequests: true,
-        canAssignRequests: false,
-        canReviewRequests: true,
-        canApproveRequests: true,
-        canManageStaff: true,
-        canAccessAnalytics: true,
-        canAccessFieldReports: true,
-        canAccessAdminPanel: false, // Director no longer has admin access
       };
     case 'ceo':
       return {
