@@ -20,14 +20,16 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
   // Check if we're in development mode
   const isDevelopment = import.meta.env.DEV;
   
-  // Check if the user has the required permission
-  const hasPermission = permissions[permission];
+  // Special case for admin panel
+  const isAdminPage = permission === 'canAccessAdminPanel';
+  const hasPermission = isAdminPage ? userProfile?.role === 'admin' : permissions[permission];
   
   // Log permission check for debugging
   console.log(`Permission check for ${permission}: ${hasPermission}`, {
     userRole: userProfile?.role,
     permissionValue: permissions[permission],
-    isDevelopment
+    isDevelopment,
+    isAdminPage
   });
   
   useEffect(() => {

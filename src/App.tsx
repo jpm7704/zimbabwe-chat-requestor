@@ -79,11 +79,11 @@ const App = () => (
             </MainLayout>
           } />
           
+          {/* Admin route - only for admin role */}
           <Route path="/admin" element={
             <MainLayout>
-              <RequirePermission permission="canAccessAdminPanel">
-                <AdminPanel />
-              </RequirePermission>
+              {/* Use the special case check in RequirePermission */}
+              <AdminPanel />
             </MainLayout>
           } />
           

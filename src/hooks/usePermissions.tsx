@@ -2,7 +2,7 @@
 import { UserProfile } from "./useAuth";
 
 // Define role types for better type safety
-export type UserRole = 'user' | 'field_officer' | 'project_officer' | 'assistant_project_officer' | 'head_of_programs' | 'director' | 'ceo' | 'patron';
+export type UserRole = 'user' | 'field_officer' | 'project_officer' | 'assistant_project_officer' | 'head_of_programs' | 'director' | 'ceo' | 'patron' | 'admin';
 
 // Define permission sets for different features
 export interface Permissions {
@@ -57,6 +57,17 @@ export function usePermissions(userProfile: UserProfile | null) {
 
   // Define permissions based on role
   switch (userRole) {
+    case 'admin':
+      return {
+        canViewRequests: true,
+        canAssignRequests: true,
+        canReviewRequests: true,
+        canApproveRequests: true,
+        canManageStaff: true,
+        canAccessAnalytics: true,
+        canAccessFieldReports: true,
+        canAccessAdminPanel: true,
+      };
     case 'field_officer':
       return {
         canViewRequests: true,
@@ -110,7 +121,7 @@ export function usePermissions(userProfile: UserProfile | null) {
         canManageStaff: true,
         canAccessAnalytics: true,
         canAccessFieldReports: true,
-        canAccessAdminPanel: true, // Only director has admin access
+        canAccessAdminPanel: false, // Director no longer has admin access
       };
     case 'ceo':
       return {
@@ -121,7 +132,7 @@ export function usePermissions(userProfile: UserProfile | null) {
         canManageStaff: false,
         canAccessAnalytics: true,
         canAccessFieldReports: true,
-        canAccessAdminPanel: false, // CEO no longer has admin access
+        canAccessAdminPanel: false,
       };
     case 'patron':
       return {
@@ -132,7 +143,7 @@ export function usePermissions(userProfile: UserProfile | null) {
         canManageStaff: true,
         canAccessFieldReports: true,
         canAccessAnalytics: true,
-        canAccessAdminPanel: true, // Patron still has admin access
+        canAccessAdminPanel: false,
       };
     case 'user':
     default:

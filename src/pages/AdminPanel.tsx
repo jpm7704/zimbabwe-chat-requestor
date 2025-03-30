@@ -22,16 +22,17 @@ const AdminPanel = () => {
       return;
     }
     
-    if (!permissions.canAccessAdminPanel) {
+    // Only allow users with admin role
+    if (userProfile?.role !== 'admin') {
       toast({
         title: "Access Denied",
-        description: "You don't have permission to access the Admin Panel.",
+        description: "Only administrators can access this page.",
         variant: "destructive",
       });
       navigate('/dashboard');
       return;
     }
-  }, [isAuthenticated, permissions, navigate, toast]);
+  }, [isAuthenticated, userProfile, navigate, toast]);
 
   // Sample data for chart
   const systemActivityData = [

@@ -130,8 +130,8 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {/* Admin Panel - Only visible to users with canAccessAdminPanel permission */}
-      {permissions.canAccessAdminPanel && (
+      {/* Admin Panel - Only visible to users with the admin role */}
+      {userProfile?.role === 'admin' && (
         <Button 
           variant={isActive('/admin') ? "default" : buttonVariant} 
           className={buttonClass}
