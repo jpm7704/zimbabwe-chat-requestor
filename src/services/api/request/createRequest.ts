@@ -11,6 +11,7 @@ export const createRequest = async (
     type: RequestType;
     title: string;
     description: string;
+    isEnquiry?: boolean; // Added isEnquiry as an optional parameter
   }
 ): Promise<{ requestId: string, ticketNumber: string } | null> => {
   try {
@@ -31,7 +32,8 @@ export const createRequest = async (
         title: requestData.title,
         description: requestData.description,
         status: 'submitted' as RequestStatus,
-        ticket_number: 'PENDING' // This will be replaced by the trigger
+        ticket_number: 'PENDING', // This will be replaced by the trigger
+        is_enquiry: requestData.isEnquiry || false // Store the enquiry flag in the database
       })
       .select('id, ticket_number')
       .single();
