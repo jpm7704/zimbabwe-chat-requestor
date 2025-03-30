@@ -6,13 +6,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit, Plus, UserPlus, Shield, ShieldCheck } from "lucide-react";
+import { Edit, Plus, UserPlus, Shield, ShieldCheck, AlertTriangle, InfoIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
 
 const StaffManagement = () => {
   const { userProfile, isAuthenticated } = useAuth();
@@ -21,6 +20,7 @@ const StaffManagement = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<'policy' | 'fetch' | null>(null);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [newRole, setNewRole] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -43,6 +43,7 @@ const StaffManagement = () => {
       try {
         setLoading(true);
         setError(null);
+        setErrorType(null);
         
         // First check if the table exists and is accessible
         const { error: checkError } = await supabase
@@ -52,8 +53,12 @@ const StaffManagement = () => {
         
         if (checkError) {
           console.error("Error accessing user_profiles table:", checkError);
-          if (checkError.code === '42P17') { // Infinite recursion in policy
-            setError("Database policy error detected. This might be due to incorrectly configured Row Level Security policies.");
+          
+          // Check for specific types of errors
+          if (checkError.message?.includes('infinite recursion') || 
+              checkError.code === '42P17') { // Infinite recursion in policy
+            setErrorType('policy');
+            setError("Database policy error detected. The Row Level Security (RLS) policies on the user_profiles table need to be fixed.");
             setUsers([]);
             return;
           }
@@ -64,7 +69,11 @@ const StaffManagement = () => {
           .select('*')
           .order('role', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+          setErrorType('fetch');
+          throw error;
+        }
+        
         setUsers(data || []);
         
         // If we successfully queried but got no users, set a specific message
@@ -72,9 +81,10 @@ const StaffManagement = () => {
           setError("No users found in the system. You can add staff members to get started.");
         }
         
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching users:", error);
-        setError("Failed to load user data. Please check the database connection and policies.");
+        setErrorType('fetch');
+        setError(error.message || "Failed to load user data. Please check the database connection and policies.");
         toast({
           title: "Error",
           description: "Failed to load user data",
@@ -108,15 +118,15 @@ const StaffManagement = () => {
       
       toast({
         title: "Role updated",
-        description: `User ${selectedUser.first_name} ${selectedUser.last_name}'s role has been updated to ${newRole}`,
+        description: `User ${selectedUser.first_name || selectedUser.name || ''} ${selectedUser.last_name || ''}'s role has been updated to ${newRole}`,
       });
       
       setDialogOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating role:", error);
       toast({
         title: "Error",
-        description: "Failed to update user role",
+        description: error.message || "Failed to update user role",
         variant: "destructive"
       });
     }
@@ -172,7 +182,27 @@ const StaffManagement = () => {
     </div>
   );
 
-  // Render error state
+  // Render policy error state
+  const renderPolicyErrorState = () => (
+    <Alert variant="destructive" className="mb-6">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>Database Policy Error</AlertTitle>
+      <AlertDescription className="space-y-4">
+        <p>{error}</p>
+        <div className="bg-muted p-4 rounded-md text-sm">
+          <p className="font-medium mb-2">Possible Solution:</p>
+          <p>This error occurs when a Row Level Security (RLS) policy creates an infinite recursion by referencing the same table it's protecting.</p>
+          <p className="mt-2">To fix this issue:</p>
+          <ol className="list-decimal pl-5 mt-2 space-y-1">
+            <li>Create a security definer function that safely queries the user_profiles table</li>
+            <li>Update the RLS policy to use this function instead of directly querying the table</li>
+          </ol>
+        </div>
+      </AlertDescription>
+    </Alert>
+  );
+
+  // Render generic error state
   const renderErrorState = () => (
     <Alert variant="destructive" className="mb-6">
       <AlertTriangle className="h-4 w-4" />
@@ -182,6 +212,22 @@ const StaffManagement = () => {
       </AlertDescription>
     </Alert>
   );
+  
+  // Render development mode notice
+  const renderDevModeNotice = () => {
+    const isDevelopment = import.meta.env.DEV;
+    if (!isDevelopment) return null;
+    
+    return (
+      <Alert className="mb-6">
+        <InfoIcon className="h-4 w-4" />
+        <AlertTitle>Development Mode</AlertTitle>
+        <AlertDescription>
+          You're currently in development mode. All permissions are granted regardless of user role.
+        </AlertDescription>
+      </Alert>
+    );
+  };
 
   return (
     <div className="container px-4 mx-auto max-w-6xl py-8">
@@ -199,7 +245,8 @@ const StaffManagement = () => {
           </Button>
         </div>
 
-        {error && renderErrorState()}
+        {renderDevModeNotice()}
+        {errorType === 'policy' ? renderPolicyErrorState() : error ? renderErrorState() : null}
 
         <Card>
           <CardHeader>
