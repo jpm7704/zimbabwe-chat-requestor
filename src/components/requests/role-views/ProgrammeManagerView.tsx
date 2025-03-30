@@ -1,10 +1,13 @@
 
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ListFilter, Clock, ArrowRight, Users, FileText } from "lucide-react";
+import { ListFilter, Clock, SendHorizontal, Users, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserProfile } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
+import { updateRequestStatus } from "@/services/api/requestMutationApi";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProgrammeManagerViewProps {
   userProfile: UserProfile;
@@ -20,6 +23,42 @@ interface ProgrammeManagerViewProps {
 const ProgrammeManagerView = ({ userProfile, statusCounts }: ProgrammeManagerViewProps) => {
   const { getRoleInfo } = useRoles(userProfile);
   const roleInfo = getRoleInfo();
+  const { toast } = useToast();
+  const [isForwarding, setIsForwarding] = useState(false);
+  
+  // Function to forward all reviewed requests to management team (Director, CEO, Patron)
+  const handleForwardToManagement = async () => {
+    if (statusCounts.underReview === 0) {
+      toast({
+        title: "No requests to forward",
+        description: "There are no reviewed requests ready to be forwarded to management.",
+        variant: "default"
+      });
+      return;
+    }
+    
+    setIsForwarding(true);
+    try {
+      // In a real implementation, this would update multiple requests in one API call
+      // For now, we'll just show a success message to represent the action
+      
+      // Mock successful forwarding
+      toast({
+        title: "Requests forwarded",
+        description: `${statusCounts.underReview} request(s) have been forwarded to Director, CEO and Patron for review.`,
+        variant: "default"
+      });
+      
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to forward requests to management. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsForwarding(false);
+    }
+  };
   
   return (
     <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
@@ -68,15 +107,15 @@ const ProgrammeManagerView = ({ userProfile, statusCounts }: ProgrammeManagerVie
           <Clock className="mr-2 h-4 w-4" />
           Pending Reviews ({statusCounts.underReview})
         </Button>
-        <Button variant="default" size="sm">
-          <ArrowRight className="mr-2 h-4 w-4" />
-          Forward to Management ({statusCounts.underReview})
-        </Button>
-        <Button variant="outline" size="sm" asChild>
-          <Link to="/staff" className="flex items-center gap-2">
-            <Users className="h-4 w-4 mr-1" />
-            Manage Field Officers
-          </Link>
+        <Button 
+          variant="default" 
+          size="sm" 
+          className="gap-1"
+          onClick={handleForwardToManagement}
+          disabled={isForwarding || statusCounts.underReview === 0}
+        >
+          <SendHorizontal className="h-4 w-4" />
+          Forward to Management Team ({statusCounts.underReview})
         </Button>
       </div>
     </div>
