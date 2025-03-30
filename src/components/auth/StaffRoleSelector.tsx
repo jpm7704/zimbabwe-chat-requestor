@@ -12,7 +12,8 @@ const STAFF_ROLES = [
   { key: "head_of_programs", name: "Head of Programs", description: "Oversees all programs" },
   { key: "director", name: "Director", description: "Review & Approval Authority" },
   { key: "ceo", name: "CEO", description: "Executive Approval Authority" },
-  { key: "patron", name: "Patron", description: "Final Endorsement Authority" }
+  { key: "patron", name: "Patron", description: "Final Endorsement Authority" },
+  { key: "admin", name: "Administrator", description: "System Administrator" }
 ];
 
 interface StaffRoleSelectorProps {
