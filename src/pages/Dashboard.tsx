@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/label" // Properly importing Label
 import {
   Popover,
   PopoverContent,
@@ -992,5 +992,4 @@ import {
   MultiSelectDemo7,
 } from "@/components/ui/multi-select-demo7"
 import {
-  InputWithButtonDemo7,
-}
+  InputWithButtonDemo
