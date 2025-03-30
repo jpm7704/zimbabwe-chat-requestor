@@ -7,7 +7,7 @@ import { RequestTypeInfo, RequestType } from "@/types";
 import { getRequestTypeInfo } from "@/services/requestService";
 import DocumentUpload from "./DocumentUpload";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Stethoscope, GraduationCap, HelpCircle } from "lucide-react";
+import { Stethoscope, GraduationCap, HelpCircle, Home as HomeIcon, Utensils as UtensilsIcon, Droplet as DropletIcon, Users as UsersIcon, AlertTriangle } from "lucide-react";
 
 interface NewRequestFormProps {
   requestForm: {
@@ -80,10 +80,10 @@ const NewRequestForm = ({
     
     if (isEnquiry) {
       return [
-        { value: "shelter_assistance", label: "Shelter Assistance", icon: <Home className="h-4 w-4 mr-2" /> },
-        { value: "food_assistance", label: "Food Assistance", icon: <Utensils className="h-4 w-4 mr-2" /> },
-        { value: "water_sanitation", label: "Water & Sanitation", icon: <Droplet className="h-4 w-4 mr-2" /> },
-        { value: "community_development", label: "Community Development", icon: <Users className="h-4 w-4 mr-2" /> },
+        { value: "shelter_assistance", label: "Shelter Assistance", icon: <HomeIcon className="h-4 w-4 mr-2" /> },
+        { value: "food_assistance", label: "Food Assistance", icon: <UtensilsIcon className="h-4 w-4 mr-2" /> },
+        { value: "water_sanitation", label: "Water & Sanitation", icon: <DropletIcon className="h-4 w-4 mr-2" /> },
+        { value: "community_development", label: "Community Development", icon: <UsersIcon className="h-4 w-4 mr-2" /> },
         { value: "disaster_relief", label: "Emergency Relief", icon: <AlertTriangle className="h-4 w-4 mr-2" /> },
         { value: "general_enquiry", label: "General Enquiry", icon: <HelpCircle className="h-4 w-4 mr-2" /> },
       ];
