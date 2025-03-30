@@ -276,6 +276,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_staff: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
       get_available_staff_roles: {
         Args: Record<PropertyKey, never>
         Returns: {
