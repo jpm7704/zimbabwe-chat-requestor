@@ -17,7 +17,6 @@ import NotFound from "./pages/NotFound";
 import FieldWork from "./pages/FieldWork";
 import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
-import AdminPanel from "./pages/AdminPanel";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import ApprovalsPage from "./pages/ApprovalsPage";
@@ -93,17 +92,6 @@ const App = () => {
               </MainLayout>
             } />
             
-            {/* Admin route - dev admin has automatic access */}
-            <Route path="/admin" element={
-              <MainLayout>
-                {isDevAdmin ? <AdminPanel /> : (
-                  <RequirePermission permission="canAccessAdminPanel">
-                    <AdminPanel />
-                  </RequirePermission>
-                )}
-              </MainLayout>
-            } />
-            
             <Route path="/approvals" element={
               <MainLayout>
                 {isDevAdmin ? <ApprovalsPage /> : (
@@ -113,6 +101,9 @@ const App = () => {
                 )}
               </MainLayout>
             } />
+            
+            {/* Redirect admin page to dashboard */}
+            <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
             
             {/* Fallback route for not found pages */}
             <Route path="*" element={<NotFound />} />

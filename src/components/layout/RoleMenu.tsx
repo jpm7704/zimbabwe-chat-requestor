@@ -7,7 +7,6 @@ import {
   Clipboard, 
   BarChart3, 
   FileSpreadsheet, 
-  ShieldCheck,
   Settings,
   LayoutDashboard,
   Check,
@@ -126,20 +125,6 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
           <Link to="/approvals" className="flex items-center gap-2" onClick={handleClick}>
             <UserCheck size={18} />
             <span>Approvals</span>
-          </Link>
-        </Button>
-      )}
-      
-      {/* Admin Panel - Only visible to users with the admin role */}
-      {userProfile?.role === 'admin' && (
-        <Button 
-          variant={isActive('/admin') ? "default" : buttonVariant} 
-          className={buttonClass}
-          asChild
-        >
-          <Link to="/admin" className="flex items-center gap-2" onClick={handleClick}>
-            <ShieldCheck size={18} />
-            <span>Admin</span>
           </Link>
         </Button>
       )}

@@ -19,6 +19,10 @@ export interface Permissions {
 export function usePermissions(userProfile: UserProfile | null) {
   // Check if we're in development mode
   const isDevelopment = import.meta.env.DEV;
+  
+  // Check for dev admin role
+  const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
+  const isDevAdmin = isDevelopment && devRole === 'admin';
 
   // Default permissions (unauthenticated user)
   const defaultPermissions: Permissions = {
@@ -32,7 +36,22 @@ export function usePermissions(userProfile: UserProfile | null) {
     canAccessAdminPanel: false,
   };
 
-  // Development mode: always grant ALL permissions for testing easier
+  // Development mode admin role: always grant ALL permissions
+  if (isDevAdmin) {
+    console.log('Development mode admin role: granting all permissions');
+    return {
+      canViewRequests: true,
+      canAssignRequests: true,
+      canReviewRequests: true,
+      canApproveRequests: true,
+      canManageStaff: true,
+      canAccessAnalytics: true,
+      canAccessFieldReports: true,
+      canAccessAdminPanel: true,
+    };
+  }
+  
+  // Development mode: grant all permissions for testing
   if (isDevelopment) {
     console.log('Development mode: granting all permissions for testing');
     return {
@@ -55,19 +74,22 @@ export function usePermissions(userProfile: UserProfile | null) {
   // Get the user's role
   const userRole = userProfile.role as UserRole;
 
+  // Always grant admin access to admin panel
+  if (userRole === 'admin') {
+    return {
+      canViewRequests: true,
+      canAssignRequests: true,
+      canReviewRequests: true,
+      canApproveRequests: true,
+      canManageStaff: true,
+      canAccessAnalytics: true,
+      canAccessFieldReports: true,
+      canAccessAdminPanel: true,
+    };
+  }
+
   // Define permissions based on role
   switch (userRole) {
-    case 'admin':
-      return {
-        canViewRequests: true,
-        canAssignRequests: true,
-        canReviewRequests: true,
-        canApproveRequests: true,
-        canManageStaff: true,
-        canAccessAnalytics: true,
-        canAccessFieldReports: true,
-        canAccessAdminPanel: true,
-      };
     case 'field_officer':
       return {
         canViewRequests: true,
