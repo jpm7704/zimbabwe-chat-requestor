@@ -16,6 +16,7 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
+  const isHomePage = location.pathname === "/";
   
   // Scroll to top on route change
   useEffect(() => {
@@ -46,7 +47,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     <div className="min-h-screen flex flex-col w-full">
       <Navbar />
       <div className="flex flex-col min-h-screen flex-1">
-        <main className="flex-grow pt-24 px-4 container mx-auto max-w-5xl">
+        <main className={`flex-grow ${isHomePage ? "" : "pt-24"} px-4 container mx-auto max-w-5xl`}>
           {children}
         </main>
         <Footer />

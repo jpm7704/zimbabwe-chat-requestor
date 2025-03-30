@@ -32,7 +32,13 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/staff-verification" element={<StaffVerification />} />
+          
+          {/* Routes that should be wrapped in MainLayout */}
           <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
           <Route path="/submit" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
           <Route path="/enquiry" element={<MainLayout><EnquiryPage /></MainLayout>} />
@@ -40,7 +46,6 @@ const App = () => (
           <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
           <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
           <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
-          <Route path="/staff-verification" element={<StaffVerification />} />
           
           {/* Role-specific routes with permission guards */}
           <Route path="/field-work" element={
@@ -83,8 +88,6 @@ const App = () => (
             </MainLayout>
           } />
           
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
