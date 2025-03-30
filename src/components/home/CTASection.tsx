@@ -6,6 +6,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
 const CTASection = () => {
   const { isAuthenticated } = useAuth();
@@ -49,7 +55,7 @@ const CTASection = () => {
           </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
               <Stethoscope className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-3">Medical Assistance</h3>
               <p className="text-muted-foreground mb-4">
@@ -65,7 +71,7 @@ const CTASection = () => {
               </Button>
             </div>
             
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
               <GraduationCap className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-3">Educational Support</h3>
               <p className="text-muted-foreground mb-4">
@@ -96,80 +102,155 @@ const CTASection = () => {
             
             <CollapsibleContent className="mt-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
                   <Home className="h-10 w-10 text-primary mx-auto mb-3" />
                   <h3 className="text-lg font-semibold mb-2">Shelter Assistance</h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     Housing support, home repairs, and emergency shelter services.
                   </p>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                      <AccordionTrigger className="text-sm py-2">Enquiry Process</AccordionTrigger>
+                      <AccordionContent>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Shelter assistance enquiries follow a different process:
+                          <ul className="list-disc pl-4 mt-1 space-y-1">
+                            <li>Initial assessment by our housing specialists</li>
+                            <li>Site visit by regional officers</li>
+                            <li>Support recommendation based on need</li>
+                          </ul>
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                   <Button 
                     size="sm"
                     variant="outline"
-                    className="w-full"
+                    className="w-full mt-2"
                     onClick={() => handleEnquiryClick("shelter_assistance")}
                   >
                     Make an Enquiry
                   </Button>
                 </div>
                 
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
                   <Utensils className="h-10 w-10 text-primary mx-auto mb-3" />
                   <h3 className="text-lg font-semibold mb-2">Food Assistance</h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     Emergency food supplies and nutrition support programs.
                   </p>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                      <AccordionTrigger className="text-sm py-2">Enquiry Process</AccordionTrigger>
+                      <AccordionContent>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Food assistance enquiries are processed through:
+                          <ul className="list-disc pl-4 mt-1 space-y-1">
+                            <li>Nutritional needs assessment</li>
+                            <li>Family situation evaluation</li>
+                            <li>Connection to local food resources</li>
+                          </ul>
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                   <Button 
                     size="sm"
                     variant="outline"
-                    className="w-full"
+                    className="w-full mt-2"
                     onClick={() => handleEnquiryClick("food_assistance")}
                   >
                     Make an Enquiry
                   </Button>
                 </div>
                 
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
                   <Droplet className="h-10 w-10 text-primary mx-auto mb-3" />
                   <h3 className="text-lg font-semibold mb-2">Water & Sanitation</h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     Clean water access, sanitation facilities, and hygiene education.
                   </p>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                      <AccordionTrigger className="text-sm py-2">Enquiry Process</AccordionTrigger>
+                      <AccordionContent>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Water & sanitation enquiries involve:
+                          <ul className="list-disc pl-4 mt-1 space-y-1">
+                            <li>Community water source assessment</li>
+                            <li>Sanitation facilities evaluation</li>
+                            <li>Educational needs determination</li>
+                          </ul>
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                   <Button 
                     size="sm"
                     variant="outline"
-                    className="w-full"
+                    className="w-full mt-2"
                     onClick={() => handleEnquiryClick("water_sanitation")}
                   >
                     Make an Enquiry
                   </Button>
                 </div>
                 
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
                   <Users className="h-10 w-10 text-primary mx-auto mb-3" />
                   <h3 className="text-lg font-semibold mb-2">Community Development</h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     Support for community infrastructure and development initiatives.
                   </p>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                      <AccordionTrigger className="text-sm py-2">Enquiry Process</AccordionTrigger>
+                      <AccordionContent>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Community development enquiries require:
+                          <ul className="list-disc pl-4 mt-1 space-y-1">
+                            <li>Detailed project proposal submission</li>
+                            <li>Community stakeholder identification</li>
+                            <li>Impact and sustainability assessment</li>
+                          </ul>
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                   <Button 
                     size="sm"
                     variant="outline"
-                    className="w-full"
+                    className="w-full mt-2"
                     onClick={() => handleEnquiryClick("community_development")}
                   >
                     Make an Enquiry
                   </Button>
                 </div>
                 
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
                   <AlertTriangle className="h-10 w-10 text-primary mx-auto mb-3" />
                   <h3 className="text-lg font-semibold mb-2">Emergency Relief</h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     Assistance after natural disasters or other emergencies.
                   </p>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                      <AccordionTrigger className="text-sm py-2">Enquiry Process</AccordionTrigger>
+                      <AccordionContent>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Emergency relief enquiries are expedited through:
+                          <ul className="list-disc pl-4 mt-1 space-y-1">
+                            <li>Immediate needs assessment</li>
+                            <li>Disaster impact documentation</li>
+                            <li>Coordination with local relief efforts</li>
+                          </ul>
+                        </p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                   <Button 
                     size="sm"
                     variant="outline"
-                    className="w-full"
+                    className="w-full mt-2"
                     onClick={() => handleEnquiryClick("disaster_relief")}
                   >
                     Make an Enquiry
