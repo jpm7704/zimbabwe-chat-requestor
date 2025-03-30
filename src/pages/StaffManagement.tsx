@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit, Plus, UserPlus, Shield, ShieldCheck, AlertTriangle, InfoIcon } from "lucide-react";
+import { Edit, Plus, UserPlus, Shield, ShieldCheck, InfoIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
@@ -20,7 +20,6 @@ const StaffManagement = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [errorType, setErrorType] = useState<'policy' | 'fetch' | null>(null);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [newRole, setNewRole] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -43,26 +42,6 @@ const StaffManagement = () => {
       try {
         setLoading(true);
         setError(null);
-        setErrorType(null);
-        
-        // First check if the table exists and is accessible
-        const { error: checkError } = await supabase
-          .from('user_profiles')
-          .select('count')
-          .limit(1);
-        
-        if (checkError) {
-          console.error("Error accessing user_profiles table:", checkError);
-          
-          // Check for specific types of errors
-          if (checkError.message?.includes('infinite recursion') || 
-              checkError.code === '42P17') { // Infinite recursion in policy
-            setErrorType('policy');
-            setError("Database policy error detected. The Row Level Security (RLS) policies on the user_profiles table need to be fixed.");
-            setUsers([]);
-            return;
-          }
-        }
         
         const { data, error } = await supabase
           .from('user_profiles')
@@ -70,7 +49,6 @@ const StaffManagement = () => {
           .order('role', { ascending: false });
         
         if (error) {
-          setErrorType('fetch');
           throw error;
         }
         
@@ -83,8 +61,7 @@ const StaffManagement = () => {
         
       } catch (error: any) {
         console.error("Error fetching users:", error);
-        setErrorType('fetch');
-        setError(error.message || "Failed to load user data. Please check the database connection and policies.");
+        setError(error.message || "Failed to load user data. Please check the database connection.");
         toast({
           title: "Error",
           description: "Failed to load user data",
@@ -182,30 +159,9 @@ const StaffManagement = () => {
     </div>
   );
 
-  // Render policy error state
-  const renderPolicyErrorState = () => (
-    <Alert variant="destructive" className="mb-6">
-      <AlertTriangle className="h-4 w-4" />
-      <AlertTitle>Database Policy Error</AlertTitle>
-      <AlertDescription className="space-y-4">
-        <p>{error}</p>
-        <div className="bg-muted p-4 rounded-md text-sm">
-          <p className="font-medium mb-2">Possible Solution:</p>
-          <p>This error occurs when a Row Level Security (RLS) policy creates an infinite recursion by referencing the same table it's protecting.</p>
-          <p className="mt-2">To fix this issue:</p>
-          <ol className="list-decimal pl-5 mt-2 space-y-1">
-            <li>Create a security definer function that safely queries the user_profiles table</li>
-            <li>Update the RLS policy to use this function instead of directly querying the table</li>
-          </ol>
-        </div>
-      </AlertDescription>
-    </Alert>
-  );
-
   // Render generic error state
   const renderErrorState = () => (
     <Alert variant="destructive" className="mb-6">
-      <AlertTriangle className="h-4 w-4" />
       <AlertTitle>Error</AlertTitle>
       <AlertDescription>
         {error}
@@ -246,7 +202,7 @@ const StaffManagement = () => {
         </div>
 
         {renderDevModeNotice()}
-        {errorType === 'policy' ? renderPolicyErrorState() : error ? renderErrorState() : null}
+        {error ? renderErrorState() : null}
 
         <Card>
           <CardHeader>
