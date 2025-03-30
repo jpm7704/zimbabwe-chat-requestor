@@ -16,6 +16,7 @@ const DevRoleSwitcher = () => {
     { value: 'director', label: 'Director' },
     { value: 'ceo', label: 'CEO' },
     { value: 'patron', label: 'Patron' },
+    { value: 'admin', label: 'Administrator' },
   ];
 
   const handleRoleChange = (role: string) => {
