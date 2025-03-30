@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -6,7 +7,6 @@ import {
   Clipboard, 
   BarChart3, 
   FileSpreadsheet, 
-  Users, 
   ShieldCheck,
   Settings,
   LayoutDashboard,
@@ -126,19 +126,6 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
           <Link to="/approvals" className="flex items-center gap-2" onClick={handleClick}>
             <UserCheck size={18} />
             <span>Approvals</span>
-          </Link>
-        </Button>
-      )}
-      
-      {(permissions.canManageStaff) && (
-        <Button 
-          variant={isActive('/staff') ? "default" : buttonVariant} 
-          className={buttonClass}
-          asChild
-        >
-          <Link to="/staff" className="flex items-center gap-2" onClick={handleClick}>
-            <Users size={18} />
-            <span>Staff</span>
           </Link>
         </Button>
       )}

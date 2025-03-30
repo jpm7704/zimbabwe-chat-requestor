@@ -17,7 +17,6 @@ import NotFound from "./pages/NotFound";
 import FieldWork from "./pages/FieldWork";
 import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
-import StaffManagement from "./pages/StaffManagement";
 import AdminPanel from "./pages/AdminPanel";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
@@ -64,14 +63,6 @@ const App = () => (
             <MainLayout>
               <RequirePermission permission="canAccessFieldReports">
                 <Reports />
-              </RequirePermission>
-            </MainLayout>
-          } />
-          
-          <Route path="/staff" element={
-            <MainLayout>
-              <RequirePermission permission="canManageStaff">
-                <StaffManagement />
               </RequirePermission>
             </MainLayout>
           } />
