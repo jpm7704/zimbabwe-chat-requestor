@@ -17,16 +17,23 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
   const navigate = useNavigate();
   const { toast } = useToast();
   
+  // Check if we're in development mode
+  const isDevelopment = import.meta.env.DEV;
+  
   // Check if the user has the required permission
   const hasPermission = permissions[permission];
   
   // Log permission check for debugging
   console.log(`Permission check for ${permission}: ${hasPermission}`, {
     userRole: userProfile?.role,
-    permissionValue: permissions[permission]
+    permissionValue: permissions[permission],
+    isDevelopment
   });
   
   useEffect(() => {
+    // In development mode, always allow access
+    if (isDevelopment) return;
+
     // If user doesn't have permission, redirect and show a toast
     if (!hasPermission) {
       toast({
@@ -36,7 +43,10 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
       });
       navigate(redirectTo);
     }
-  }, [hasPermission, navigate, redirectTo, toast, permission]);
+  }, [hasPermission, navigate, redirectTo, toast, permission, isDevelopment]);
+  
+  // In development mode, always render children
+  if (isDevelopment) return <>{children}</>;
   
   // Only render children if the user has permission
   return hasPermission ? <>{children}</> : null;

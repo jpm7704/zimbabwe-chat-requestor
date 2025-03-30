@@ -1,4 +1,3 @@
-
 import { UserProfile } from "./useAuth";
 
 // Define role types for better type safety
@@ -17,6 +16,9 @@ export interface Permissions {
 }
 
 export function usePermissions(userProfile: UserProfile | null) {
+  // Check if we're in development mode
+  const isDevelopment = import.meta.env.DEV;
+
   // Default permissions (unauthenticated user)
   const defaultPermissions: Permissions = {
     canViewRequests: false,
@@ -31,6 +33,20 @@ export function usePermissions(userProfile: UserProfile | null) {
 
   if (!userProfile || !userProfile.role) {
     return defaultPermissions;
+  }
+
+  // Development mode: grant ALL permissions
+  if (isDevelopment) {
+    return {
+      canViewRequests: true,
+      canAssignRequests: true,
+      canReviewRequests: true,
+      canApproveRequests: true,
+      canManageStaff: true,
+      canAccessAnalytics: true,
+      canAccessFieldReports: true,
+      canAccessAdminPanel: true,
+    };
   }
 
   // Get the user's role
