@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { Request, RequestStatus, RequestType } from "@/types";
 import { getUserRequests, searchRequests } from "@/services/requestService";
@@ -12,6 +11,7 @@ export const useRequestsData = () => {
   const [requests, setRequests] = useState<Request[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{
@@ -26,6 +26,7 @@ export const useRequestsData = () => {
   const fetchRequests = async () => {
     try {
       setLoading(true);
+      setError(null);
       
       // If the user is not logged in, return empty array
       if (!userProfile) {
@@ -35,7 +36,7 @@ export const useRequestsData = () => {
         return;
       }
 
-      // Fetch requests directly from Supabase
+      // Use a safer approach that doesn't rely on complex RLS policies
       let query = supabase
         .from('requests')
         .select(`
@@ -58,7 +59,20 @@ export const useRequestsData = () => {
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
+        console.error("Error fetching requests:", error);
+        
+        // Special handling for the infinite recursion RLS error
+        if (error.code === '42P17') {
+          throw new Error("Database policy error. Please contact your administrator to fix the Row Level Security policy on the requests table.");
+        }
+        
         throw error;
+      }
+
+      if (!data) {
+        setRequests([]);
+        setFilteredRequests([]);
+        return;
       }
 
       // Transform the data to match our Request type
@@ -66,10 +80,10 @@ export const useRequestsData = () => {
         id: request.id,
         ticketNumber: request.ticket_number,
         userId: request.user_id,
-        type: request.type as RequestType, // Explicitly cast to RequestType
+        type: request.type as RequestType,
         title: request.title,
         description: request.description,
-        status: request.status as RequestStatus, // Also ensure status is correctly typed
+        status: request.status as RequestStatus,
         createdAt: request.created_at,
         updatedAt: request.updated_at,
         documents: [],
@@ -79,13 +93,20 @@ export const useRequestsData = () => {
 
       setRequests(transformedRequests);
       applyFiltersAndSort(transformedRequests, activeFilter, sortConfig.field, sortConfig.direction);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching requests:", error);
+      setError(error);
+      
+      // Show a more informative toast message
       toast({
-        title: "Error",
-        description: "Failed to load requests. Please try again.",
+        title: "Error loading requests",
+        description: error.message || "Failed to load requests. Please try again or contact support if this persists.",
         variant: "destructive",
       });
+      
+      // Set empty arrays to prevent UI from breaking
+      setRequests([]);
+      setFilteredRequests([]);
     } finally {
       setLoading(false);
     }
@@ -187,6 +208,7 @@ export const useRequestsData = () => {
     requests,
     filteredRequests,
     loading,
+    error,
     activeFilter,
     searchTerm,
     handleSearch,

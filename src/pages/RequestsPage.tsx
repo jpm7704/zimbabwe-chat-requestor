@@ -17,6 +17,7 @@ const RequestsPage = () => {
   const {
     filteredRequests,
     loading,
+    error,
     activeFilter,
     searchTerm,
     handleSearch,
@@ -85,6 +86,7 @@ const RequestsPage = () => {
         requests={filteredRequests} 
         loading={loading} 
         searchTerm={searchTerm}
+        error={error}
       />
     </div>
   );
