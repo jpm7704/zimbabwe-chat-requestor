@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,10 +10,26 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Dashboard = () => {
-  const { user, userProfile, signOut } = useAuth();
+  const { userProfile, handleLogout } = useAuth();
   const navigate = useNavigate();
   const { getRoleInfo } = useRoles(userProfile);
   const roleInfo = getRoleInfo();
+
+  // Format the user's full name from first_name and last_name
+  const fullName = userProfile 
+    ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() 
+    : 'User';
+
+  // Get user initials for avatar
+  const getInitials = () => {
+    if (userProfile?.first_name && userProfile?.first_name.length > 0) {
+      return userProfile.first_name.charAt(0);
+    }
+    if (userProfile?.email && userProfile?.email.length > 0) {
+      return userProfile.email.charAt(0);
+    }
+    return 'U';
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -23,16 +39,16 @@ const Dashboard = () => {
         {/* User Profile Card */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle>Welcome, {userProfile?.name || user?.email || 'User'}</CardTitle>
+            <CardTitle>Welcome, {fullName}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center space-x-4 mb-4">
               <Avatar className="h-12 w-12">
-                <AvatarImage src={userProfile?.avatar_url || undefined} alt={userProfile?.name || "User"} />
-                <AvatarFallback>{userProfile?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}</AvatarFallback>
+                <AvatarImage src={userProfile?.avatar_url || undefined} alt={fullName} />
+                <AvatarFallback>{getInitials()}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                <p className="text-sm text-muted-foreground">{userProfile?.email}</p>
                 <Badge className={`mt-1 ${roleInfo.badgeClass}`}>{roleInfo.title}</Badge>
               </div>
             </div>
@@ -93,6 +109,9 @@ const Dashboard = () => {
                 Pending Approvals
               </Button>
             )}
+            <Button onClick={handleLogout} variant="outline" className="justify-start text-destructive hover:text-destructive">
+              Logout
+            </Button>
           </CardContent>
         </Card>
       </div>
