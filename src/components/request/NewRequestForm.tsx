@@ -7,7 +7,7 @@ import { RequestTypeInfo, RequestType } from "@/types";
 import { getRequestTypeInfo } from "@/services/requestService";
 import DocumentUpload from "./DocumentUpload";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Stethoscope, GraduationCap } from "lucide-react";
+import { Stethoscope, GraduationCap, HelpCircle } from "lucide-react";
 
 interface NewRequestFormProps {
   requestForm: {
@@ -27,6 +27,7 @@ interface NewRequestFormProps {
   handleRequestSubmit: (e: React.FormEvent) => void;
   requestTypeInfo: RequestTypeInfo | null;
   restrictedTypes?: RequestType[];
+  isEnquiry?: boolean;
 }
 
 const NewRequestForm = ({
@@ -38,7 +39,8 @@ const NewRequestForm = ({
   setShowNewRequest,
   handleRequestSubmit,
   requestTypeInfo,
-  restrictedTypes
+  restrictedTypes,
+  isEnquiry = false
 }: NewRequestFormProps) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,6 +77,18 @@ const NewRequestForm = ({
         restrictedTypes.includes(option.value as RequestType)
       );
     }
+    
+    if (isEnquiry) {
+      return [
+        { value: "shelter_assistance", label: "Shelter Assistance", icon: <Home className="h-4 w-4 mr-2" /> },
+        { value: "food_assistance", label: "Food Assistance", icon: <Utensils className="h-4 w-4 mr-2" /> },
+        { value: "water_sanitation", label: "Water & Sanitation", icon: <Droplet className="h-4 w-4 mr-2" /> },
+        { value: "community_development", label: "Community Development", icon: <Users className="h-4 w-4 mr-2" /> },
+        { value: "disaster_relief", label: "Emergency Relief", icon: <AlertTriangle className="h-4 w-4 mr-2" /> },
+        { value: "general_enquiry", label: "General Enquiry", icon: <HelpCircle className="h-4 w-4 mr-2" /> },
+      ];
+    }
+    
     return [];
   };
 
@@ -82,11 +96,13 @@ const NewRequestForm = ({
 
   return (
     <form onSubmit={handleRequestSubmit} className="space-y-6 animate-fade-in">
-      <h2 className="text-2xl font-serif font-semibold mb-6 text-elegant">Application Details</h2>
+      <h2 className="text-2xl font-serif font-semibold mb-6 text-elegant">
+        {isEnquiry ? "Enquiry Details" : "Application Details"}
+      </h2>
       
       <div>
         <label htmlFor="requestType" className="block text-sm font-medium font-serif mb-2">
-          Request Type <span className="text-destructive">*</span>
+          {isEnquiry ? "Enquiry Type" : "Request Type"} <span className="text-destructive">*</span>
         </label>
         <Select
           value={requestForm.type}
@@ -96,7 +112,7 @@ const NewRequestForm = ({
           }}
         >
           <SelectTrigger className="w-full font-serif">
-            <SelectValue placeholder="Select Request Type" />
+            <SelectValue placeholder={isEnquiry ? "Select Enquiry Type" : "Select Request Type"} />
           </SelectTrigger>
           <SelectContent>
             {typeOptions.map((option) => (
@@ -117,11 +133,11 @@ const NewRequestForm = ({
       
       <div>
         <label htmlFor="requestTitle" className="block text-sm font-medium font-serif mb-2">
-          Request Title <span className="text-destructive">*</span>
+          {isEnquiry ? "Enquiry Title" : "Request Title"} <span className="text-destructive">*</span>
         </label>
         <Input
           id="requestTitle"
-          placeholder="Enter a title for your request"
+          placeholder={isEnquiry ? "Enter a title for your enquiry" : "Enter a title for your request"}
           value={requestForm.title}
           onChange={(e) => setRequestForm(prev => ({ ...prev, title: e.target.value }))}
           required
@@ -135,7 +151,7 @@ const NewRequestForm = ({
         </label>
         <Textarea
           id="requestDescription"
-          placeholder="Describe your request in detail"
+          placeholder={isEnquiry ? "Describe your enquiry in detail" : "Describe your request in detail"}
           rows={6}
           value={requestForm.description}
           onChange={(e) => setRequestForm(prev => ({ ...prev, description: e.target.value }))}
@@ -144,12 +160,14 @@ const NewRequestForm = ({
         />
       </div>
       
-      <DocumentUpload 
-        requestTypeInfo={requestTypeInfo}
-        selectedFiles={selectedFiles}
-        handleFileChange={handleFileChange}
-        removeFile={removeFile}
-      />
+      {!isEnquiry && (
+        <DocumentUpload 
+          requestTypeInfo={requestTypeInfo}
+          selectedFiles={selectedFiles}
+          handleFileChange={handleFileChange}
+          removeFile={removeFile}
+        />
+      )}
       
       <div className="flex justify-end gap-4 pt-4 border-t border-primary/10">
         <Button
@@ -166,7 +184,7 @@ const NewRequestForm = ({
           disabled={submitting}
           className="font-serif px-6"
         >
-          {submitting ? 'Submitting...' : 'Submit Request'}
+          {submitting ? 'Submitting...' : isEnquiry ? 'Submit Enquiry' : 'Submit Request'}
         </Button>
       </div>
     </form>

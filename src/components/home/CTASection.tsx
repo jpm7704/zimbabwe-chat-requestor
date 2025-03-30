@@ -34,7 +34,7 @@ const CTASection = () => {
   
   const handleEnquiryClick = (type: string) => {
     if (isAuthenticated) {
-      navigate(`/submit?type=${type}&enquiry=true`);
+      navigate(`/enquiry?type=${type}`);
     } else {
       toast({
         title: "Authentication required",

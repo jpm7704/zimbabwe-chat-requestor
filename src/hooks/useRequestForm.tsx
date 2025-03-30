@@ -51,6 +51,14 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
     }
   }, [requestForm.type]);
 
+  // Update request form when isEnquiry changes
+  useEffect(() => {
+    setRequestForm(prev => ({
+      ...prev,
+      isEnquiry
+    }));
+  }, [isEnquiry]);
+
   const loadRequestTypeInfo = async (type: string) => {
     try {
       const info = await getRequestTypeInfo(type as any);
