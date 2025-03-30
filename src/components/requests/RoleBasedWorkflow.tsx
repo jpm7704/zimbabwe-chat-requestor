@@ -9,6 +9,7 @@ import RegularUserView from "./role-views/RegularUserView";
 import FallbackView from "./role-views/FallbackView";
 import CEOView from "./role-views/CEOView";
 import PatronView from "./role-views/PatronView";
+import ProjectOfficerView from "./role-views/ProjectOfficerView";
 
 interface RoleBasedWorkflowProps {
   userProfile: UserProfile | null;
@@ -34,7 +35,7 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
   
   // Project Officer View
   else if (roles.isProjectOfficer()) {
-    return <FieldOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
+    return <ProjectOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
   }
   
   // Assistant Project Officer / HOP View
