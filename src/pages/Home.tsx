@@ -1,16 +1,10 @@
 
-import HeroSection from "@/components/home/HeroSection";
-import SupportTypesSection from "@/components/home/SupportTypesSection";
-import ProcessSection from "@/components/home/ProcessSection";
-import CTASection from "@/components/home/CTASection";
+import React from 'react';
 
 const Home = () => {
   return (
-    <div className="animate-fade-in w-full">
-      <HeroSection />
-      <SupportTypesSection />
-      <ProcessSection />
-      <CTASection />
+    <div className="w-full min-h-screen flex items-center justify-center">
+      <h1 className="text-2xl text-muted-foreground">Home Page (Under Construction)</h1>
     </div>
   );
 };
