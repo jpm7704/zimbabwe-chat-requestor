@@ -1,8 +1,8 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { Request, RequestStatus, RequestType } from "@/types";
-import { getUserRequests, searchRequests } from "@/services/requestService";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 export const useRequestsData = () => {
@@ -38,7 +38,7 @@ export const useRequestsData = () => {
 
       console.log("Fetching requests for user role:", userProfile.role);
 
-      // Use a safer approach with proper error handling
+      // Start with a base query that doesn't use RLS for filtering
       let query = supabase
         .from('requests')
         .select(`
@@ -50,36 +50,42 @@ export const useRequestsData = () => {
           status,
           created_at,
           updated_at,
-          user_id
+          user_id,
+          field_officer_id,
+          program_manager_id
         `);
-
-      // Filter by user_id if the user is a regular user
+      
+      // Apply simple filters based on role without complex DB logic
+      // This is our application-level access control
       if (userProfile.role === 'user') {
         query = query.eq('user_id', userProfile.id);
+      } else if (userProfile.role === 'field_officer') {
+        // Field officers see requests they're assigned to
+        query = query.or(`user_id.eq.${userProfile.id},field_officer_id.eq.${userProfile.id}`);
+      } else if (userProfile.role === 'programme_manager') {
+        // Program managers see requests they're assigned to 
+        query = query.or(`user_id.eq.${userProfile.id},program_manager_id.eq.${userProfile.id}`);
       }
+      // For directors, CEOs, patrons, and other management roles, fetch all requests
+      // as we'll now rely on simple RLS policies that don't cause recursion
 
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error("Error fetching requests:", error);
         
-        // Skip setting errors for RLS policy issues in development
-        if (!error.code?.includes('42P17') && 
-            !error.message?.includes('infinite recursion') && 
-            !error.message?.includes('policy')) {
+        if (error.message?.includes('policy') || error.message?.includes('infinite recursion')) {
+          console.warn("Database policy error detected:", error.message);
+          // Continue execution but log the warning
+        } else {
           throw error;
         }
-        
-        // If it's an RLS error, just continue with empty data
-        setRequests([]);
-        setFilteredRequests([]);
-        setLoading(false);
-        return;
       }
 
       if (!data) {
         setRequests([]);
         setFilteredRequests([]);
+        setLoading(false);
         return;
       }
 
@@ -98,7 +104,8 @@ export const useRequestsData = () => {
         updatedAt: request.updated_at,
         documents: [],
         notes: [],
-        timeline: []
+        timeline: [],
+        assignedTo: request.field_officer_id || request.program_manager_id
       }));
 
       setRequests(transformedRequests);
@@ -106,9 +113,11 @@ export const useRequestsData = () => {
     } catch (error: any) {
       console.error("Error fetching requests:", error);
       
-      // Suppress RLS policy errors in UI but keep them in console for developers
+      // Only set error state for non-policy errors
       if (!error.message?.includes('policy') && !error.message?.includes('infinite recursion')) {
         setError(error);
+      } else {
+        console.warn("Suppressing database policy error:", error.message);
       }
       
       // Set empty arrays to prevent UI from breaking

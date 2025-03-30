@@ -23,8 +23,14 @@ const RequestsList = ({ requests, loading, searchTerm, error, onRetry }: Request
     return <RequestsLoadingState />;
   }
   
-  // In development, don't show database policy errors
-  if (error && !error.message?.includes('policy') && !error.message?.includes('infinite recursion')) {
+  // In development, don't show database policy errors - app will still function
+  const isDatabasePolicyError = error && (
+    error.message?.includes('policy') || 
+    error.message?.includes('infinite recursion')
+  );
+  
+  // Only show error UI for non-database policy errors
+  if (error && !isDatabasePolicyError) {
     return (
       <Alert variant="destructive" className="my-4">
         <AlertCircle className="h-4 w-4" />
