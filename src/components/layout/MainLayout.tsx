@@ -28,25 +28,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  // If user is authenticated, render the sidebar layout
-  if (isAuthenticated) {
-    return (
-      <SidebarProvider defaultOpen={true}>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <div className="flex flex-col min-h-screen flex-1">
-            <main className="flex-grow pt-24 px-4 container mx-auto max-w-5xl">
-              {children}
-            </main>
-            {/* Footer removed for authenticated users */}
-          </div>
-          <ThemeToggle />
-          <DevRoleSwitcher />
-        </div>
-      </SidebarProvider>
-    );
-  }
-  
   // For public pages like home, render the regular layout with footer
   if (isHomePage) {
     return (
@@ -61,6 +42,40 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <ThemeToggle />
         <DevRoleSwitcher />
       </div>
+    );
+  }
+
+  // For login/register pages, don't redirect if not authenticated
+  if (!isAuthenticated && (location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/staff-verification")) {
+    return (
+      <div className="min-h-screen flex flex-col w-full">
+        <Navbar />
+        <div className="flex flex-col min-h-screen flex-1">
+          <main className="flex-grow px-4 container mx-auto max-w-5xl">
+            {children}
+          </main>
+        </div>
+        <ThemeToggle />
+        <DevRoleSwitcher />
+      </div>
+    );
+  }
+  
+  // If user is authenticated, render the sidebar layout
+  if (isAuthenticated) {
+    return (
+      <SidebarProvider defaultOpen={true}>
+        <div className="min-h-screen flex w-full">
+          <AppSidebar />
+          <div className="flex flex-col min-h-screen flex-1">
+            <main className="flex-grow pt-24 px-4 container mx-auto max-w-5xl">
+              {children}
+            </main>
+          </div>
+          <ThemeToggle />
+          <DevRoleSwitcher />
+        </div>
+      </SidebarProvider>
     );
   }
   
