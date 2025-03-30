@@ -45,7 +45,8 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
     }
   }, [hasPermission, navigate, redirectTo, toast, permission, isDevelopment]);
   
-  // In development mode or if user has permission, render children
+  // Always render children - in both dev mode and when user has permission
+  // For production, the useEffect will handle redirecting if needed
   return <>{children}</>;
 };
 

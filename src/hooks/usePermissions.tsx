@@ -1,3 +1,4 @@
+
 import { UserProfile } from "./useAuth";
 
 // Define role types for better type safety
@@ -31,11 +32,7 @@ export function usePermissions(userProfile: UserProfile | null) {
     canAccessAdminPanel: false,
   };
 
-  if (!userProfile || !userProfile.role) {
-    return defaultPermissions;
-  }
-
-  // Development mode: grant ALL permissions
+  // Development mode: always grant ALL permissions to make testing easier
   if (isDevelopment) {
     return {
       canViewRequests: true,
@@ -47,6 +44,11 @@ export function usePermissions(userProfile: UserProfile | null) {
       canAccessFieldReports: true,
       canAccessAdminPanel: true,
     };
+  }
+
+  // If no userProfile or role, return default permissions
+  if (!userProfile || !userProfile.role) {
+    return defaultPermissions;
   }
 
   // Get the user's role
@@ -92,7 +94,7 @@ export function usePermissions(userProfile: UserProfile | null) {
         canViewRequests: true,
         canAssignRequests: true,
         canReviewRequests: true,
-        canApproveRequests: false, // Changed to false as HOP no longer makes final decision
+        canApproveRequests: false, 
         canManageStaff: true,
         canAccessAnalytics: true,
         canAccessFieldReports: true,
@@ -126,10 +128,10 @@ export function usePermissions(userProfile: UserProfile | null) {
         canAssignRequests: false,
         canReviewRequests: true,
         canApproveRequests: true,
-        canManageStaff: true, // Giving patron management access like director
-        canAccessAnalytics: true,
+        canManageStaff: true,
         canAccessFieldReports: true,
-        canAccessAdminPanel: true, // Giving patron admin access like director
+        canAccessAnalytics: true,
+        canAccessAdminPanel: true,
       };
     case 'user':
     default:
