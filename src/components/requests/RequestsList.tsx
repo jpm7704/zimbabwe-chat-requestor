@@ -3,7 +3,7 @@ import { Request } from "@/types";
 import RequestCard from "@/components/requests/RequestCard";
 import RequestsLoadingState from "@/components/requests/RequestsLoadingState";
 import EmptyRequestsState from "@/components/requests/EmptyRequestsState";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Settings, Database, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -24,8 +24,10 @@ const RequestsList = ({ requests, loading, searchTerm, error, onRetry }: Request
   }
   
   if (error) {
-    const isPolicyError = error.message?.includes("policy");
-    const isAuthError = error.message?.includes("auth") || error.message?.includes("authentication");
+    const isPolicyError = error.message?.includes("policy") || 
+                         error.message?.includes("infinite recursion");
+    const isAuthError = error.message?.includes("auth") || 
+                        error.message?.includes("authentication");
     
     return (
       <Alert variant="destructive" className="my-4">
@@ -35,10 +37,18 @@ const RequestsList = ({ requests, loading, searchTerm, error, onRetry }: Request
           <p>{error.message || "Failed to load requests. Please try again later."}</p>
           
           {isPolicyError && (
-            <div className="text-sm">
-              <p className="font-medium mb-1">Troubleshooting:</p>
-              <p>This appears to be a database configuration issue with Row Level Security policies.</p>
-              <p>The system administrator has been notified and is working on a solution.</p>
+            <div className="text-sm space-y-2">
+              <p className="font-medium mb-1">Database configuration issue:</p>
+              <p>We're experiencing a technical issue with our database security policies.</p>
+              <div className="flex flex-wrap gap-2 mt-3 bg-background/50 p-3 rounded-md border">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Database className="h-3 w-3" />
+                  <code className="bg-muted px-1 rounded">infinite recursion detected in policy for relation "requests"</code>
+                </div>
+                <p className="w-full text-xs text-muted-foreground">
+                  This is an administrative issue and our database team has been notified.
+                </p>
+              </div>
             </div>
           )}
           
@@ -57,15 +67,28 @@ const RequestsList = ({ requests, loading, searchTerm, error, onRetry }: Request
             </div>
           )}
           
-          {onRetry && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {onRetry && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onRetry}
+                className="gap-1"
+              >
+                <RefreshCw className="h-3 w-3" />
+                Try again
+              </Button>
+            )}
+            
             <Button 
               variant="outline" 
-              size="sm" 
-              onClick={onRetry}
+              size="sm"
+              className="gap-1" 
+              onClick={() => navigate("/")}
             >
-              Retry
+              Return to home
             </Button>
-          )}
+          </div>
         </AlertDescription>
       </Alert>
     );

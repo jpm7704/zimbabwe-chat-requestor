@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { Request, RequestStatus, RequestType } from "@/types";
 import { getUserRequests, searchRequests } from "@/services/requestService";
@@ -65,7 +66,9 @@ export const useRequestsData = () => {
         
         // Special handling for the infinite recursion RLS error
         if (error.code === '42P17' || error.message?.includes('infinite recursion')) {
-          throw new Error("Database policy error. Please contact your administrator to fix the Row Level Security policy on the requests table.");
+          throw new Error(
+            "Database policy error. The database administrator needs to fix the Row Level Security policy on the requests table. This is a configuration issue and not an application error."
+          );
         }
         
         throw error;
@@ -100,6 +103,16 @@ export const useRequestsData = () => {
     } catch (error: any) {
       console.error("Error fetching requests:", error);
       setError(error);
+      
+      // Show a more descriptive toast for database policy errors
+      if (error.message?.includes('policy')) {
+        toast({
+          title: "Database Configuration Issue",
+          description: "Our team has been notified. Please try again later or contact support if the issue persists.",
+          variant: "destructive",
+          duration: 8000,
+        });
+      }
       
       // Set empty arrays to prevent UI from breaking
       setRequests([]);

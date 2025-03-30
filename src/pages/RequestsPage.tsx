@@ -1,4 +1,3 @@
-
 import { useRequestsData } from "@/hooks/useRequestsData";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -10,6 +9,7 @@ import RequestsList from "@/components/requests/RequestsList";
 import RoleBasedWorkflow from "@/components/requests/RoleBasedWorkflow";
 import UserStatsSummary from "@/components/requests/UserStatsSummary";
 import { useToast } from "@/hooks/use-toast";
+import { Database } from "lucide-react";
 
 const RequestsPage = () => {
   const { userProfile, isAuthenticated } = useAuth();
@@ -28,14 +28,22 @@ const RequestsPage = () => {
     refreshRequests
   } = useRequestsData();
 
-  // Show toast if there's an error with database policies
+  // Show persistent toast if there's an error with database policies
   useEffect(() => {
-    if (error && error.message?.includes('policy')) {
+    if (error && (error.message?.includes('policy') || error.message?.includes('infinite recursion'))) {
       toast({
-        title: "Database configuration issue",
-        description: "Our team has been notified and is working to resolve this. Some features may be limited temporarily.",
+        title: "Database Configuration Issue",
+        description: "Our administrator is working to fix the database security policies. Some features may be limited temporarily.",
         variant: "destructive",
-        duration: 6000,
+        duration: 0, // Keep it visible until dismissed
+        action: (
+          <div className="flex flex-col gap-1 text-xs">
+            <div className="flex items-center gap-1">
+              <Database className="h-3 w-3" />
+              <span className="font-mono bg-background/50 px-1 rounded">RLS policy error</span>
+            </div>
+          </div>
+        ),
       });
     }
   }, [error, toast]);
