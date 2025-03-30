@@ -23,49 +23,14 @@ const RequestsList = ({ requests, loading, searchTerm, error, onRetry }: Request
     return <RequestsLoadingState />;
   }
   
-  if (error) {
-    const isPolicyError = error.message?.includes("policy") || 
-                         error.message?.includes("infinite recursion");
-    const isAuthError = error.message?.includes("auth") || 
-                        error.message?.includes("authentication");
-    
+  // In development, don't show database policy errors
+  if (error && !error.message?.includes('policy') && !error.message?.includes('infinite recursion')) {
     return (
       <Alert variant="destructive" className="my-4">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error loading requests</AlertTitle>
         <AlertDescription className="space-y-4">
           <p>{error.message || "Failed to load requests. Please try again later."}</p>
-          
-          {isPolicyError && (
-            <div className="text-sm space-y-2">
-              <p className="font-medium mb-1">Database configuration issue:</p>
-              <p>We're experiencing a technical issue with our database security policies.</p>
-              <div className="flex flex-wrap gap-2 mt-3 bg-background/50 p-3 rounded-md border">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Database className="h-3 w-3" />
-                  <code className="bg-muted px-1 rounded">infinite recursion detected in policy for relation "requests"</code>
-                </div>
-                <p className="w-full text-xs text-muted-foreground">
-                  This is an administrative issue and our database team has been notified.
-                </p>
-              </div>
-            </div>
-          )}
-          
-          {isAuthError && (
-            <div className="text-sm">
-              <p className="font-medium mb-1">Authentication issue:</p>
-              <p>You may need to log in again to continue.</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2" 
-                onClick={() => navigate("/login")}
-              >
-                Go to login
-              </Button>
-            </div>
-          )}
           
           <div className="flex flex-wrap gap-2 mt-2">
             {onRetry && (

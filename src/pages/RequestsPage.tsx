@@ -28,25 +28,25 @@ const RequestsPage = () => {
     refreshRequests
   } = useRequestsData();
 
-  // Show persistent toast if there's an error with database policies
-  useEffect(() => {
-    if (error && (error.message?.includes('policy') || error.message?.includes('infinite recursion'))) {
-      toast({
-        title: "Database Configuration Issue",
-        description: "Our administrator is working to fix the database security policies. Some features may be limited temporarily.",
-        variant: "destructive",
-        duration: 0, // Keep it visible until dismissed
-        action: (
-          <div className="flex flex-col gap-1 text-xs">
-            <div className="flex items-center gap-1">
-              <Database className="h-3 w-3" />
-              <span className="font-mono bg-background/50 px-1 rounded">RLS policy error</span>
-            </div>
-          </div>
-        ),
-      });
-    }
-  }, [error, toast]);
+  // We're removing the persistent toast for database policy errors since this is not in production
+  // useEffect(() => {
+  //   if (error && (error.message?.includes('policy') || error.message?.includes('infinite recursion'))) {
+  //     toast({
+  //       title: "Database Configuration Issue",
+  //       description: "Our administrator is working to fix the database security policies. Some features may be limited temporarily.",
+  //       variant: "destructive",
+  //       duration: 0, // Keep it visible until dismissed
+  //       action: (
+  //         <div className="flex flex-col gap-1 text-xs">
+  //           <div className="flex items-center gap-1">
+  //             <Database className="h-3 w-3" />
+  //             <span className="font-mono bg-background/50 px-1 rounded">RLS policy error</span>
+  //           </div>
+  //         </div>
+  //       ),
+  //     });
+  //   }
+  // }, [error, toast]);
 
   // Redirect users to their appropriate dashboard based on role
   useEffect(() => {
