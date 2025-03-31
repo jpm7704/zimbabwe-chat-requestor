@@ -2,12 +2,12 @@
 import { ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { usePermissions, Permissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/use-toast';
 
 interface RequirePermissionProps {
   children: ReactNode;
-  permission: keyof Permissions;
+  permission: keyof ReturnType<typeof usePermissions>;
   redirectTo?: string;
 }
 

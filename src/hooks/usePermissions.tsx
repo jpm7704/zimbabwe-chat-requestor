@@ -19,7 +19,7 @@ export type Permissions = {
   canManageUsers: boolean;
 };
 
-export function usePermissions(userProfile: UserProfile | null) {
+export function usePermissions(userProfile: UserProfile | null): Permissions {
   const { getRoleInfo } = useRoles(userProfile);
   const roleInfo = getRoleInfo();
   

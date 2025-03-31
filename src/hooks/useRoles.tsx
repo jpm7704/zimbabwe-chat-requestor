@@ -137,7 +137,7 @@ export const useRoles = (userProfile: UserProfile | null) => {
     return info.permissions.includes(permission);
   };
 
-  // Add role check methods
+  // Add role check methods - ensure these are defined as functions that can be called
   const isAdmin = () => {
     return userProfile?.role?.toLowerCase() === 'admin' || 
            userProfile?.role?.toLowerCase() === 'director' ||
