@@ -26,7 +26,16 @@ interface RoleMenuProps {
 const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
   const { userProfile } = useAuth();
   const permissions = usePermissions(userProfile);
-  const roles = useRoles(userProfile);
+  const { 
+    isAdmin, 
+    isRegularUser, 
+    isFieldOfficer, 
+    isProjectOfficer,
+    isAssistantProjectOfficer,
+    isHeadOfPrograms,
+    isCEO,
+    isPatron
+  } = useRoles(userProfile);
   const location = useLocation();
   
   const isActive = (path: string) => location.pathname === path;
@@ -44,7 +53,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
   const isDevelopment = import.meta.env.DEV;
   const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
   const isDevAdmin = isDevelopment && devRole === 'admin';
-  const isAdmin = isDevAdmin || roles.isAdmin();
+  const isUserAdmin = isDevAdmin || isAdmin();
 
   return (
     <div className={`flex ${variant === "sidebar" ? "flex-col w-full gap-1" : "items-center gap-1"}`}>
@@ -59,7 +68,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Link>
       </Button>
       
-      {(roles.isRegularUser() || !permissions.canReviewRequests) && (
+      {(isRegularUser() || !permissions.canReviewRequests) && (
         <>
           <Button 
             variant={isActive('/submit') ? "default" : buttonVariant} 
@@ -85,7 +94,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </>
       )}
 
-      {(roles.isFieldOfficer() || roles.isProjectOfficer()) && (
+      {(isFieldOfficer() || isProjectOfficer()) && (
         <Button 
           variant={isActive('/field-work') ? "default" : buttonVariant} 
           className={buttonClass}
@@ -98,7 +107,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {(roles.isAssistantProjectOfficer() || roles.isHeadOfPrograms() || roles.isAdmin()) && (
+      {(isAssistantProjectOfficer() || isHeadOfPrograms() || isAdmin()) && (
         <Button 
           variant={isActive('/analytics') ? "default" : buttonVariant} 
           className={buttonClass}
@@ -124,7 +133,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {(roles.isAdmin() || roles.isCEO() || roles.isPatron()) && (
+      {(isAdmin() || isCEO() || isPatron()) && (
         <Button 
           variant={isActive('/approvals') ? "default" : buttonVariant} 
           className={buttonClass}
@@ -137,7 +146,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
 
-      {isAdmin && (
+      {isUserAdmin && (
         <>
           <Button 
             variant={isActive('/users') ? "default" : buttonVariant} 
