@@ -3,6 +3,22 @@ import { useMemo } from "react";
 import { UserProfile } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
 
+// Define and export the Permissions type
+export type Permissions = {
+  canViewRequests: boolean;
+  canCreateRequests: boolean;
+  canViewOwnRequests: boolean;
+  canApproveRequests: boolean;
+  canRejectRequests: boolean;
+  canReviewRequests: boolean;
+  canAssignRequests: boolean;
+  canAccessAnalytics: boolean;
+  canAccessFieldReports: boolean;
+  canAccessSystemSettings: boolean;
+  canAccessAdminPanel?: boolean;
+  canManageUsers: boolean;
+};
+
 export function usePermissions(userProfile: UserProfile | null) {
   const { getRoleInfo } = useRoles(userProfile);
   const roleInfo = getRoleInfo();
@@ -11,7 +27,7 @@ export function usePermissions(userProfile: UserProfile | null) {
     const role = userProfile?.role?.toLowerCase() || 'user';
     
     // Default permissions for any user
-    const defaultPermissions = {
+    const defaultPermissions: Permissions = {
       canViewRequests: true,
       canCreateRequests: true,
       canViewOwnRequests: true,

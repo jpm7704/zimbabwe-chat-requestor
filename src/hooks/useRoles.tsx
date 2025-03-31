@@ -137,8 +137,54 @@ export const useRoles = (userProfile: UserProfile | null) => {
     return info.permissions.includes(permission);
   };
 
+  // Add role check methods
+  const isAdmin = () => {
+    return userProfile?.role?.toLowerCase() === 'admin' || 
+           userProfile?.role?.toLowerCase() === 'director' ||
+           userProfile?.role?.toLowerCase() === 'management';
+  };
+
+  const isRegularUser = () => {
+    return !userProfile?.role || userProfile.role.toLowerCase() === 'user';
+  };
+
+  const isFieldOfficer = () => {
+    return userProfile?.role?.toLowerCase() === 'field_officer';
+  };
+
+  const isProjectOfficer = () => {
+    return userProfile?.role?.toLowerCase() === 'project_officer' || 
+           userProfile?.role?.toLowerCase() === 'regional_project_officer';
+  };
+
+  const isAssistantProjectOfficer = () => {
+    return userProfile?.role?.toLowerCase() === 'assistant_project_officer';
+  };
+
+  const isHeadOfPrograms = () => {
+    return userProfile?.role?.toLowerCase() === 'head_of_programs' || 
+           userProfile?.role?.toLowerCase() === 'programme_manager' || 
+           userProfile?.role?.toLowerCase() === 'hop';
+  };
+
+  const isCEO = () => {
+    return userProfile?.role?.toLowerCase() === 'ceo';
+  };
+
+  const isPatron = () => {
+    return userProfile?.role?.toLowerCase() === 'patron';
+  };
+
   return { 
     getRoleInfo,
-    hasPermission
+    hasPermission,
+    isAdmin,
+    isRegularUser,
+    isFieldOfficer,
+    isProjectOfficer,
+    isAssistantProjectOfficer,
+    isHeadOfPrograms,
+    isCEO,
+    isPatron
   };
 };

@@ -39,7 +39,7 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
   const hasPermission = isAdminPage ? userProfile?.role === 'admin' : permissions[permission];
   
   // Log permission check for debugging
-  console.log(`Permission check for ${permission}: ${hasPermission}`, {
+  console.log(`Permission check for ${String(permission)}: ${hasPermission}`, {
     userRole: userProfile?.role,
     devRole,
     permissionValue: permissions[permission],
