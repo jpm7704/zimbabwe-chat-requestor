@@ -61,7 +61,7 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
 
   const loadRequestTypeInfo = async (type: string) => {
     try {
-      const info = await getRequestTypeInfo(type as any);
+      const info = await getRequestTypeInfo(type);
       if (info) {
         setRequestTypeInfo(info);
       }

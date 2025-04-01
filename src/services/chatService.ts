@@ -1,5 +1,6 @@
 
 import { useToast } from "@/hooks/use-toast";
+import { ChatMessage as ChatMessageType } from "@/types";
 
 export interface ChatMessage {
   id: string;
@@ -9,13 +10,14 @@ export interface ChatMessage {
   isSystemMessage?: boolean;
 }
 
-export const sendMessage = async (requestId: string, message: string, senderId: string): Promise<ChatMessage> => {
+export const sendMessage = async (requestId: string, message: string, senderId: string): Promise<ChatMessageType> => {
   try {
     // This will be connected to a real API in the future
-    const newMessage: ChatMessage = {
+    const newMessage: ChatMessageType = {
       id: `msg-${Date.now()}`,
       content: message,
-      sender: senderId,
+      senderId: senderId,
+      senderType: "user", // default sender type
       timestamp: new Date().toISOString(),
     };
     
@@ -26,12 +28,23 @@ export const sendMessage = async (requestId: string, message: string, senderId: 
   }
 };
 
-export const fetchMessages = async (requestId: string): Promise<ChatMessage[]> => {
+export const fetchMessages = async (requestId: string): Promise<ChatMessageType[]> => {
   try {
     // This will be connected to a real API in the future
     return [];
   } catch (error) {
     console.error("Error fetching messages:", error);
     throw new Error("Failed to load messages. Please try again.");
+  }
+};
+
+// Adding the missing getChatHistory function
+export const getChatHistory = async (): Promise<ChatMessageType[]> => {
+  try {
+    // This will be connected to a real API in the future
+    return [];
+  } catch (error) {
+    console.error("Error loading chat history:", error);
+    throw new Error("Failed to load chat history. Please try again.");
   }
 };

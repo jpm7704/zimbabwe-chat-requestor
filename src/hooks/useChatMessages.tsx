@@ -46,7 +46,8 @@ export const useChatMessages = () => {
     setIsTyping(true);
     
     try {
-      const response = await sendMessage(inputMessage);
+      // Using a dummy requestId and senderId for now, to be replaced with real values later
+      const response = await sendMessage("dummy-request-id", inputMessage, "user");
       
       // Slight delay to simulate typing
       await new Promise(resolve => setTimeout(resolve, 1000));
