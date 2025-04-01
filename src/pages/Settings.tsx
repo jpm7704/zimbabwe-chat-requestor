@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -22,7 +21,7 @@ const Settings = () => {
     firstName: userProfile?.first_name || "",
     lastName: userProfile?.last_name || "",
     email: userProfile?.email || "",
-    phone: userProfile?.phone || "", // Handle missing phone property
+    phone: "", // Initialize with empty string since it's not in the UserProfile type
   });
   
   const [notifications, setNotifications] = useState({
