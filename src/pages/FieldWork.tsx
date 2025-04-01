@@ -1,8 +1,5 @@
-
 import { useAuth } from "@/hooks/useAuth";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   ClipboardList, 
@@ -23,24 +20,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const FieldWork = () => {
-  const { userProfile, isAuthenticated, formatRole } = useAuth();
-  const permissions = usePermissions(userProfile);
-  const navigate = useNavigate();
+  const { userProfile, formatRole } = useAuth();
   const [assignedRequests, setAssignedRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Redirect if user doesn't have permission to view this page
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    
-    if (!permissions.canReviewRequests) {
-      navigate('/');
-    }
-    
-    // Mock loading of assigned requests
+  // Mock loading of assigned requests without permission checks
+  useState(() => {
     const timer = setTimeout(() => {
       setAssignedRequests([
         {
@@ -75,7 +60,7 @@ const FieldWork = () => {
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, [isAuthenticated, permissions, navigate]);
+  }, []);
 
   const getPriorityBadge = (priority) => {
     switch(priority) {
