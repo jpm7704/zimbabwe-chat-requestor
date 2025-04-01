@@ -1,37 +1,14 @@
-
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, PieChart, LineChart, ResponsiveContainer, XAxis, YAxis, Bar, Pie, Line, Tooltip, Legend, Cell } from "recharts";
+import { useAnalyticsData } from "@/hooks/useAnalyticsData";
 
 const Analytics = () => {
   const { userProfile } = useAuth();
+  const { data, loading, error } = useAnalyticsData();
 
-  // Sample data for charts
-  const requestsByTypeData = [
-    { name: "Medical", value: 35 },
-    { name: "Educational", value: 25 },
-    { name: "Financial", value: 20 },
-    { name: "Food", value: 15 },
-    { name: "Other", value: 5 },
-  ];
-
-  const monthlyRequestsData = [
-    { month: "Jan", requests: 65 },
-    { month: "Feb", requests: 78 },
-    { month: "Mar", requests: 82 },
-    { month: "Apr", requests: 70 },
-    { month: "May", requests: 93 },
-    { month: "Jun", requests: 88 },
-  ];
-
-  const statusDistributionData = [
-    { name: "Completed", value: 45 },
-    { name: "In Progress", value: 30 },
-    { name: "Pending", value: 15 },
-    { name: "Rejected", value: 10 },
-  ];
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+  if (loading) return <div>Loading analytics...</div>;
+  if (error) return <div>Error loading analytics: {error.message}</div>;
 
   return (
     <div className="container px-4 mx-auto max-w-6xl py-8">
@@ -50,8 +27,7 @@ const Analytics = () => {
               <CardDescription>All time requests</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">1,243</div>
-              <p className="text-sm text-muted-foreground">+12% from last month</p>
+              <div className="text-4xl font-bold">{data.totalRequests}</div>
             </CardContent>
           </Card>
           <Card>
@@ -60,8 +36,12 @@ const Analytics = () => {
               <CardDescription>Requests successfully fulfilled</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">78%</div>
-              <p className="text-sm text-muted-foreground">+5% from last month</p>
+              <div className="text-4xl font-bold">
+                {data.completedRequests ? 
+                  `${Math.round((data.completedRequests / data.totalRequests) * 100)}%` : 
+                  'N/A'
+                }
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -70,8 +50,7 @@ const Analytics = () => {
               <CardDescription>Currently in progress</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">243</div>
-              <p className="text-sm text-muted-foreground">-8% from last month</p>
+              <div className="text-4xl font-bold">{data.pendingRequests}</div>
             </CardContent>
           </Card>
         </div>
@@ -87,17 +66,17 @@ const Analytics = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={requestsByTypeData}
+                      data={data.requestsByType}
                       cx="50%"
                       cy="50%"
                       labelLine={true}
                       label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                       outerRadius={80}
                       fill="#8884d8"
-                      dataKey="value"
+                      dataKey="count"
                     >
-                      {requestsByTypeData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      {data.requestsByType.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={`hsl(${index * 60}, 70%, 50%)`} />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -116,12 +95,12 @@ const Analytics = () => {
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlyRequestsData}>
+                  <BarChart data={data.requestsByMonth}>
                     <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="requests" fill="#8884d8" />
+                    <Bar dataKey="count" fill="#8884d8" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -139,17 +118,17 @@ const Analytics = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={statusDistributionData}
+                    data={data.requestsByStatus}
                     cx="50%"
                     cy="50%"
                     labelLine={true}
                     label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                     outerRadius={80}
                     fill="#8884d8"
-                    dataKey="value"
+                    dataKey="count"
                   >
-                    {statusDistributionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    {data.requestsByStatus.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={`hsl(${index * 60}, 70%, 50%)`} />
                     ))}
                   </Pie>
                   <Tooltip />

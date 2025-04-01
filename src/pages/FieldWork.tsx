@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -19,49 +20,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { fetchFieldWorkRequests } from "@/services/requestService";
 
 const FieldWork = () => {
   const { userProfile, formatRole } = useAuth();
   const navigate = useNavigate();
-  const [assignedRequests, setAssignedRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
   
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setAssignedRequests([
-        {
-          id: '1',
-          ticketNumber: 'BGF-2309-0023',
-          title: 'Medical Assistance',
-          status: 'assigned',
-          createdAt: '2025-03-22T10:00:00Z',
-          dueDate: '2025-03-29T10:00:00Z',
-          priority: 'high'
-        },
-        {
-          id: '2',
-          ticketNumber: 'BGF-2309-0045',
-          title: 'Educational Support',
-          status: 'under_review',
-          createdAt: '2025-03-21T14:30:00Z',
-          dueDate: '2025-03-28T14:30:00Z',
-          priority: 'medium'
-        },
-        {
-          id: '3',
-          ticketNumber: 'BGF-2309-0018',
-          title: 'Food Assistance',
-          status: 'assigned',
-          createdAt: '2025-03-20T09:15:00Z',
-          dueDate: '2025-03-27T09:15:00Z',
-          priority: 'low'
-        }
-      ]);
-      setLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+  const { data: assignedRequests, isLoading, error } = useQuery({
+    queryKey: ['fieldWorkRequests'],
+    queryFn: fetchFieldWorkRequests
+  });
 
   const getPriorityBadge = (priority) => {
     switch(priority) {
@@ -75,6 +44,9 @@ const FieldWork = () => {
         return <Badge>Normal</Badge>;
     }
   };
+
+  if (isLoading) return <div>Loading field work requests...</div>;
+  if (error) return <div>Error loading requests: {error.message}</div>;
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">
@@ -97,7 +69,9 @@ const FieldWork = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">5</div>
+              <div className="text-3xl font-bold">
+                {assignedRequests?.filter(r => r.status === 'assigned').length || 0}
+              </div>
               <p className="text-sm text-muted-foreground">Waiting for verification</p>
             </CardContent>
           </Card>
@@ -110,7 +84,9 @@ const FieldWork = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">12</div>
+              <div className="text-3xl font-bold">
+                {assignedRequests?.filter(r => r.status === 'completed').length || 0}
+              </div>
               <p className="text-sm text-muted-foreground">This month</p>
             </CardContent>
           </Card>
@@ -123,7 +99,9 @@ const FieldWork = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">3</div>
+              <div className="text-3xl font-bold">
+                {assignedRequests?.filter(r => new Date(r.dueDate) < new Date(Date.now() + 48 * 60 * 60 * 1000)).length || 0}
+              </div>
               <p className="text-sm text-muted-foreground">Within 48 hours</p>
             </CardContent>
           </Card>
@@ -150,20 +128,14 @@ const FieldWork = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4">
-                      Loading assigned requests...
-                    </TableCell>
-                  </TableRow>
-                ) : assignedRequests.length === 0 ? (
+                {assignedRequests?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-4">
                       No requests assigned to you at this time.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  assignedRequests.map((request) => (
+                  assignedRequests?.map((request) => (
                     <TableRow key={request.id}>
                       <TableCell className="font-medium">{request.ticketNumber}</TableCell>
                       <TableCell>{request.title}</TableCell>
@@ -189,23 +161,7 @@ const FieldWork = () => {
           </div>
         </div>
 
-        <div className="border rounded-lg p-6 shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-          <div className="space-y-2">
-            <div className="p-3 border rounded-md">
-              <div className="font-medium">BGF-2309-0023 - Medical Assistance</div>
-              <div className="text-sm text-muted-foreground">Field assessment completed on March 22, 2025</div>
-            </div>
-            <div className="p-3 border rounded-md">
-              <div className="font-medium">BGF-2309-0045 - Educational Support</div>
-              <div className="text-sm text-muted-foreground">Report submitted on March 21, 2025</div>
-            </div>
-            <div className="p-3 border rounded-md">
-              <div className="font-medium">BGF-2309-0018 - Food Assistance</div>
-              <div className="text-sm text-muted-foreground">Verification completed on March 20, 2025</div>
-            </div>
-          </div>
-        </div>
+        {/* Removed recent activity section as it was mock data */}
       </div>
     </div>
   );
