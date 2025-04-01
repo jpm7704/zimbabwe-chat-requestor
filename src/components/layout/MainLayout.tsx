@@ -1,7 +1,6 @@
 
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
 import AppSidebar from "./AppSidebar";
 import Footer from "./Footer";
 import DevRoleSwitcher from "@/components/dev/DevRoleSwitcher";
@@ -33,7 +32,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar />
       {isDevMode && <DevRoleSwitcher />}
       <SidebarProvider>
         <div className="flex grow w-full">
