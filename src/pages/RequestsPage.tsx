@@ -3,7 +3,6 @@ import { useRequestsData } from "@/hooks/useRequestsData";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { useRoles } from "@/hooks/useRoles";
 import RequestsHeader from "@/components/requests/RequestsHeader";
 import RequestsSearchFilter from "@/components/requests/RequestsSearchFilter";
@@ -14,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const RequestsPage = () => {
   const { userProfile, isAuthenticated } = useAuth();
-  const { isRegularUser, isPatron, isFieldOfficer } = useRoles(userProfile);
+  const { isRegularUser } = useRoles(userProfile);
   const permissions = usePermissions(userProfile);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -30,30 +29,6 @@ const RequestsPage = () => {
     refreshRequests
   } = useRequestsData();
   
-  // Redirect users to their appropriate dashboard based on role
-  useEffect(() => {
-    if (!loading && isAuthenticated && userProfile) {
-      // Only regular users should access the requests page
-      // All other roles should be redirected to their respective dashboards
-      if (!isRegularUser()) {
-        // Redirect based on role
-        if (isPatron()) {
-          navigate('/approvals');
-        } else if (isFieldOfficer()) {
-          navigate('/field-work');
-        } else if (userProfile.role === 'programme_manager') {
-          navigate('/analytics');
-        } else if (userProfile.role === 'management' || 
-                  userProfile.role === 'director' || 
-                  userProfile.role === 'ceo') {
-          navigate('/admin');
-        } else {
-          navigate('/dashboard');
-        }
-      }
-    }
-  }, [userProfile, isAuthenticated, loading, navigate, isRegularUser, isPatron, isFieldOfficer]);
-
   // Get counts for different request statuses
   const getStatusCounts = () => {
     const counts = {
@@ -67,11 +42,6 @@ const RequestsPage = () => {
   };
 
   const statusCounts = getStatusCounts();
-
-  // If the user should be redirected based on role, show nothing while redirecting
-  if (!loading && isAuthenticated && userProfile && !isRegularUser()) {
-    return null;
-  }
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">

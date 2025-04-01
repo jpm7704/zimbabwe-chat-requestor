@@ -55,14 +55,43 @@ const App = () => {
             <Route path="/submit" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
             <Route path="/enquiry" element={<MainLayout><EnquiryPage /></MainLayout>} />
             <Route path="/chat" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
+            
+            {/* Requests page - accessible by all authenticated users */}
             <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
             <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
+            
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
             
-            {/* Role-specific routes with direct access - no permission checking */}
-            <Route path="/field-work" element={<MainLayout><FieldWork /></MainLayout>} />
-            <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
-            <Route path="/analytics" element={<MainLayout><Analytics /></MainLayout>} />
+            {/* Role-specific routes */}
+            <Route path="/field-work" element={
+              <MainLayout>
+                {isDevMode ? <FieldWork /> : (
+                  <RequirePermission permission="canAccessFieldReports">
+                    <FieldWork />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            <Route path="/reports" element={
+              <MainLayout>
+                {isDevMode ? <Reports /> : (
+                  <RequirePermission permission="canAccessFieldReports">
+                    <Reports />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            <Route path="/analytics" element={
+              <MainLayout>
+                {isDevMode ? <Analytics /> : (
+                  <RequirePermission permission="canAccessAnalytics">
+                    <Analytics />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
             
             <Route path="/approvals" element={
               <MainLayout>

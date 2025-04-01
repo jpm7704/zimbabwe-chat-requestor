@@ -59,6 +59,15 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
   // Check if user has executive-level role (Director, CEO, Patron)
   const isExecutiveRole = isDirector() || isCEO() || isPatron();
 
+  // Check if the user can access the requests page (any role except regular users)
+  const canAccessRequests = permissions.canViewRequests || 
+                            isFieldOfficer() || 
+                            isProjectOfficer() || 
+                            isAssistantProjectOfficer() || 
+                            isHeadOfPrograms() || 
+                            isExecutiveRole || 
+                            isAdmin();
+
   return (
     <div className={`flex ${variant === "sidebar" ? "flex-col w-full gap-1" : "items-center gap-1"}`}>
       <Button 
@@ -86,19 +95,17 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {/* Only regular users can view their submitted requests */}
-      {isRegularUser() && (
-        <Button 
-          variant={isActive('/requests') ? "default" : buttonVariant} 
-          className={buttonClass}
-          asChild
-        >
-          <Link to="/requests" className="flex items-center gap-2" onClick={handleClick}>
-            <ClipboardList size={18} />
-            <span>My Requests</span>
-          </Link>
-        </Button>
-      )}
+      {/* Regular users see "My Requests", staff see "Manage Requests" */}
+      <Button 
+        variant={isActive('/requests') ? "default" : buttonVariant} 
+        className={buttonClass}
+        asChild
+      >
+        <Link to="/requests" className="flex items-center gap-2" onClick={handleClick}>
+          <ClipboardList size={18} />
+          <span>{isRegularUser() ? "My Requests" : "Manage Requests"}</span>
+        </Link>
+      </Button>
       
       {/* Field work for field officers and project officers */}
       {(isFieldOfficer() || isProjectOfficer()) && (

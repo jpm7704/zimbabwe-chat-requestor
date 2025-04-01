@@ -8,12 +8,14 @@ import { MessageCircle, HelpCircle, AlertCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 
 const EnquiryPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { isAuthenticated, userProfile } = useAuth();
   const { isRegularUser } = useRoles(userProfile);
+  const { toast } = useToast();
   const [messages, setMessages] = useState<any[]>([]);
   
   const requestFormProps = useRequestForm(setMessages);
@@ -27,9 +29,14 @@ const EnquiryPage = () => {
   // Redirect non-regular users to their appropriate dashboard
   useEffect(() => {
     if (userProfile && !isRegularUser()) {
+      toast({
+        title: "Access restricted",
+        description: "Only regular users can submit enquiries",
+        variant: "destructive",
+      });
       navigate('/dashboard');
     }
-  }, [userProfile, navigate, isRegularUser]);
+  }, [userProfile, navigate, isRegularUser, toast]);
 
   useEffect(() => {
     const type = searchParams.get("type");
