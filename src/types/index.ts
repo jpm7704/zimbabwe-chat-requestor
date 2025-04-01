@@ -1,4 +1,3 @@
-
 // Request status types
 export type RequestStatus = 
   | "submitted" 
@@ -137,4 +136,18 @@ export interface RequestTypeInfo {
   name: string;
   description: string;
   requiredDocuments: RequiredDocument[];
+}
+
+export type NotificationType = 'document_upload' | 'status_change' | 'assignment' | 'system';
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
+  link?: string;
+  targetRoles: string[];
+  relatedId?: string;
 }

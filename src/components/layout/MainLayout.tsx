@@ -1,51 +1,47 @@
-
-import { useEffect } from "react";
-import { useLocation, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./AppSidebar";
-import { useAuth } from "@/hooks/useAuth";
-import ThemeToggle from "@/components/theme/ThemeToggle";
+import Footer from "./Footer";
 import DevRoleSwitcher from "@/components/dev/DevRoleSwitcher";
+import { useAuth } from "@/hooks/useAuth";
+import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
 
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
-
-const MainLayout = ({ children }: MainLayoutProps) => {
-  const location = useLocation();
+const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
+  const navigate = useNavigate();
   
-  // Scroll to top on route change
+  // Enable real-time notifications
+  useRealtimeNotifications();
+  
+  // Check if we're in development mode
+  const isDevelopment = import.meta.env.DEV;
+  
+  // Get dev role from localStorage (for development mode role switching)
+  const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
+  
+  // In development mode, ALL roles should bypass permission checks
+  const isDevMode = isDevelopment && devRole;
+  
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
+    if (!loading && !isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, loading, navigate]);
 
-  // Show loading state while auth is determining
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  }
-
-  // If user is authenticated, render the sidebar layout
-  if (isAuthenticated) {
-    return (
-      <SidebarProvider defaultOpen={true}>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <div className="flex flex-col min-h-screen flex-1">
-            <main className="flex-grow">
-              {children}
-            </main>
-          </div>
-          <ThemeToggle />
-          <DevRoleSwitcher />
-        </div>
-      </SidebarProvider>
-    );
-  }
-  
-  // For non-authenticated routes, redirect to login
-  return <Navigate to="/login" replace />;
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
+      {isDevMode && <DevRoleSwitcher />}
+      <div className="flex grow">
+        <AppSidebar />
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
 };
 
 export default MainLayout;

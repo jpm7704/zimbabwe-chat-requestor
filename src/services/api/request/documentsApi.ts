@@ -3,6 +3,7 @@ import { Document as RequestDocument, DocumentType } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "@/hooks/use-toast";
+import { createDocumentUploadNotification } from "@/services/notificationService";
 
 /**
  * Upload a document for a request
@@ -62,6 +63,22 @@ export const uploadDocument = async (
         variant: "destructive"
       });
       return null;
+    }
+    
+    // Get the request ticket number for the notification
+    const { data: requestData, error: requestError } = await supabase
+      .from('requests')
+      .select('ticket_number')
+      .eq('id', requestId)
+      .single();
+    
+    if (!requestError && requestData) {
+      // Create a notification for relevant staff roles
+      await createDocumentUploadNotification(
+        requestId,
+        requestData.ticket_number,
+        file.name
+      );
     }
     
     return {
