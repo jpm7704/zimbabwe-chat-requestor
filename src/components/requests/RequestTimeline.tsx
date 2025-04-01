@@ -38,7 +38,7 @@ const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
         // Transform into timeline events
         const timelineEvents: TimelineEvent[] = statusUpdates.map(update => ({
           id: update.id,
-          type: 'status_update',
+          type: 'status_change',
           description: `Status changed to ${update.status.replace('_', ' ')}`,
           createdAt: update.timestamp,
           requestId: update.request_id,
@@ -91,8 +91,8 @@ const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
           <div className="flex">
             <div className="mr-4 flex flex-col items-center">
               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                {event.type === 'status_update' ? (
-                  <span className="text-sm font-medium">{event.metadata.status.charAt(0).toUpperCase()}</span>
+                {event.type === 'status_change' ? (
+                  <span className="text-sm font-medium">{event.metadata?.status.charAt(0).toUpperCase()}</span>
                 ) : (
                   <span className="text-sm font-medium">N</span>
                 )}
@@ -102,10 +102,10 @@ const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
             <div>
               <p className="font-medium">{event.description}</p>
               <p className="text-sm text-muted-foreground mb-2">
-                {format(new Date(event.createdAt), 'PPpp')} by {event.createdBy.name} ({event.createdBy.role.replace('_', ' ')})
+                {format(new Date(event.createdAt), 'PPpp')} by {event.createdBy?.name || 'Unknown'} ({event.createdBy?.role || 'user'})
               </p>
               
-              {event.metadata.notes && (
+              {event.metadata?.notes && (
                 <div className="bg-secondary/20 p-3 rounded-md text-sm mt-2 whitespace-pre-wrap">
                   {event.metadata.notes}
                 </div>

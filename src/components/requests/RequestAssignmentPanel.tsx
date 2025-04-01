@@ -1,105 +1,128 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { Request } from '@/types';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2, User } from 'lucide-react';
-
-interface StaffMember {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Request } from '@/types';
+import { Loader2 } from 'lucide-react';
+import { UserCircle } from 'lucide-react';
+import { updateRequest } from '@/services/api/requestMutationApi';
 
 interface RequestAssignmentPanelProps {
   request: Request;
   onAssignmentChange: () => void;
 }
 
+type StaffMember = {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+};
+
 const RequestAssignmentPanel = ({ request, onAssignmentChange }: RequestAssignmentPanelProps) => {
-  const { userProfile } = useAuth();
-  const { toast } = useToast();
-  
+  const [loading, setLoading] = useState(false);
   const [fieldOfficers, setFieldOfficers] = useState<StaffMember[]>([]);
   const [programManagers, setProgramManagers] = useState<StaffMember[]>([]);
-  const [selectedFieldOfficer, setSelectedFieldOfficer] = useState<string | undefined>(request.fieldOfficer?.id);
-  const [selectedProgramManager, setSelectedProgramManager] = useState<string | undefined>(request.programManager?.id);
-  const [loading, setLoading] = useState(false);
-  
-  // Can current user assign staff?
-  const canAssign = userProfile && (
-    userProfile.role === 'director' ||
-    userProfile.role === 'head_of_programs' ||
-    userProfile.role === 'patron' ||
-    userProfile.role === 'ceo'
+  const [selectedFieldOfficer, setSelectedFieldOfficer] = useState<string | undefined>(
+    request.fieldOfficer ? request.fieldOfficer.id : undefined
   );
+  const [selectedProgramManager, setSelectedProgramManager] = useState<string | undefined>(
+    request.programManager ? request.programManager.id : undefined
+  );
+  const { toast } = useToast();
   
-  // Fetch available staff
-  useEffect(() => {
-    const fetchStaff = async () => {
+  // Load staff members on initial render
+  useState(() => {
+    const loadStaffMembers = async () => {
       try {
-        // Get field officers
-        const { data: fieldOfficerData, error: fieldOfficerError } = await supabase
+        setLoading(true);
+        
+        // Fetch field officers
+        const { data: officers, error: officersError } = await supabase
           .from('user_profiles')
           .select('id, name, email, role')
-          .eq('role', 'field_officer')
-          .order('name');
+          .eq('role', 'field_officer');
+          
+        if (officersError) throw officersError;
+        setFieldOfficers(officers || []);
         
-        if (fieldOfficerError) throw fieldOfficerError;
-        
-        // Get program managers
-        const { data: programManagerData, error: programManagerError } = await supabase
+        // Fetch program managers
+        const { data: managers, error: managersError } = await supabase
           .from('user_profiles')
           .select('id, name, email, role')
-          .eq('role', 'programme_manager')
-          .order('name');
+          .eq('role', 'programme_manager');
+          
+        if (managersError) throw managersError;
+        setProgramManagers(managers || []);
         
-        if (programManagerError) throw programManagerError;
-        
-        setFieldOfficers(fieldOfficerData);
-        setProgramManagers(programManagerData);
       } catch (error) {
-        console.error("Error fetching staff:", error);
+        console.error('Error loading staff members:', error);
+      } finally {
+        setLoading(false);
       }
     };
     
-    if (canAssign) {
-      fetchStaff();
-    }
-  }, [canAssign]);
+    loadStaffMembers();
+  }, []);
   
-  // Handle assignment
-  const handleAssign = async () => {
+  const handleAssignFieldOfficer = async () => {
+    if (!selectedFieldOfficer) return;
+    
     try {
       setLoading(true);
       
-      // Update request with assigned staff
-      const { error } = await supabase
-        .from('requests')
-        .update({
-          field_officer_id: selectedFieldOfficer || null,
-          program_manager_id: selectedProgramManager || null
-        })
-        .eq('id', request.id);
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Assignment updated",
-        description: "The request assignment has been updated successfully."
+      // Update request with new field officer
+      await updateRequest(request.id, {
+        field_officer_id: selectedFieldOfficer
       });
       
-      onAssignmentChange();
-    } catch (error) {
-      console.error("Error assigning staff:", error);
       toast({
-        title: "Assignment failed",
-        description: "Failed to update staff assignments.",
+        title: "Field Officer Assigned",
+        description: "Field officer has been assigned to this request."
+      });
+      
+      // Trigger refresh of parent component
+      onAssignmentChange();
+      
+    } catch (error) {
+      console.error('Error assigning field officer:', error);
+      toast({
+        title: "Assignment Failed",
+        description: "Failed to assign field officer. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleAssignProgramManager = async () => {
+    if (!selectedProgramManager) return;
+    
+    try {
+      setLoading(true);
+      
+      // Update request with new program manager
+      await updateRequest(request.id, {
+        program_manager_id: selectedProgramManager
+      });
+      
+      toast({
+        title: "Program Manager Assigned",
+        description: "Program manager has been assigned to this request."
+      });
+      
+      // Trigger refresh of parent component
+      onAssignmentChange();
+      
+    } catch (error) {
+      console.error('Error assigning program manager:', error);
+      toast({
+        title: "Assignment Failed",
+        description: "Failed to assign program manager. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -110,29 +133,30 @@ const RequestAssignmentPanel = ({ request, onAssignmentChange }: RequestAssignme
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Staff Assignment</CardTitle>
+        <CardTitle>Assignment</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Field Officer Assignment */}
-        <div>
-          <p className="text-sm font-medium mb-2">Field Officer</p>
-          {request.fieldOfficer && !canAssign ? (
-            <div className="flex items-center">
-              <User className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span>{request.fieldOfficer.name}</span>
+        {/* Field Officer Section */}
+        <div className="space-y-2">
+          <h3 className="font-medium">Field Officer</h3>
+          {request.fieldOfficer ? (
+            <div className="flex items-center p-3 bg-secondary/20 rounded-md">
+              <UserCircle className="h-5 w-5 mr-2 text-primary" />
+              <div>
+                <p className="font-medium text-sm">{request.fieldOfficer.name}</p>
+                <p className="text-xs text-muted-foreground">{request.fieldOfficer.email}</p>
+              </div>
             </div>
-          ) : !canAssign ? (
-            <div className="text-muted-foreground text-sm">No field officer assigned</div>
           ) : (
-            <Select 
-              value={selectedFieldOfficer} 
-              onValueChange={setSelectedFieldOfficer}
-            >
-              <SelectTrigger>
+            <p className="text-sm text-muted-foreground">No field officer assigned</p>
+          )}
+          
+          <div className="flex gap-2 pt-2">
+            <Select value={selectedFieldOfficer} onValueChange={setSelectedFieldOfficer}>
+              <SelectTrigger className="flex-1">
                 <SelectValue placeholder="Select field officer" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
                 {fieldOfficers.map(officer => (
                   <SelectItem key={officer.id} value={officer.id}>
                     {officer.name}
@@ -140,29 +164,36 @@ const RequestAssignmentPanel = ({ request, onAssignmentChange }: RequestAssignme
                 ))}
               </SelectContent>
             </Select>
-          )}
+            <Button 
+              onClick={handleAssignFieldOfficer} 
+              disabled={!selectedFieldOfficer || loading}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Assign'}
+            </Button>
+          </div>
         </div>
         
-        {/* Program Manager Assignment */}
-        <div>
-          <p className="text-sm font-medium mb-2">Program Manager</p>
-          {request.programManager && !canAssign ? (
-            <div className="flex items-center">
-              <User className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span>{request.programManager.name}</span>
+        {/* Program Manager Section */}
+        <div className="space-y-2 pt-4">
+          <h3 className="font-medium">Program Manager</h3>
+          {request.programManager ? (
+            <div className="flex items-center p-3 bg-secondary/20 rounded-md">
+              <UserCircle className="h-5 w-5 mr-2 text-primary" />
+              <div>
+                <p className="font-medium text-sm">{request.programManager.name}</p>
+                <p className="text-xs text-muted-foreground">{request.programManager.email}</p>
+              </div>
             </div>
-          ) : !canAssign ? (
-            <div className="text-muted-foreground text-sm">No program manager assigned</div>
           ) : (
-            <Select 
-              value={selectedProgramManager} 
-              onValueChange={setSelectedProgramManager}
-            >
-              <SelectTrigger>
+            <p className="text-sm text-muted-foreground">No program manager assigned</p>
+          )}
+          
+          <div className="flex gap-2 pt-2">
+            <Select value={selectedProgramManager} onValueChange={setSelectedProgramManager}>
+              <SelectTrigger className="flex-1">
                 <SelectValue placeholder="Select program manager" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
                 {programManagers.map(manager => (
                   <SelectItem key={manager.id} value={manager.id}>
                     {manager.name}
@@ -170,19 +201,14 @@ const RequestAssignmentPanel = ({ request, onAssignmentChange }: RequestAssignme
                 ))}
               </SelectContent>
             </Select>
-          )}
+            <Button 
+              onClick={handleAssignProgramManager} 
+              disabled={!selectedProgramManager || loading}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Assign'}
+            </Button>
+          </div>
         </div>
-        
-        {canAssign && (
-          <Button 
-            className="w-full" 
-            onClick={handleAssign}
-            disabled={loading}
-          >
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Update Assignment
-          </Button>
-        )}
       </CardContent>
     </Card>
   );

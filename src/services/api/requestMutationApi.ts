@@ -1,18 +1,22 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Request, RequestType, RequestStatus, Document, DocumentType } from "@/types";
+import { Document, DocumentType, Note, Request, RequestStatus } from "@/types";
 
 type RequestParams = {
   title: string;
   description: string;
-  type: RequestType;
-  isEnquiry?: boolean;
+  type: string;
+};
+
+type RequestResult = {
+  requestId: string;
+  ticketNumber: string;
 };
 
 /**
  * Creates a new request.
  */
-export const createRequest = async (params: RequestParams): Promise<{ requestId: string, ticketNumber: string } | null> => {
+export const createRequest = async (params: RequestParams): Promise<RequestResult | null> => {
   try {
     // Get the current user session
     const { data: session } = await supabase.auth.getSession();
@@ -23,14 +27,12 @@ export const createRequest = async (params: RequestParams): Promise<{ requestId:
     // Insert the new request into the database
     const { data, error } = await supabase
       .from('requests')
-      .insert([
-        {
-          user_id: session.session.user.id,
-          title: params.title,
-          description: params.description,
-          type: params.type,
-        },
-      ])
+      .insert({
+        user_id: session.session.user.id,
+        title: params.title,
+        description: params.description,
+        type: params.type,
+      })
       .select()
       .single();
 
@@ -53,14 +55,34 @@ export const createRequest = async (params: RequestParams): Promise<{ requestId:
  */
 export const updateRequest = async (
   id: string,
-  updates: Record<string, any>
+  updates: Partial<{
+    title: string;
+    description: string;
+    status: RequestStatus;
+    notes: string;
+    field_officer_id?: string;
+    program_manager_id?: string;
+  }>
 ): Promise<Request | null> => {
   try {
     const { data, error } = await supabase
       .from('requests')
       .update(updates)
       .eq('id', id)
-      .select()
+      .select(`
+        id,
+        ticket_number,
+        user_id,
+        title,
+        description,
+        type,
+        status,
+        created_at,
+        updated_at,
+        notes,
+        field_officer_id,
+        program_manager_id
+      `)
       .single();
 
     if (error) {
@@ -77,7 +99,11 @@ export const updateRequest = async (
       status: data.status,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
-      notes: data.notes
+      notes: data.notes ? [data.notes] : [],
+      documents: [],
+      timeline: [],
+      fieldOfficer: null,
+      programManager: null
     };
   } catch (error: any) {
     console.error("Error updating request:", error);
@@ -106,7 +132,7 @@ export const deleteRequest = async (id: string): Promise<void> => {
  */
 export const updateRequestStatus = async (
   requestId: string,
-  status: RequestStatus, 
+  status: string, 
   notes?: string
 ): Promise<void> => {
   try {
@@ -150,7 +176,7 @@ export const updateRequestStatus = async (
 /**
  * Adds a note to a request.
  */
-export const addNoteToRequest = async (
+export const addNote = async (
   requestId: string,
   content: string,
   isInternal: boolean = false
@@ -182,6 +208,9 @@ export const addNoteToRequest = async (
     throw error;
   }
 };
+
+// Alias for backward compatibility
+export const addNoteToRequest = addNote;
 
 /**
  * Upload a document for a request

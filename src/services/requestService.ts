@@ -15,7 +15,10 @@ export {
   createRequest,
   uploadDocument,
   updateRequestStatus,
-  addNoteToRequest
+  addNoteToRequest,
+  addNote,
+  getRequestDocuments,
+  deleteDocument
 } from './api/requestMutationApi';
 
 // Field Work related exports

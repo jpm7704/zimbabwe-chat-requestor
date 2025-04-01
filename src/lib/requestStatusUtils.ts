@@ -1,151 +1,96 @@
 
-import { RequestStatus, UserRole } from "@/types";
+import { RequestStatus } from '@/types';
+
+type UserRole = 'user' | 'field_officer' | 'programme_manager' | 'management' | 'director' | string;
+
+interface StatusOption {
+  value: string;
+  label: string;
+}
 
 /**
- * Get available next status options based on current status and user role
+ * Gets the next possible status options based on the current status and user role
  */
-export const getNextStatusOptions = (currentStatus: RequestStatus, userRole?: UserRole): { value: RequestStatus; label: string }[] => {
-  // Default no options
-  const noOptions: { value: RequestStatus; label: string }[] = [];
+export function getNextStatusOptions(
+  currentStatus: RequestStatus, 
+  userRole?: UserRole
+): StatusOption[] {
+  // Define possible next statuses for each current status
+  const nextStatusMapping: Record<string, string[]> = {
+    submitted: ['assigned', 'rejected'],
+    assigned: ['under_review', 'rejected'],
+    under_review: ['manager_review', 'rejected'],
+    manager_review: ['forwarded', 'completed', 'rejected'],
+    forwarded: ['completed', 'rejected'],
+    completed: [],
+    rejected: [],
+  };
   
-  if (!userRole) return noOptions;
-  
-  // Map of status transitions allowed per role
-  const statusTransitions: Record<UserRole, Record<RequestStatus, RequestStatus[]>> = {
+  // Define which roles can transition to which statuses
+  const rolePermissions: Record<string, Record<string, boolean>> = {
     user: {
-      // Regular users can't change status
-      submitted: [],
-      pending: [],
-      in_review: [],
-      additional_info: [],
-      approved: [],
-      rejected: [],
-      completed: [],
-      cancelled: [],
+      // Users cannot change statuses
     },
     field_officer: {
-      submitted: ['in_review'],
-      pending: ['in_review'],
-      in_review: ['pending', 'additional_info', 'approved', 'rejected'],
-      additional_info: ['in_review', 'approved', 'rejected'],
-      approved: ['completed'],
-      rejected: [],
-      completed: [],
-      cancelled: [],
-    },
-    project_officer: {
-      submitted: ['pending', 'in_review'],
-      pending: ['in_review', 'additional_info'],
-      in_review: ['pending', 'additional_info', 'approved', 'rejected'],
-      additional_info: ['pending', 'in_review'],
-      approved: ['completed'],
-      rejected: [],
-      completed: [],
-      cancelled: [],
-    },
-    assistant_project_officer: {
-      submitted: ['pending', 'in_review'],
-      pending: ['in_review', 'additional_info'],
-      in_review: ['pending', 'additional_info', 'approved', 'rejected'],
-      additional_info: ['pending', 'in_review'],
-      approved: ['completed'],
-      rejected: [],
-      completed: [],
-      cancelled: [],
-    },
-    regional_project_officer: {
-      submitted: ['pending', 'in_review'],
-      pending: ['in_review', 'additional_info'],
-      in_review: ['pending', 'additional_info', 'approved', 'rejected'],
-      additional_info: ['pending', 'in_review'],
-      approved: ['completed'],
-      rejected: [],
-      completed: [],
-      cancelled: [],
+      assigned: true,
+      under_review: true,
+      rejected: true
     },
     programme_manager: {
-      submitted: ['pending', 'in_review', 'approved', 'rejected'],
-      pending: ['in_review', 'approved', 'rejected'],
-      in_review: ['pending', 'additional_info', 'approved', 'rejected'],
-      additional_info: ['pending', 'in_review', 'approved', 'rejected'],
-      approved: ['completed'],
-      rejected: ['pending'],
-      completed: [],
-      cancelled: [],
+      assigned: true,
+      under_review: true,
+      manager_review: true,
+      forwarded: true,
+      rejected: true
     },
-    head_of_programs: {
-      submitted: ['pending', 'in_review', 'approved', 'rejected'],
-      pending: ['in_review', 'approved', 'rejected'],
-      in_review: ['pending', 'additional_info', 'approved', 'rejected'],
-      additional_info: ['pending', 'in_review', 'approved', 'rejected'],
-      approved: ['completed'],
-      rejected: ['pending'],
-      completed: [],
-      cancelled: [],
-    },
-    finance_manager: {
-      submitted: [],
-      pending: [],
-      in_review: [],
-      additional_info: [],
-      approved: [],
-      rejected: [],
-      completed: [],
-      cancelled: [],
+    management: {
+      assigned: true,
+      under_review: true,
+      manager_review: true,
+      forwarded: true,
+      completed: true,
+      rejected: true
     },
     director: {
-      // Directors can do everything
-      submitted: ['pending', 'in_review', 'additional_info', 'approved', 'rejected', 'cancelled'],
-      pending: ['in_review', 'additional_info', 'approved', 'rejected', 'cancelled'],
-      in_review: ['pending', 'additional_info', 'approved', 'rejected', 'cancelled'],
-      additional_info: ['pending', 'in_review', 'approved', 'rejected', 'cancelled'],
-      approved: ['completed', 'cancelled'],
-      rejected: ['pending', 'cancelled'],
-      completed: ['cancelled'],
-      cancelled: ['pending'],
-    },
-    patron: {
-      // Patrons can do everything
-      submitted: ['pending', 'in_review', 'additional_info', 'approved', 'rejected', 'cancelled'],
-      pending: ['in_review', 'additional_info', 'approved', 'rejected', 'cancelled'],
-      in_review: ['pending', 'additional_info', 'approved', 'rejected', 'cancelled'],
-      additional_info: ['pending', 'in_review', 'approved', 'rejected', 'cancelled'],
-      approved: ['completed', 'cancelled'],
-      rejected: ['pending', 'cancelled'],
-      completed: ['cancelled'],
-      cancelled: ['pending'],
-    },
-    ceo: {
-      // CEO can do everything
-      submitted: ['pending', 'in_review', 'additional_info', 'approved', 'rejected', 'cancelled'],
-      pending: ['in_review', 'additional_info', 'approved', 'rejected', 'cancelled'],
-      in_review: ['pending', 'additional_info', 'approved', 'rejected', 'cancelled'],
-      additional_info: ['pending', 'in_review', 'approved', 'rejected', 'cancelled'],
-      approved: ['completed', 'cancelled'],
-      rejected: ['pending', 'cancelled'],
-      completed: ['cancelled'],
-      cancelled: ['pending'],
-    },
+      assigned: true,
+      under_review: true,
+      manager_review: true,
+      forwarded: true,
+      completed: true,
+      rejected: true
+    }
   };
   
-  // Status display labels
-  const statusLabels: Record<RequestStatus, string> = {
-    submitted: 'Submitted',
-    pending: 'Pending',
-    in_review: 'In Review',
-    additional_info: 'Additional Information Needed',
-    approved: 'Approved',
-    rejected: 'Rejected',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
-  };
+  // Get possible next statuses based on current status
+  const possibleNextStatuses = nextStatusMapping[currentStatus] || [];
   
-  // Get allowed transitions for this role and current status
-  const allowedStatuses = statusTransitions[userRole]?.[currentStatus] || [];
-  
-  // Map to options format
-  return allowedStatuses.map(status => ({
+  // Filter based on role permissions
+  const filteredStatuses = userRole 
+    ? possibleNextStatuses.filter(status => rolePermissions[userRole]?.[status])
+    : [];
+
+  // Map to the format needed for the dropdown
+  return filteredStatuses.map(status => ({
     value: status,
-    label: statusLabels[status]
+    label: formatStatusLabel(status),
   }));
-};
+}
+
+/**
+ * Format a status string into a user-friendly label
+ */
+export function formatStatusLabel(status: string): string {
+  const statusLabels: Record<string, string> = {
+    submitted: 'Submitted',
+    assigned: 'Assigned',
+    under_review: 'Under Review',
+    manager_review: 'Manager Review',
+    forwarded: 'Forwarded',
+    completed: 'Completed',
+    rejected: 'Rejected',
+  };
+  
+  return statusLabels[status] || status.split('_').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
+}

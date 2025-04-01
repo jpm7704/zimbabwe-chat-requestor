@@ -7,7 +7,7 @@ import { Loader2, Send } from 'lucide-react';
 import { format } from 'date-fns';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Note } from '@/types';
-import { addNoteToRequest } from '@/services/api/requestMutationApi';
+import { addNoteToRequest } from '@/services/requestService';
 import { useToast } from '@/hooks/use-toast';
 
 interface RequestMessagesProps {

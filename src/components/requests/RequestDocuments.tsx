@@ -4,6 +4,7 @@ import FileUpload from '@/components/request/FileUpload';
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
 import { Document } from '@/types';
+import { getRequestDocuments } from '@/services/requestService';
 
 interface RequestDocumentsProps {
   requestId: string;
@@ -12,9 +13,15 @@ interface RequestDocumentsProps {
 const RequestDocuments = ({ requestId }: RequestDocumentsProps) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   
-  const handleDocumentsChange = () => {
+  const handleDocumentsChange = async () => {
     // This will be called after a document is uploaded or deleted
     // We'll refresh the file list
+    try {
+      const updatedDocs = await getRequestDocuments(requestId);
+      setDocuments(updatedDocs);
+    } catch (error) {
+      console.error("Error refreshing documents:", error);
+    }
   };
   
   return (

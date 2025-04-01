@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getRequestById } from '@/services/api/requestApi';
-import { addNote, updateRequestStatus } from '@/services/api/requestMutationApi';
+import { getRequestById } from '@/services/requestService';
+import { addNote, updateRequestStatus } from '@/services/requestService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

@@ -1,188 +1,195 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { Notification, NotificationType } from "@/types";
+import { Notification } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Get all notifications for the current user based on their role
+ * Gets all notifications for the current user based on their role
  */
-export const getNotifications = async (): Promise<Notification[]> => {
+export async function getNotifications(): Promise<Notification[]> {
   try {
-    // Get the current user session
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session?.user) {
+    const { data: userSession } = await supabase.auth.getSession();
+    if (!userSession.session) {
       return [];
     }
-    
+
+    // Get the user's role from their profile
     const { data: userProfile } = await supabase
       .from('user_profiles')
       .select('role')
-      .eq('id', session.session.user.id)
+      .eq('id', userSession.session.user.id)
       .single();
-      
-    if (!userProfile) {
+
+    if (!userProfile || !userProfile.role) {
       return [];
     }
-    
-    // Get notifications for the user based on their role
+
+    // Query notifications where target_roles contains the user's role
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
       .contains('target_roles', [userProfile.role])
       .order('created_at', { ascending: false });
-    
+
     if (error) {
-      console.error("Error fetching notifications:", error);
+      console.error('Error fetching notifications:', error);
       return [];
     }
-    
-    // Transform received data to match our Notification type
-    return Array.isArray(data) ? data.map((item): Notification => ({
-      id: item.id,
-      type: item.type as NotificationType,
-      title: item.title,
-      message: item.message,
-      createdAt: item.created_at,
-      read: item.read,
-      link: item.link || '',
-      targetRoles: item.target_roles,
-      relatedId: item.related_id
-    })) : [];
+
+    return data.map(notification => ({
+      id: notification.id,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      createdAt: notification.created_at,
+      read: notification.read,
+      link: notification.link,
+      targetRoles: notification.target_roles,
+      relatedId: notification.related_id
+    }));
   } catch (error) {
-    console.error("Error in getNotifications:", error);
+    console.error('Error in getNotifications:', error);
     return [];
   }
-};
+}
 
 /**
- * Get count of unread notifications for the current user
+ * Gets the count of unread notifications for the current user
  */
-export const getUnreadNotificationsCount = async (): Promise<number> => {
+export async function getUnreadNotificationCount(): Promise<number> {
   try {
-    // Get the current user session
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session?.user) {
+    const { data: userSession } = await supabase.auth.getSession();
+    if (!userSession.session) {
       return 0;
     }
-    
+
+    // Get the user's role from their profile
     const { data: userProfile } = await supabase
       .from('user_profiles')
       .select('role')
-      .eq('id', session.session.user.id)
+      .eq('id', userSession.session.user.id)
       .single();
-      
-    if (!userProfile) {
+
+    if (!userProfile || !userProfile.role) {
       return 0;
     }
-    
-    // Count unread notifications for the user based on their role
-    const { data, error, count } = await supabase
+
+    // Count unread notifications for the user's role
+    const { count, error } = await supabase
       .from('notifications')
-      .select('*', { count: 'exact' })
+      .select('*', { count: 'exact', head: true })
       .contains('target_roles', [userProfile.role])
       .eq('read', false);
-    
+
     if (error) {
-      console.error("Error fetching notification count:", error);
+      console.error('Error counting unread notifications:', error);
       return 0;
     }
-    
+
     return count || 0;
   } catch (error) {
-    console.error("Error in getUnreadNotificationsCount:", error);
+    console.error('Error in getUnreadNotificationCount:', error);
     return 0;
   }
-};
+}
 
 /**
- * Mark a notification as read
+ * Marks a notification as read
  */
-export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
+export async function markNotificationRead(notificationId: string): Promise<boolean> {
   try {
-    // Update the notification
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('notifications')
       .update({ read: true })
-      .eq('id', notificationId);
-    
+      .eq('id', notificationId)
+      .select();
+
     if (error) {
-      console.error("Error marking notification as read:", error);
-      throw error;
+      console.error('Error marking notification as read:', error);
+      return false;
     }
+
+    return true;
   } catch (error) {
-    console.error("Error in markNotificationAsRead:", error);
-    throw error;
+    console.error('Error in markNotificationRead:', error);
+    return false;
   }
-};
+}
 
 /**
- * Mark all notifications for the current user as read
+ * Marks all notifications as read for the current user's role
  */
-export const markAllNotificationsAsRead = async (): Promise<void> => {
+export async function markAllNotificationsRead(): Promise<boolean> {
   try {
-    // Get the current user session
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session?.user) {
-      return;
+    const { data: userSession } = await supabase.auth.getSession();
+    if (!userSession.session) {
+      return false;
     }
-    
+
+    // Get the user's role from their profile
     const { data: userProfile } = await supabase
       .from('user_profiles')
       .select('role')
-      .eq('id', session.session.user.id)
+      .eq('id', userSession.session.user.id)
       .single();
-      
-    if (!userProfile) {
-      return;
+
+    if (!userProfile || !userProfile.role) {
+      return false;
     }
-    
-    // Mark all unread notifications for this role as read
+
+    // Update all unread notifications for this role
     const { error } = await supabase
       .from('notifications')
       .update({ read: true })
       .contains('target_roles', [userProfile.role])
       .eq('read', false);
-    
+
     if (error) {
-      console.error("Error marking all notifications as read:", error);
-      throw error;
+      console.error('Error marking all notifications as read:', error);
+      return false;
     }
+
+    return true;
   } catch (error) {
-    console.error("Error in markAllNotificationsAsRead:", error);
-    throw error;
+    console.error('Error in markAllNotificationsRead:', error);
+    return false;
   }
-};
+}
 
 /**
- * Create a notification when a document is uploaded
+ * Creates a new notification
  */
-export const createDocumentUploadNotification = async (
-  requestId: string,
-  requestTicketNumber: string,
-  documentName: string,
-): Promise<void> => {
+export async function createNotification(
+  type: string,
+  title: string,
+  message: string,
+  targetRoles: string[],
+  link?: string,
+  relatedId?: string
+): Promise<boolean> {
   try {
-    // Create a notification for relevant roles
-    // Field officers and project officers should be notified
-    const targetRoles = ['field_officer', 'project_officer', 'regional_project_officer', 'assistant_project_officer', 'programme_manager', 'head_of_programs'];
-    
-    // Create notification directly in the database
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('notifications')
-      .insert({
-        type: 'document_upload',
-        title: 'New document uploaded',
-        message: `A new document "${documentName}" has been uploaded for request ${requestTicketNumber}`,
-        target_roles: targetRoles,
-        link: `/requests/${requestId}`,
-        related_id: requestId
-      });
-    
+      .insert([
+        {
+          type,
+          title,
+          message,
+          target_roles: targetRoles,
+          link,
+          related_id: relatedId,
+          read: false
+        }
+      ])
+      .select();
+
     if (error) {
-      console.error("Error creating document upload notification:", error);
-      throw error;
+      console.error('Error creating notification:', error);
+      return false;
     }
+
+    return true;
   } catch (error) {
-    console.error("Error in createDocumentUploadNotification:", error);
-    // Just log error but don't throw - notifications are not critical to app function
+    console.error('Error in createNotification:', error);
+    return false;
   }
-};
+}
