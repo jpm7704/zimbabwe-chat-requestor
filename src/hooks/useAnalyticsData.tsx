@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 export interface AnalyticsData {
   totalRequests: number;
@@ -31,13 +32,17 @@ export function useAnalyticsData() {
     const fetchAnalyticsData = async () => {
       try {
         setLoading(true);
+        setError(null);
         
         // Get total requests count
         const { count: totalCount, error: totalError } = await supabase
           .from('requests')
           .select('*', { count: 'exact', head: true });
           
-        if (totalError) throw totalError;
+        if (totalError) {
+          console.error('Error fetching total count:', totalError);
+          throw new Error(`Failed to fetch total requests: ${totalError.message}`);
+        }
         
         // Get pending requests count
         const { count: pendingCount, error: pendingError } = await supabase
@@ -45,7 +50,10 @@ export function useAnalyticsData() {
           .select('*', { count: 'exact', head: true })
           .in('status', ['submitted', 'assigned', 'under_review', 'manager_review']);
           
-        if (pendingError) throw pendingError;
+        if (pendingError) {
+          console.error('Error fetching pending count:', pendingError);
+          throw new Error(`Failed to fetch pending requests: ${pendingError.message}`);
+        }
         
         // Get completed requests count
         const { count: completedCount, error: completedError } = await supabase
@@ -53,7 +61,10 @@ export function useAnalyticsData() {
           .select('*', { count: 'exact', head: true })
           .in('status', ['completed', 'forwarded']);
           
-        if (completedError) throw completedError;
+        if (completedError) {
+          console.error('Error fetching completed count:', completedError);
+          throw new Error(`Failed to fetch completed requests: ${completedError.message}`);
+        }
         
         // Get rejected requests count
         const { count: rejectedCount, error: rejectedError } = await supabase
@@ -61,18 +72,23 @@ export function useAnalyticsData() {
           .select('*', { count: 'exact', head: true })
           .eq('status', 'rejected');
           
-        if (rejectedError) throw rejectedError;
+        if (rejectedError) {
+          console.error('Error fetching rejected count:', rejectedError);
+          throw new Error(`Failed to fetch rejected requests: ${rejectedError.message}`);
+        }
         
         // Get requests by type
         const { data: typeData, error: typeError } = await supabase
           .from('requests')
-          .select('type')
-          .order('type');
+          .select('type');
           
-        if (typeError) throw typeError;
+        if (typeError) {
+          console.error('Error fetching requests by type:', typeError);
+          throw new Error(`Failed to fetch request types: ${typeError.message}`);
+        }
         
         const typeCount: Record<string, number> = {};
-        typeData.forEach(item => {
+        typeData?.forEach(item => {
           typeCount[item.type] = (typeCount[item.type] || 0) + 1;
         });
         
@@ -84,13 +100,15 @@ export function useAnalyticsData() {
         // Get requests by status
         const { data: statusData, error: statusError } = await supabase
           .from('requests')
-          .select('status')
-          .order('status');
+          .select('status');
           
-        if (statusError) throw statusError;
+        if (statusError) {
+          console.error('Error fetching requests by status:', statusError);
+          throw new Error(`Failed to fetch request statuses: ${statusError.message}`);
+        }
         
         const statusCount: Record<string, number> = {};
-        statusData.forEach(item => {
+        statusData?.forEach(item => {
           statusCount[item.status] = (statusCount[item.status] || 0) + 1;
         });
         
@@ -102,13 +120,15 @@ export function useAnalyticsData() {
         // Get requests by month
         const { data: dateData, error: dateError } = await supabase
           .from('requests')
-          .select('created_at')
-          .order('created_at');
+          .select('created_at');
           
-        if (dateError) throw dateError;
+        if (dateError) {
+          console.error('Error fetching requests by date:', dateError);
+          throw new Error(`Failed to fetch request dates: ${dateError.message}`);
+        }
         
         const monthCount: Record<string, number> = {};
-        dateData.forEach(item => {
+        dateData?.forEach(item => {
           const month = new Date(item.created_at).toLocaleString('default', { month: 'short', year: 'numeric' });
           monthCount[month] = (monthCount[month] || 0) + 1;
         });
@@ -137,7 +157,26 @@ export function useAnalyticsData() {
         });
       } catch (err) {
         console.error('Error fetching analytics data:', err);
-        setError(err instanceof Error ? err : new Error('Unknown error'));
+        let errorMessage = 'Failed to load analytics data';
+        
+        if (err instanceof Error) {
+          errorMessage = err.message;
+          setError(err);
+        } else {
+          // Handle non-Error objects
+          const genericError = new Error(errorMessage);
+          setError(genericError);
+          
+          // Log more details for debugging
+          console.error('Non-standard error object:', err);
+        }
+        
+        // Show a toast notification for user feedback
+        toast({
+          title: "Analytics Error",
+          description: errorMessage,
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }

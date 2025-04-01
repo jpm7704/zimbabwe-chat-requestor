@@ -1,14 +1,47 @@
+
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, PieChart, LineChart, ResponsiveContainer, XAxis, YAxis, Bar, Pie, Line, Tooltip, Legend, Cell } from "recharts";
+import { BarChart, PieChart, ResponsiveContainer, XAxis, YAxis, Bar, Pie, Tooltip, Legend, Cell } from "recharts";
 import { useAnalyticsData } from "@/hooks/useAnalyticsData";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Analytics = () => {
   const { userProfile } = useAuth();
   const { data, loading, error } = useAnalyticsData();
 
-  if (loading) return <div>Loading analytics...</div>;
-  if (error) return <div>Error loading analytics: {error.message}</div>;
+  // Handle loading state
+  if (loading) {
+    return (
+      <div className="container px-4 mx-auto max-w-6xl py-8 flex flex-col items-center justify-center min-h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Loading analytics data...</p>
+      </div>
+    );
+  }
+
+  // Handle error state with retry option
+  if (error) {
+    return (
+      <div className="container px-4 mx-auto max-w-6xl py-8">
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            {error.message || "Failed to load analytics data. Please try again."}
+          </AlertDescription>
+        </Alert>
+        <Button 
+          onClick={() => window.location.reload()} 
+          variant="outline"
+          className="mt-2"
+        >
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container px-4 mx-auto max-w-6xl py-8">
@@ -37,9 +70,9 @@ const Analytics = () => {
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold">
-                {data.completedRequests ? 
+                {data.totalRequests > 0 ? 
                   `${Math.round((data.completedRequests / data.totalRequests) * 100)}%` : 
-                  'N/A'
+                  '0%'
                 }
               </div>
             </CardContent>
@@ -64,24 +97,31 @@ const Analytics = () => {
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={data.requestsByType}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={true}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="count"
-                    >
-                      {data.requestsByType.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={`hsl(${index * 60}, 70%, 50%)`} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
+                  {data.requestsByType.length > 0 ? (
+                    <PieChart>
+                      <Pie
+                        data={data.requestsByType}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={true}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="count"
+                        nameKey="type"
+                      >
+                        {data.requestsByType.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={`hsl(${index * 60}, 70%, 50%)`} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <p className="text-muted-foreground text-center">No request type data available</p>
+                    </div>
+                  )}
                 </ResponsiveContainer>
               </div>
             </CardContent>
@@ -95,13 +135,19 @@ const Analytics = () => {
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.requestsByMonth}>
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="count" fill="#8884d8" />
-                  </BarChart>
+                  {data.requestsByMonth.length > 0 ? (
+                    <BarChart data={data.requestsByMonth}>
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="count" fill="#8884d8" />
+                    </BarChart>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <p className="text-muted-foreground text-center">No monthly data available</p>
+                    </div>
+                  )}
                 </ResponsiveContainer>
               </div>
             </CardContent>
@@ -116,24 +162,31 @@ const Analytics = () => {
           <CardContent>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={data.requestsByStatus}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={true}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="count"
-                  >
-                    {data.requestsByStatus.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={`hsl(${index * 60}, 70%, 50%)`} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
+                {data.requestsByStatus.length > 0 ? (
+                  <PieChart>
+                    <Pie
+                      data={data.requestsByStatus}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="count"
+                      nameKey="status"
+                    >
+                      {data.requestsByStatus.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={`hsl(${index * 60}, 70%, 50%)`} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-muted-foreground text-center">No status data available</p>
+                  </div>
+                )}
               </ResponsiveContainer>
             </div>
           </CardContent>
