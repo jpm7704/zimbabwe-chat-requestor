@@ -60,32 +60,16 @@ const App = () => {
             <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
             
-            {/* Role-specific routes - dev mode bypasses permission checks */}
-            <Route path="/field-work" element={
-              <MainLayout>
-                {isDevMode ? <FieldWork /> : (
-                  <RequirePermission permission="canAccessFieldReports">
-                    <FieldWork />
-                  </RequirePermission>
-                )}
-              </MainLayout>
-            } />
+            {/* Special route for Field Officers - Allow direct access */}
+            <Route path="/field-work" element={<MainLayout><FieldWork /></MainLayout>} />
+            <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
             
+            {/* Role-specific routes - kept for other roles */}
             <Route path="/analytics" element={
               <MainLayout>
                 {isDevMode ? <Analytics /> : (
                   <RequirePermission permission="canAccessAnalytics">
                     <Analytics />
-                  </RequirePermission>
-                )}
-              </MainLayout>
-            } />
-            
-            <Route path="/reports" element={
-              <MainLayout>
-                {isDevMode ? <Reports /> : (
-                  <RequirePermission permission="canAccessFieldReports">
-                    <Reports />
                   </RequirePermission>
                 )}
               </MainLayout>

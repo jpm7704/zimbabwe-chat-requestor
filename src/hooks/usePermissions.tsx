@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { UserProfile } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
@@ -47,7 +46,7 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
         return {
           ...defaultPermissions,
           canReviewRequests: true,
-          canAccessFieldReports: true
+          canAccessFieldReports: true  // Ensure Field Officers have this permission
         };
         
       case 'project_officer':
