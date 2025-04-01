@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { RequestType, RequestTypeInfo, ChatMessage as ChatMessageType, RequestStatus } from "@/types";
@@ -63,7 +62,7 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
     try {
       const info = await getRequestTypeInfo(type);
       if (info) {
-        setRequestTypeInfo(info);
+        setRequestTypeInfo(info as unknown as RequestTypeInfo);
       }
     } catch (error) {
       console.error("Error loading request type info:", error);

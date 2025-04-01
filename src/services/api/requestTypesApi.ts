@@ -1,4 +1,7 @@
 
+import { RequestTypeInfo } from "@/types";
+import { getRequestTypeDetails } from "./requestTypeUtils";
+
 // Define the request type interface
 export interface RequestType {
   id: string;
@@ -22,7 +25,6 @@ export const getRequestTypes = async (): Promise<RequestType[]> => {
 };
 
 // Get detailed info about a specific request type
-export const getRequestTypeInfo = async (typeId: string): Promise<RequestType | null> => {
-  // This will be replaced with actual API call in the future
-  return null;
+export const getRequestTypeInfo = async (typeId: string): Promise<RequestTypeInfo | null> => {
+  return await getRequestTypeDetails(typeId);
 };

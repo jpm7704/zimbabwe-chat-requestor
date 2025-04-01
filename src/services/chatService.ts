@@ -1,7 +1,7 @@
 
-import { useToast } from "@/hooks/use-toast";
 import { ChatMessage as ChatMessageType } from "@/types";
 
+// Local interface for backward compatibility
 export interface ChatMessage {
   id: string;
   content: string;
@@ -10,7 +10,11 @@ export interface ChatMessage {
   isSystemMessage?: boolean;
 }
 
-export const sendMessage = async (requestId: string, message: string, senderId: string): Promise<ChatMessageType> => {
+export const sendMessage = async (
+  requestId: string,
+  message: string, 
+  senderId: string
+): Promise<ChatMessageType> => {
   try {
     // This will be connected to a real API in the future
     const newMessage: ChatMessageType = {
@@ -38,7 +42,7 @@ export const fetchMessages = async (requestId: string): Promise<ChatMessageType[
   }
 };
 
-// Adding the missing getChatHistory function
+// Function to get chat history
 export const getChatHistory = async (): Promise<ChatMessageType[]> => {
   try {
     // This will be connected to a real API in the future

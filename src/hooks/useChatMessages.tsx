@@ -46,13 +46,13 @@ export const useChatMessages = () => {
     setIsTyping(true);
     
     try {
-      // Using a dummy requestId and senderId for now, to be replaced with real values later
+      // Using a dummy requestId for now, to be replaced with real value later
       const response = await sendMessage("dummy-request-id", inputMessage, "user");
       
       // Slight delay to simulate typing
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      setMessages(prev => [...prev, response]);
+      setMessages(prevMessages => [...prevMessages, response]);
       setIsTyping(false);
     } catch (error) {
       console.error("Error sending message:", error);
