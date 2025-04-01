@@ -21,18 +21,18 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { fetchFieldWorkRequests } from "@/services/requestService";
+import { fetchFieldWorkRequests, type FieldWorkRequest } from "@/services/requestService";
 
 const FieldWork = () => {
   const { userProfile, formatRole } = useAuth();
   const navigate = useNavigate();
   
-  const { data: assignedRequests, isLoading, error } = useQuery({
+  const { data: assignedRequests = [], isLoading, error } = useQuery({
     queryKey: ['fieldWorkRequests'],
     queryFn: fetchFieldWorkRequests
   });
 
-  const getPriorityBadge = (priority) => {
+  const getPriorityBadge = (priority: string) => {
     switch(priority) {
       case 'high':
         return <Badge className="bg-red-500">High</Badge>;
@@ -46,7 +46,7 @@ const FieldWork = () => {
   };
 
   if (isLoading) return <div>Loading field work requests...</div>;
-  if (error) return <div>Error loading requests: {error.message}</div>;
+  if (error) return <div>Error loading requests: {(error as Error).message}</div>;
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">
@@ -70,7 +70,7 @@ const FieldWork = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {assignedRequests?.filter(r => r.status === 'assigned').length || 0}
+                {assignedRequests.filter(r => r.status === 'assigned').length || 0}
               </div>
               <p className="text-sm text-muted-foreground">Waiting for verification</p>
             </CardContent>
@@ -85,7 +85,7 @@ const FieldWork = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {assignedRequests?.filter(r => r.status === 'completed').length || 0}
+                {assignedRequests.filter(r => r.status === 'completed').length || 0}
               </div>
               <p className="text-sm text-muted-foreground">This month</p>
             </CardContent>
@@ -100,7 +100,7 @@ const FieldWork = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {assignedRequests?.filter(r => new Date(r.dueDate) < new Date(Date.now() + 48 * 60 * 60 * 1000)).length || 0}
+                {assignedRequests.filter(r => new Date(r.dueDate) < new Date(Date.now() + 48 * 60 * 60 * 1000)).length || 0}
               </div>
               <p className="text-sm text-muted-foreground">Within 48 hours</p>
             </CardContent>
@@ -128,14 +128,14 @@ const FieldWork = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {assignedRequests?.length === 0 ? (
+                {assignedRequests.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-4">
                       No requests assigned to you at this time.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  assignedRequests?.map((request) => (
+                  assignedRequests.map((request) => (
                     <TableRow key={request.id}>
                       <TableCell className="font-medium">{request.ticketNumber}</TableCell>
                       <TableCell>{request.title}</TableCell>
@@ -160,8 +160,6 @@ const FieldWork = () => {
             </Table>
           </div>
         </div>
-
-        {/* Removed recent activity section as it was mock data */}
       </div>
     </div>
   );

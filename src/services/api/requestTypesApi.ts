@@ -1,20 +1,28 @@
 
-import { RequestType, RequestTypeInfo } from "@/types";
-import { requestTypes } from "../mockData";
-import { delay } from "./baseApi";
+// Define the request type interface
+export interface RequestType {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  requiredDocuments?: string[];
+  fields?: Array<{
+    name: string;
+    label: string;
+    type: string;
+    required: boolean;
+    options?: string[];
+  }>;
+}
 
-/**
- * Get all request types and their requirements
- */
-export const getRequestTypes = async (): Promise<RequestTypeInfo[]> => {
-  await delay(500);
-  return requestTypes;
+// Get all available request types
+export const getRequestTypes = async (): Promise<RequestType[]> => {
+  // This will be replaced with actual API call in the future
+  return [];
 };
 
-/**
- * Get a specific request type and its requirements
- */
-export const getRequestTypeInfo = async (type: RequestType): Promise<RequestTypeInfo | undefined> => {
-  await delay(300);
-  return requestTypes.find(t => t.type === type);
+// Get detailed info about a specific request type
+export const getRequestTypeInfo = async (typeId: string): Promise<RequestType | null> => {
+  // This will be replaced with actual API call in the future
+  return null;
 };

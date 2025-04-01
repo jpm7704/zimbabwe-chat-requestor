@@ -5,17 +5,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, FileText, Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchReports } from "@/services/reportService";
+import { fetchReports, type Report } from "@/services/reportService";
 
 const Reports = () => {
   const { userProfile } = useAuth();
-  const { data: reports, isLoading, error } = useQuery({
+  const { data: reports = [], isLoading, error } = useQuery({
     queryKey: ['reports'],
     queryFn: fetchReports
   });
 
   if (isLoading) return <div>Loading reports...</div>;
-  if (error) return <div>Error loading reports: {error.message}</div>;
+  if (error) return <div>Error loading reports: {(error as Error).message}</div>;
 
   return (
     <div className="container px-4 mx-auto max-w-6xl py-8">
@@ -111,7 +111,7 @@ const Reports = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {/* Report template section remains mostly the same */}
+                {/* Report template section remains empty for now */}
               </div>
             </CardContent>
           </Card>
