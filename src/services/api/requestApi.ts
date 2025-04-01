@@ -1,3 +1,4 @@
+
 import { Request, RequestStatus, RequestType, Note } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -37,13 +38,13 @@ export const getRequestById = async (requestId: string): Promise<Request | null>
       createdAt: data.created_at,
       updatedAt: data.updated_at,
       // Handle possible null values for officers with proper type-checking
-      fieldOfficer: data.field_officer ? {
+      fieldOfficer: data.field_officer && !('error' in data.field_officer) ? {
         id: data.field_officer.id,
         name: data.field_officer.name,
         email: data.field_officer.email,
         role: data.field_officer.role,
       } : null,
-      programManager: data.program_manager ? {
+      programManager: data.program_manager && !('error' in data.program_manager) ? {
         id: data.program_manager.id,
         name: data.program_manager.name,
         email: data.program_manager.email,

@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
@@ -6,6 +7,7 @@ import Footer from "./Footer";
 import DevRoleSwitcher from "@/components/dev/DevRoleSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -33,12 +35,14 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="flex min-h-screen flex-col">
       <Navbar />
       {isDevMode && <DevRoleSwitcher />}
-      <div className="flex grow">
-        <AppSidebar />
-        <main className="flex-1">
-          {children}
-        </main>
-      </div>
+      <SidebarProvider>
+        <div className="flex grow w-full">
+          <AppSidebar />
+          <main className="flex-1">
+            {children}
+          </main>
+        </div>
+      </SidebarProvider>
       <Footer />
     </div>
   );
