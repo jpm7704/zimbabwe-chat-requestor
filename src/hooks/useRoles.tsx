@@ -139,9 +139,7 @@ export const useRoles = (userProfile: UserProfile | null) => {
 
   // Add role check methods - ensure these are defined as functions that can be called
   const isAdmin = () => {
-    return userProfile?.role?.toLowerCase() === 'admin' || 
-           userProfile?.role?.toLowerCase() === 'director' ||
-           userProfile?.role?.toLowerCase() === 'management';
+    return userProfile?.role?.toLowerCase() === 'admin';
   };
 
   const isRegularUser = () => {
@@ -167,6 +165,11 @@ export const useRoles = (userProfile: UserProfile | null) => {
            userProfile?.role?.toLowerCase() === 'hop';
   };
 
+  const isDirector = () => {
+    return userProfile?.role?.toLowerCase() === 'director' || 
+           userProfile?.role?.toLowerCase() === 'management';
+  };
+
   const isCEO = () => {
     return userProfile?.role?.toLowerCase() === 'ceo';
   };
@@ -184,6 +187,7 @@ export const useRoles = (userProfile: UserProfile | null) => {
     isProjectOfficer,
     isAssistantProjectOfficer,
     isHeadOfPrograms,
+    isDirector,
     isCEO,
     isPatron
   };

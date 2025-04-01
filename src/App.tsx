@@ -59,7 +59,7 @@ const App = () => {
             <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
             
-            {/* Role-specific routes - direct access with no permission checking */}
+            {/* Role-specific routes with direct access - no permission checking */}
             <Route path="/field-work" element={<MainLayout><FieldWork /></MainLayout>} />
             <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
             <Route path="/analytics" element={<MainLayout><Analytics /></MainLayout>} />

@@ -20,7 +20,7 @@ export type Permissions = {
 };
 
 export function usePermissions(userProfile: UserProfile | null): Permissions {
-  const { getRoleInfo } = useRoles(userProfile);
+  const { getRoleInfo, isDirector } = useRoles(userProfile);
   const roleInfo = getRoleInfo();
   
   const permissions = useMemo(() => {
@@ -57,7 +57,8 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
           ...defaultPermissions,
           canReviewRequests: true,
           canAssignRequests: true,
-          canAccessFieldReports: true
+          canAccessFieldReports: true,
+          canAccessAnalytics: role === 'assistant_project_officer'
         };
         
       case 'programme_manager':
@@ -80,6 +81,7 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
           canReviewRequests: true,
           canAssignRequests: true,
           canAccessAnalytics: true,
+          canAccessFieldReports: true,
           canAccessSystemSettings: true,
           canManageUsers: true
         };
@@ -92,6 +94,7 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
           canReviewRequests: true,
           canAssignRequests: true,
           canAccessAnalytics: true,
+          canAccessFieldReports: true,
           canAccessSystemSettings: true,
           canManageUsers: true
         };
@@ -101,7 +104,22 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
           ...defaultPermissions,
           canApproveRequests: true,
           canRejectRequests: true,
-          canAccessAnalytics: true
+          canAccessAnalytics: true,
+          canAccessFieldReports: true
+        };
+        
+      case 'admin':
+        return {
+          ...defaultPermissions,
+          canApproveRequests: true,
+          canRejectRequests: true,
+          canReviewRequests: true,
+          canAssignRequests: true,
+          canAccessAnalytics: true,
+          canAccessFieldReports: true,
+          canAccessSystemSettings: true,
+          canAccessAdminPanel: true,
+          canManageUsers: true
         };
         
       case 'user':

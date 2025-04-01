@@ -33,6 +33,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
     isProjectOfficer,
     isAssistantProjectOfficer,
     isHeadOfPrograms,
+    isDirector,
     isCEO,
     isPatron
   } = useRoles(userProfile);
@@ -54,6 +55,9 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
   const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
   const isDevAdmin = isDevelopment && devRole === 'admin';
   const isUserAdmin = isDevAdmin || isAdmin();
+  
+  // Check if user has executive-level role (Director, CEO, Patron)
+  const isExecutiveRole = isDirector() || isCEO() || isPatron();
 
   return (
     <div className={`flex ${variant === "sidebar" ? "flex-col w-full gap-1" : "items-center gap-1"}`}>
@@ -109,7 +113,8 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {(isAssistantProjectOfficer() || isHeadOfPrograms() || isAdmin()) && (
+      {/* Analytics access for executives and program managers */}
+      {(isExecutiveRole || isHeadOfPrograms() || isAssistantProjectOfficer() || isAdmin()) && (
         <Button 
           variant={isActive('/analytics') ? "default" : buttonVariant} 
           className={buttonClass}
@@ -135,7 +140,8 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {(isAdmin() || isCEO() || isPatron()) && (
+      {/* Approvals access for executives */}
+      {(isExecutiveRole || isAdmin()) && (
         <Button 
           variant={isActive('/approvals') ? "default" : buttonVariant} 
           className={buttonClass}
