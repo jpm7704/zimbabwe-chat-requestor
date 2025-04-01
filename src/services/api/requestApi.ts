@@ -26,6 +26,19 @@ export const getRequestById = async (requestId: string): Promise<Request | null>
       return null;
     }
     
+    // Helper function to safely access profile properties
+    const mapProfile = (profile: any) => {
+      if (!profile || typeof profile !== 'object' || 'error' in profile) {
+        return null;
+      }
+      return {
+        id: profile.id,
+        name: profile.name,
+        email: profile.email,
+        role: profile.role,
+      };
+    };
+    
     // Convert database format to our app's Request type
     return {
       id: data.id,
@@ -37,19 +50,8 @@ export const getRequestById = async (requestId: string): Promise<Request | null>
       status: data.status as RequestStatus,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
-      // Handle possible null values for officers with proper type-checking
-      fieldOfficer: data.field_officer && !('error' in data.field_officer) ? {
-        id: data.field_officer.id,
-        name: data.field_officer.name,
-        email: data.field_officer.email,
-        role: data.field_officer.role,
-      } : null,
-      programManager: data.program_manager && !('error' in data.program_manager) ? {
-        id: data.program_manager.id,
-        name: data.program_manager.name,
-        email: data.program_manager.email,
-        role: data.program_manager.role,
-      } : null,
+      fieldOfficer: mapProfile(data.field_officer),
+      programManager: mapProfile(data.program_manager),
       notes: [], // These will be loaded separately when needed
       documents: [],
       timeline: []
