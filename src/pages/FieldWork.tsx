@@ -22,15 +22,33 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchFieldWorkRequests, type FieldWorkRequest } from "@/services/requestService";
+import { useRoles } from "@/hooks/useRoles";
 
 const FieldWork = () => {
   const { userProfile, formatRole } = useAuth();
   const navigate = useNavigate();
+  const { isFieldOfficer, isProjectOfficer } = useRoles(userProfile);
   
+  // Check if user has appropriate role for this page
+  useEffect(() => {
+    // If we have user profile data but user is not a field officer or project officer, redirect
+    if (userProfile && !isFieldOfficer() && !isProjectOfficer()) {
+      navigate('/dashboard');
+    }
+  }, [userProfile, navigate, isFieldOfficer, isProjectOfficer]);
+
   const { data: assignedRequests = [], isLoading, error } = useQuery({
     queryKey: ['fieldWorkRequests'],
     queryFn: fetchFieldWorkRequests
   });
+
+  // If still checking roles or loading data, show loading
+  if (!userProfile || isLoading) return <div>Loading field work requests...</div>;
+  
+  // Additional role verification - if somehow we get past the useEffect redirect
+  if (!isFieldOfficer() && !isProjectOfficer()) {
+    return null; // Don't render anything while redirecting
+  }
 
   const getPriorityBadge = (priority: string) => {
     switch(priority) {
@@ -45,7 +63,6 @@ const FieldWork = () => {
     }
   };
 
-  if (isLoading) return <div>Loading field work requests...</div>;
   if (error) return <div>Error loading requests: {(error as Error).message}</div>;
 
   return (

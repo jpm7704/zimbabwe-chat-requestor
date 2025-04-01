@@ -40,7 +40,7 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
     const userRole = userProfile.role?.toLowerCase() || '';
     
     // Redirect from inappropriate pages based on role
-    if (currentPath === '/field-work' && !['field_officer', 'project_officer', 'regional_project_officer'].includes(userRole)) {
+    if (currentPath === '/field-work' && !['field_officer', 'project_officer', 'regional_project_officer', 'assistant_project_officer'].includes(userRole)) {
       // Redirect non-field officers from field work page
       navigate('/dashboard');
       return;
@@ -63,6 +63,35 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
       navigate('/dashboard');
       return;
     }
+  }, [userProfile, location.pathname, permissions, navigate]);
+
+  // Add an event listener to respond to role changes
+  useEffect(() => {
+    const handleRoleChange = () => {
+      // Check permissions on role change
+      if (!userProfile) return;
+      
+      const currentPath = location.pathname;
+      const userRole = userProfile.role?.toLowerCase() || '';
+      
+      // Re-check permissions based on the current path
+      if (currentPath === '/field-work' && !['field_officer', 'project_officer', 'regional_project_officer', 'assistant_project_officer'].includes(userRole)) {
+        navigate('/dashboard');
+      } else if (currentPath === '/reports' && !permissions.canAccessFieldReports) {
+        navigate('/dashboard');
+      } else if (currentPath === '/approvals' && !permissions.canApproveRequests) {
+        navigate('/dashboard');
+      } else if (currentPath === '/analytics' && !permissions.canAccessAnalytics) {
+        navigate('/dashboard');
+      }
+    };
+
+    // Listen for dev role changes
+    window.addEventListener('dev-role-changed', handleRoleChange);
+    
+    return () => {
+      window.removeEventListener('dev-role-changed', handleRoleChange);
+    };
   }, [userProfile, location.pathname, permissions, navigate]);
 
   if (!userProfile) {
