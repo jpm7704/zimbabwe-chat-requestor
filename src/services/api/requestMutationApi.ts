@@ -291,6 +291,8 @@ export const getRequestNotes = async (requestId: string, canSeeInternalNotes: bo
   }
 };
 
-// Export update functions used in other parts of the app
-export { updateRequestStatus } from '@/services/api/request/statusApi';
+// Export the createRequest function directly
 export { createRequest } from '@/services/api/request/createRequest';
+
+// Export other functions from the request folder
+export { updateRequestStatus } from '@/services/api/request/statusApi';

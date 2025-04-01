@@ -2,11 +2,33 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Notification, NotificationType } from "@/types";
 
+// Helper function to check if notifications table exists
+const checkForNotificationsTable = async (): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('id')
+      .limit(1);
+      
+    return !error;
+  } catch (error) {
+    console.error("Error checking for notifications table:", error);
+    return false;
+  }
+};
+
 /**
  * Get all notifications for the current user based on their role
  */
 export const getNotifications = async (): Promise<Notification[]> => {
   try {
+    // Check if table exists
+    const tableExists = await checkForNotificationsTable();
+    if (!tableExists) {
+      console.warn("Notifications table does not exist yet");
+      return [];
+    }
+    
     // Get the current user session
     const { data: session } = await supabase.auth.getSession();
     if (!session?.session?.user) {
@@ -25,15 +47,11 @@ export const getNotifications = async (): Promise<Notification[]> => {
     
     // Get notifications for the user based on their role and role hierarchy
     const { data, error } = await supabase
-      .from('notifications')
-      .select()
-      .filter('target_roles', 'cs', `{${userProfile.role}}`)
-      .order('created_at', { ascending: false })
-      .limit(100);
+      .rpc('get_notifications_for_role', { user_role: userProfile.role });
     
     if (error) {
       console.error("Error fetching notifications:", error);
-      throw error;
+      return [];
     }
     
     // Transform received data to match our Notification type
@@ -59,6 +77,12 @@ export const getNotifications = async (): Promise<Notification[]> => {
  */
 export const getUnreadNotificationsCount = async (): Promise<number> => {
   try {
+    // Check if table exists
+    const tableExists = await checkForNotificationsTable();
+    if (!tableExists) {
+      return 0;
+    }
+    
     // Get the current user session
     const { data: session } = await supabase.auth.getSession();
     if (!session?.session?.user) {
@@ -77,14 +101,11 @@ export const getUnreadNotificationsCount = async (): Promise<number> => {
     
     // Count unread notifications for the user based on their role
     const { count, error } = await supabase
-      .from('notifications')
-      .select('*', { count: 'exact', head: true })
-      .filter('target_roles', 'cs', `{${userProfile.role}}`)
-      .eq('read', false);
+      .rpc('get_unread_notification_count', { user_role: userProfile.role });
     
     if (error) {
       console.error("Error fetching notification count:", error);
-      throw error;
+      return 0;
     }
     
     return count || 0;
@@ -99,10 +120,15 @@ export const getUnreadNotificationsCount = async (): Promise<number> => {
  */
 export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
   try {
+    // Check if table exists
+    const tableExists = await checkForNotificationsTable();
+    if (!tableExists) {
+      return;
+    }
+    
+    // Update the notification
     const { error } = await supabase
-      .from('notifications')
-      .update({ read: true })
-      .eq('id', notificationId);
+      .rpc('mark_notification_read', { notification_id: notificationId });
     
     if (error) {
       console.error("Error marking notification as read:", error);
@@ -119,6 +145,12 @@ export const markNotificationAsRead = async (notificationId: string): Promise<vo
  */
 export const markAllNotificationsAsRead = async (): Promise<void> => {
   try {
+    // Check if table exists
+    const tableExists = await checkForNotificationsTable();
+    if (!tableExists) {
+      return;
+    }
+    
     // Get the current user session
     const { data: session } = await supabase.auth.getSession();
     if (!session?.session?.user) {
@@ -137,10 +169,7 @@ export const markAllNotificationsAsRead = async (): Promise<void> => {
     
     // Mark all unread notifications as read
     const { error } = await supabase
-      .from('notifications')
-      .update({ read: true })
-      .filter('target_roles', 'cs', `{${userProfile.role}}`)
-      .eq('read', false);
+      .rpc('mark_all_notifications_read', { user_role: userProfile.role });
     
     if (error) {
       console.error("Error marking all notifications as read:", error);
@@ -161,20 +190,26 @@ export const createDocumentUploadNotification = async (
   documentName: string,
 ): Promise<void> => {
   try {
+    // Check if table exists before attempting to create notification
+    const tableExists = await checkForNotificationsTable();
+    if (!tableExists) {
+      console.warn("Skipping notification creation - table does not exist yet");
+      return;
+    }
+
     // Create a notification for relevant roles
     // Field officers and project officers should be notified
     const targetRoles = ['field_officer', 'project_officer', 'regional_project_officer', 'assistant_project_officer', 'programme_manager', 'head_of_programs'];
     
+    // Use the dedicated RPC function to create notification
     const { error } = await supabase
-      .from('notifications')
-      .insert({
-        type: 'document_upload',
-        title: 'New document uploaded',
-        message: `A new document "${documentName}" has been uploaded for request ${requestTicketNumber}`,
-        target_roles: targetRoles,
-        link: `/requests/${requestId}`,
-        related_id: requestId,
-        read: false
+      .rpc('create_notification', {
+        notification_type: 'document_upload',
+        notification_title: 'New document uploaded',
+        notification_message: `A new document "${documentName}" has been uploaded for request ${requestTicketNumber}`,
+        target_roles_array: targetRoles,
+        link_path: `/requests/${requestId}`,
+        related_id_param: requestId
       });
     
     if (error) {
@@ -183,6 +218,6 @@ export const createDocumentUploadNotification = async (
     }
   } catch (error) {
     console.error("Error in createDocumentUploadNotification:", error);
-    throw error;
+    // Just log error but don't throw - notifications are not critical to app function
   }
 };

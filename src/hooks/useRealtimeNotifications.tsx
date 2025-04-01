@@ -47,10 +47,11 @@ export const useRealtimeNotifications = () => {
             toast({
               title: newNotification.title,
               description: newNotification.message,
-              action: newNotification.link ? {
-                label: "View",
+              action: {
+                altText: "View notification",
+                children: "View",
                 onClick: () => window.location.href = newNotification.link || ''
-              } : undefined
+              }
             });
             
             // Add to the existing notifications or create new array
