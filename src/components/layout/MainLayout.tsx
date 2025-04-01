@@ -7,6 +7,8 @@ import DevRoleSwitcher from "@/components/dev/DevRoleSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/toaster";
+import NotificationCenter from "@/components/notifications/NotificationCenter";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -37,11 +39,15 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="flex grow w-full">
           <AppSidebar />
           <main className="flex-1">
+            <div className="flex justify-end p-4">
+              <NotificationCenter />
+            </div>
             {children}
           </main>
         </div>
       </SidebarProvider>
       <Footer />
+      <Toaster />
     </div>
   );
 };
