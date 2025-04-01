@@ -73,6 +73,6 @@ export function AppSidebar() {
       <SidebarRail />
     </>
   );
-}
+};
 
 export default AppSidebar;
