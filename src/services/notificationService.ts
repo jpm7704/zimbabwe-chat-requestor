@@ -23,9 +23,12 @@ export const getNotifications = async (): Promise<Notification[]> => {
       return [];
     }
     
-    // Get notifications for the user based on their role and role hierarchy
+    // Get notifications for the user based on their role
     const { data, error } = await supabase
-      .rpc('get_notifications_for_role', { user_role: userProfile.role });
+      .from('notifications')
+      .select('*')
+      .contains('target_roles', [userProfile.role])
+      .order('created_at', { ascending: false });
     
     if (error) {
       console.error("Error fetching notifications:", error);
@@ -72,15 +75,18 @@ export const getUnreadNotificationsCount = async (): Promise<number> => {
     }
     
     // Count unread notifications for the user based on their role
-    const { data, error } = await supabase
-      .rpc('get_unread_notification_count', { user_role: userProfile.role });
+    const { data, error, count } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact' })
+      .contains('target_roles', [userProfile.role])
+      .eq('read', false);
     
     if (error) {
       console.error("Error fetching notification count:", error);
       return 0;
     }
     
-    return data || 0;
+    return count || 0;
   } catch (error) {
     console.error("Error in getUnreadNotificationsCount:", error);
     return 0;
@@ -94,7 +100,9 @@ export const markNotificationAsRead = async (notificationId: string): Promise<vo
   try {
     // Update the notification
     const { error } = await supabase
-      .rpc('mark_notification_read', { notification_id: notificationId });
+      .from('notifications')
+      .update({ read: true })
+      .eq('id', notificationId);
     
     if (error) {
       console.error("Error marking notification as read:", error);
@@ -127,9 +135,12 @@ export const markAllNotificationsAsRead = async (): Promise<void> => {
       return;
     }
     
-    // Mark all unread notifications as read
+    // Mark all unread notifications for this role as read
     const { error } = await supabase
-      .rpc('mark_all_notifications_read', { user_role: userProfile.role });
+      .from('notifications')
+      .update({ read: true })
+      .contains('target_roles', [userProfile.role])
+      .eq('read', false);
     
     if (error) {
       console.error("Error marking all notifications as read:", error);
@@ -154,15 +165,16 @@ export const createDocumentUploadNotification = async (
     // Field officers and project officers should be notified
     const targetRoles = ['field_officer', 'project_officer', 'regional_project_officer', 'assistant_project_officer', 'programme_manager', 'head_of_programs'];
     
-    // Use the dedicated RPC function to create notification
+    // Create notification directly in the database
     const { error } = await supabase
-      .rpc('create_notification', {
-        notification_type: 'document_upload',
-        notification_title: 'New document uploaded',
-        notification_message: `A new document "${documentName}" has been uploaded for request ${requestTicketNumber}`,
-        target_roles_array: targetRoles,
-        link_path: `/requests/${requestId}`,
-        related_id_param: requestId
+      .from('notifications')
+      .insert({
+        type: 'document_upload',
+        title: 'New document uploaded',
+        message: `A new document "${documentName}" has been uploaded for request ${requestTicketNumber}`,
+        target_roles: targetRoles,
+        link: `/requests/${requestId}`,
+        related_id: requestId
       });
     
     if (error) {

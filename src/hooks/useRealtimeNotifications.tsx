@@ -49,7 +49,10 @@ export const useRealtimeNotifications = () => {
               title: newNotification.title,
               description: newNotification.message,
               action: <ToastAction 
-                onClick={() => window.location.href = newNotification.link || ''}
+                altText="View"
+                onClick={() => {
+                  if (newNotification.link) window.location.href = newNotification.link;
+                }}
               >
                 View
               </ToastAction>

@@ -9,7 +9,7 @@ export {
   getUserRequests,
   getRequestById,
   searchRequests
-} from './api/requestFetchApi';
+} from './api/requestApi';
 
 export {
   createRequest,
