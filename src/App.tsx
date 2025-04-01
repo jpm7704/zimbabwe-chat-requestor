@@ -20,7 +20,7 @@ import Reports from "./pages/Reports";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import ApprovalsPage from "./pages/ApprovalsPage";
-import DevRoleSwitcher from "./components/dev/DevRoleSwitcher";
+import RequirePermission from "./components/auth/RequirePermission";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,7 +51,7 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/staff-verification" element={<StaffVerification />} />
             
-            {/* Protected routes - all with full access */}
+            {/* Protected routes - require authentication */}
             <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
             <Route path="/submit" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
             <Route path="/enquiry" element={<MainLayout><EnquiryPage /></MainLayout>} />
@@ -59,10 +59,47 @@ const App = () => {
             <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
             <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
-            <Route path="/field-work" element={<MainLayout><FieldWork /></MainLayout>} />
-            <Route path="/analytics" element={<MainLayout><Analytics /></MainLayout>} />
-            <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
-            <Route path="/approvals" element={<MainLayout><ApprovalsPage /></MainLayout>} />
+            
+            {/* Role-specific routes - dev mode bypasses permission checks */}
+            <Route path="/field-work" element={
+              <MainLayout>
+                {isDevMode ? <FieldWork /> : (
+                  <RequirePermission permission="canAccessFieldReports">
+                    <FieldWork />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            <Route path="/analytics" element={
+              <MainLayout>
+                {isDevMode ? <Analytics /> : (
+                  <RequirePermission permission="canAccessAnalytics">
+                    <Analytics />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            <Route path="/reports" element={
+              <MainLayout>
+                {isDevMode ? <Reports /> : (
+                  <RequirePermission permission="canAccessFieldReports">
+                    <Reports />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            <Route path="/approvals" element={
+              <MainLayout>
+                {isDevMode ? <ApprovalsPage /> : (
+                  <RequirePermission permission="canApproveRequests">
+                    <ApprovalsPage />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
             
             {/* Redirect admin page to dashboard */}
             <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
@@ -70,9 +107,6 @@ const App = () => {
             {/* Fallback route for not found pages */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          
-          {/* Always show DevRoleSwitcher regardless of environment */}
-          <DevRoleSwitcher />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

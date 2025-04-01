@@ -1,13 +1,31 @@
+
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, FileText, Search } from "lucide-react";
 
 const Reports = () => {
-  const { userProfile } = useAuth();
+  const { userProfile, isAuthenticated } = useAuth();
+  const permissions = usePermissions(userProfile);
+  const navigate = useNavigate();
 
-  // Sample reports data without permission checks
+  // Redirect if user doesn't have permission to view this page
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    
+    if (!permissions.canAccessFieldReports) {
+      navigate('/');
+    }
+  }, [isAuthenticated, permissions, navigate]);
+
+  // Sample reports data
   const reports = [
     {
       id: "REP-2503-001",
