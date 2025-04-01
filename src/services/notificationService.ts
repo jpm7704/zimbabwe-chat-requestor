@@ -36,7 +36,7 @@ export const getNotifications = async (): Promise<Notification[]> => {
       throw error;
     }
     
-    // Map to our Notification type
+    // Transform received data to match our Notification type
     return data.map((item): Notification => ({
       id: item.id,
       type: item.type as NotificationType,

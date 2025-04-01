@@ -10,9 +10,7 @@ import { getRequestNotes, addNoteToRequest } from '@/services/api/requestMutatio
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { FileUpload } from './FileUpload';
-import { DocumentType } from '@/types';
-import { Skeleton } from '@/components/ui/skeleton';
+import FileUpload from './FileUpload';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 

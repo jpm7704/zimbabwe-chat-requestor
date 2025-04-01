@@ -1,48 +1,33 @@
-import { useState, useCallback } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FilePlus, Upload, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { Document } from "@/types";
-import { uploadDocument } from "@/services/api/requestMutationApi";
+import { Document, DocumentType } from "@/types";
+import { uploadDocument } from "@/services/api/request/documentsApi";
 
 interface FileUploadProps {
   requestId: string;
   onUploadSuccess?: () => void;
   initialFiles?: Document[];
+  documentType?: DocumentType;
+  onUploadComplete?: () => void;
 }
 
-const FileUpload = ({ requestId, onUploadSuccess, initialFiles = [] }: FileUploadProps) => {
+const FileUpload = ({ 
+  requestId, 
+  onUploadSuccess, 
+  initialFiles = [],
+  documentType = 'supporting_document',
+  onUploadComplete
+}: FileUploadProps) => {
   const [uploadedFiles, setUploadedFiles] = useState<Document[]>(initialFiles);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    handleUpload(acceptedFiles);
-  }, [requestId, handleUpload]);
-
-  const {getRootProps, getInputProps, isDragActive} = useDropzone({
-    onDrop,
-    multiple: true,
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
-      'application/pdf': ['.pdf'],
-      'application/msword': ['.doc'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
-    }
-  });
-  
-  // Update drag active state
-  useState(() => {
-    if (isDragActive) {
-      setDragActive(true);
-    } else {
-      setDragActive(false);
-    }
-  }, [isDragActive]);
 
   const handleUpload = async (files: File[]) => {
     try {
@@ -50,7 +35,7 @@ const FileUpload = ({ requestId, onUploadSuccess, initialFiles = [] }: FileUploa
       setError(null);
       
       for (const file of files) {
-        const result = await uploadDocument(requestId, file, 'supporting_document');
+        const result = await uploadDocument(requestId, file, documentType);
         if (result) {
           setUploadedFiles(prev => [...prev, result]);
         }
@@ -59,6 +44,10 @@ const FileUpload = ({ requestId, onUploadSuccess, initialFiles = [] }: FileUploa
       // Notify onUploadSuccess with the new files
       if (onUploadSuccess) {
         onUploadSuccess();
+      }
+
+      if (onUploadComplete) {
+        onUploadComplete();
       }
       
       toast({
@@ -78,6 +67,26 @@ const FileUpload = ({ requestId, onUploadSuccess, initialFiles = [] }: FileUploa
       setLoading(false);
     }
   };
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    handleUpload(acceptedFiles);
+  }, [requestId]);
+
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({
+    onDrop,
+    multiple: true,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+    }
+  });
+  
+  // Update drag active state
+  useEffect(() => {
+    setDragActive(isDragActive);
+  }, [isDragActive]);
 
   return (
     <div className="flex flex-col space-y-4">

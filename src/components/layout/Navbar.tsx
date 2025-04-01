@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 const Navbar = () => {
   const { isAuthenticated, userProfile } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Add scroll effect for navbar
   useEffect(() => {
@@ -36,17 +37,22 @@ const Navbar = () => {
             <span className="font-bold text-xl">BGF</span>
           </Link>
           <nav className="hidden md:flex gap-6">
-            <NavLinks />
+            <NavLinks isAuthenticated={isAuthenticated} />
           </nav>
         </div>
         <div className="flex items-center gap-4">
           {isAuthenticated && (
             <>
               <NotificationCenter />
-              <UserProfileDropdown />
+              <UserProfileDropdown userProfile={userProfile} />
             </>
           )}
-          <MobileMenu />
+          <MobileMenu 
+            isOpen={mobileMenuOpen}
+            onClose={() => setMobileMenuOpen(false)}
+            userProfile={userProfile}
+            isAuthenticated={isAuthenticated}
+          />
         </div>
       </div>
     </header>
