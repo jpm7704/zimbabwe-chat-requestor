@@ -7,8 +7,6 @@ const ApprovalsPage = () => {
   const { isAdmin, isCEO } = useRoles(userProfile);
   const [activeTab, setActiveTab] = useState("pending");
 
-  // Remaining implementation
-  
   return (
     <div className="container mx-auto max-w-6xl py-8">
       <h1 className="text-3xl font-bold mb-2">Approval Dashboard</h1>
@@ -31,8 +29,6 @@ const ApprovalsPage = () => {
         </div>
       )}
 
-      {/* Rest of the component implementation would be here */}
-      
       <div className="text-center text-muted-foreground mt-8">
         <p>No requests currently awaiting your approval.</p>
       </div>

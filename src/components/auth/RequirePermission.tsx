@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/use-toast';
+import { useRoles } from '@/hooks/useRoles';
 
 interface RequirePermissionProps {
   children: ReactNode;
@@ -14,6 +15,7 @@ interface RequirePermissionProps {
 const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: RequirePermissionProps) => {
   const { userProfile } = useAuth();
   const permissions = usePermissions(userProfile);
+  const { isAdmin } = useRoles(userProfile);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -36,7 +38,7 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
   const isAdminPage = permission === 'canAccessAdminPanel';
   
   // Determine if user has permission - for normal users
-  const hasPermission = isAdminPage ? userProfile?.role === 'admin' : permissions[permission];
+  const hasPermission = isAdminPage ? isAdmin() : permissions[permission];
   
   // Log permission check for debugging
   console.log(`Permission check for ${String(permission)}: ${hasPermission}`, {

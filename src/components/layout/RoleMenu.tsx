@@ -27,9 +27,9 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
   const { userProfile } = useAuth();
   const permissions = usePermissions(userProfile);
   const { 
-    isAdmin, 
-    isRegularUser, 
-    isFieldOfficer, 
+    isAdmin,
+    isRegularUser,
+    isFieldOfficer,
     isProjectOfficer,
     isAssistantProjectOfficer,
     isHeadOfPrograms,

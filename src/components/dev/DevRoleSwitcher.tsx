@@ -3,9 +3,11 @@ import { useState, useEffect } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const DevRoleSwitcher = () => {
   const [currentRole, setCurrentRole] = useState(localStorage.getItem('dev_role') || 'director');
+  const { toast } = useToast();
   
   const roles = [
     { value: 'user', label: 'Regular User' },
@@ -23,7 +25,16 @@ const DevRoleSwitcher = () => {
     localStorage.setItem('dev_role', role);
     setCurrentRole(role);
     
-    // Reload the page to apply the new role
+    // Trigger a custom event to notify components that need to update
+    window.dispatchEvent(new Event('dev-role-changed'));
+    
+    // Show toast notification
+    toast({
+      title: "Role Changed",
+      description: `You are now viewing the app as: ${roles.find(r => r.value === role)?.label || role}`,
+    });
+    
+    // Force refresh the page to ensure all components update
     window.location.reload();
   };
 

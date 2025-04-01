@@ -71,6 +71,33 @@ export function useUserProfile(userId: string | null) {
     fetchProfile();
   }, [userId]);
 
+  // Add effect to update profile when dev_role changes in localStorage
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      const handleStorageChange = () => {
+        setUserProfile(getMockProfile(userId));
+      };
+
+      // Listen for changes to localStorage
+      window.addEventListener('storage', handleStorageChange);
+      
+      // Also check for changes directly (for when the localStorage is updated in the same window)
+      const checkInterval = setInterval(() => {
+        const currentProfileRole = userProfile?.role;
+        const currentDevRole = localStorage.getItem('dev_role');
+        
+        if (currentProfileRole !== currentDevRole && currentDevRole) {
+          setUserProfile(getMockProfile(userId));
+        }
+      }, 1000);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        clearInterval(checkInterval);
+      };
+    }
+  }, [userId, userProfile]);
+
   // Helper function to get a mock profile for development
   const getMockProfile = (userId: string | null): UserProfile => {
     // Check if we have a role in localStorage
