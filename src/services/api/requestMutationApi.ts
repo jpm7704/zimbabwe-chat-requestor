@@ -235,7 +235,14 @@ export const getRequestNotes = async (requestId: string, canSeeInternalNotes: bo
   try {
     let query = supabase
       .from('messages')
-      .select('*, user_profiles(first_name, last_name, role)')
+      .select(`
+        id,
+        request_id,
+        sender_id,
+        content,
+        is_system_message,
+        timestamp
+      `)
       .eq('request_id', requestId)
       .order('timestamp', { ascending: true });
     
@@ -251,19 +258,39 @@ export const getRequestNotes = async (requestId: string, canSeeInternalNotes: bo
       throw error;
     }
     
+    // Get user profiles for sender IDs
+    const senderIds = [...new Set(data.map(item => item.sender_id))];
+    const { data: userProfiles } = await supabase
+      .from('user_profiles')
+      .select('id, name, role')
+      .in('id', senderIds);
+    
+    const profileMap = new Map();
+    userProfiles?.forEach(profile => {
+      profileMap.set(profile.id, profile);
+    });
+    
     // Map the data to the Note interface
-    return data.map(item => ({
-      id: item.id,
-      requestId: item.request_id,
-      authorId: item.sender_id,
-      authorName: item.user_profiles ? `${item.user_profiles.first_name} ${item.user_profiles.last_name}` : 'System',
-      authorRole: item.user_profiles?.role || 'System',
-      content: item.content,
-      createdAt: item.timestamp,
-      isInternal: item.is_system_message
-    }));
+    return data.map(item => {
+      const authorProfile = profileMap.get(item.sender_id) || { name: 'System', role: 'system' };
+      
+      return {
+        id: item.id,
+        requestId: item.request_id,
+        authorId: item.sender_id,
+        authorName: authorProfile.name || 'System',
+        authorRole: authorProfile.role || 'System',
+        content: item.content,
+        createdAt: item.timestamp,
+        isInternal: item.is_system_message
+      };
+    });
   } catch (error) {
     console.error("Error in getRequestNotes:", error);
     return [];
   }
 };
+
+// Export update functions used in other parts of the app
+export { updateRequestStatus } from '@/services/api/request/statusApi';
+export { createRequest } from '@/services/api/request/createRequest';

@@ -92,6 +92,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          related_id: string | null
+          target_roles: string[]
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          related_id?: string | null
+          target_roles: string[]
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          related_id?: string | null
+          target_roles?: string[]
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
       requests: {
         Row: {
           created_at: string

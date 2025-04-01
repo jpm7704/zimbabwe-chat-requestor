@@ -48,6 +48,7 @@ export const useRealtimeNotifications = () => {
               title: newNotification.title,
               description: newNotification.message,
               action: newNotification.link ? {
+                label: "View",
                 onClick: () => window.location.href = newNotification.link || ''
               } : undefined
             });

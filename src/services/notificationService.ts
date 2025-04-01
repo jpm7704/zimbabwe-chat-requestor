@@ -26,7 +26,7 @@ export const getNotifications = async (): Promise<Notification[]> => {
     // Get notifications for the user based on their role and role hierarchy
     const { data, error } = await supabase
       .from('notifications')
-      .select('*')
+      .select()
       .filter('target_roles', 'cs', `{${userProfile.role}}`)
       .order('created_at', { ascending: false })
       .limit(100);
@@ -37,7 +37,7 @@ export const getNotifications = async (): Promise<Notification[]> => {
     }
     
     // Transform received data to match our Notification type
-    return data.map((item): Notification => ({
+    return (data || []).map((item): Notification => ({
       id: item.id,
       type: item.type as NotificationType,
       title: item.title,

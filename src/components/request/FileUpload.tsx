@@ -21,7 +21,7 @@ const FileUpload = ({
   requestId, 
   onUploadSuccess, 
   initialFiles = [],
-  documentType = 'supporting_document',
+  documentType = 'supporting_document' as DocumentType,
   onUploadComplete
 }: FileUploadProps) => {
   const [uploadedFiles, setUploadedFiles] = useState<Document[]>(initialFiles);
