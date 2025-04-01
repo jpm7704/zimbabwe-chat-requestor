@@ -26,16 +26,23 @@ export const createRequest = async (params: RequestParams): Promise<RequestResul
     }
 
     // Insert the new request into the database
+    // Note: We omit is_enquiry if not defined to let database use default
+    const requestData: any = {
+      user_id: session.session.user.id,
+      title: params.title,
+      description: params.description,
+      type: params.type,
+      status: 'submitted' as RequestStatus // Default status
+    };
+    
+    // Only add is_enquiry field if it's explicitly set
+    if (params.isEnquiry !== undefined) {
+      requestData.is_enquiry = params.isEnquiry;
+    }
+
     const { data, error } = await supabase
       .from('requests')
-      .insert({
-        user_id: session.session.user.id,
-        title: params.title,
-        description: params.description,
-        type: params.type,
-        status: 'submitted', // Default status
-        is_enquiry: params.isEnquiry || false
-      })
+      .insert(requestData)
       .select()
       .single();
 
@@ -61,9 +68,16 @@ export const updateRequest = async (
   updates: Record<string, any>
 ): Promise<Request | null> => {
   try {
+    // Convert notes if present to match database format
+    const dbUpdates = {...updates};
+    if (updates.notes && Array.isArray(updates.notes)) {
+      // Convert notes array to string or format expected by the database
+      dbUpdates.notes = JSON.stringify(updates.notes);
+    }
+
     const { data, error } = await supabase
       .from('requests')
-      .update(updates)
+      .update(dbUpdates)
       .eq('id', id)
       .select(`
         id,
@@ -85,6 +99,7 @@ export const updateRequest = async (
       throw error;
     }
 
+    // Convert the data from DB format to our application's Request type
     return {
       id: data.id,
       ticketNumber: data.ticket_number,
@@ -95,7 +110,8 @@ export const updateRequest = async (
       status: data.status as RequestStatus,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
-      notes: data.notes ? [data.notes] as Note[] : [],
+      // Initialize with empty arrays - these would typically be loaded separately
+      notes: [], 
       documents: [],
       timeline: []
     };

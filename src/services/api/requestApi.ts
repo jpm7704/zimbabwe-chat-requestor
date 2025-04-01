@@ -1,4 +1,3 @@
-
 import { Request, RequestStatus, RequestType, Note } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -26,6 +25,7 @@ export const getRequestById = async (requestId: string): Promise<Request | null>
       return null;
     }
     
+    // Convert database format to our app's Request type
     return {
       id: data.id,
       ticketNumber: data.ticket_number,
@@ -36,9 +36,20 @@ export const getRequestById = async (requestId: string): Promise<Request | null>
       status: data.status as RequestStatus,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
-      fieldOfficer: data.field_officer,
-      programManager: data.program_manager,
-      notes: data.notes ? [data.notes] as Note[] : [],
+      // Handle possible null values for officers with proper type-checking
+      fieldOfficer: data.field_officer ? {
+        id: data.field_officer.id,
+        name: data.field_officer.name,
+        email: data.field_officer.email,
+        role: data.field_officer.role,
+      } : null,
+      programManager: data.program_manager ? {
+        id: data.program_manager.id,
+        name: data.program_manager.name,
+        email: data.program_manager.email,
+        role: data.program_manager.role,
+      } : null,
+      notes: [], // These will be loaded separately when needed
       documents: [],
       timeline: []
     };
