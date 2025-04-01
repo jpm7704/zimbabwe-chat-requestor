@@ -25,12 +25,12 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
   // Get dev role from localStorage (for development mode role switching)
   const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
   
-  // In development mode, admin role should bypass ALL permission checks
-  const isDevAdmin = isDevelopment && devRole === 'admin';
+  // In development mode, ALL roles should bypass permission checks
+  const isDevMode = isDevelopment && devRole;
   
-  // If we're in dev admin mode, skip all permission checks
-  if (isDevAdmin) {
-    console.log('Dev admin mode: bypassing permission check for', permission);
+  // If we're in dev mode, skip all permission checks
+  if (isDevMode) {
+    console.log('Dev mode: bypassing permission check for', permission);
     return <>{children}</>;
   }
   
@@ -50,8 +50,8 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
   });
   
   useEffect(() => {
-    // Skip all permission checks for dev admin users
-    if (isDevAdmin) return;
+    // Skip all permission checks for dev users
+    if (isDevMode) return;
 
     // Only redirect if the user doesn't have permission
     if (!hasPermission) {
@@ -62,9 +62,9 @@ const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: 
       });
       navigate(redirectTo);
     }
-  }, [hasPermission, navigate, redirectTo, toast, permission, isDevAdmin]);
+  }, [hasPermission, navigate, redirectTo, toast, permission, isDevMode]);
   
-  // Only render children if user has permission or is dev admin
+  // Only render children if user has permission or is dev mode
   return <>{children}</>;
 };
 

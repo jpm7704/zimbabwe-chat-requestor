@@ -32,12 +32,12 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Check if we're in development mode and using admin role
+  // Check if we're in development mode
   const isDevelopment = import.meta.env.DEV;
   const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
-  const isDevAdmin = isDevelopment && devRole === 'admin';
+  const isDevMode = isDevelopment && devRole;
   
-  console.log('App rendering, isDevelopment:', isDevelopment, 'devRole:', devRole, 'isDevAdmin:', isDevAdmin);
+  console.log('App rendering, isDevelopment:', isDevelopment, 'devRole:', devRole, 'isDevMode:', isDevMode);
   
   return (
     <QueryClientProvider client={queryClient}>
@@ -61,10 +61,10 @@ const App = () => {
             <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
             
-            {/* Role-specific routes - dev admin can access all */}
+            {/* Role-specific routes - dev mode bypasses permission checks */}
             <Route path="/field-work" element={
               <MainLayout>
-                {isDevAdmin ? <FieldWork /> : (
+                {isDevMode ? <FieldWork /> : (
                   <RequirePermission permission="canAccessFieldReports">
                     <FieldWork />
                   </RequirePermission>
@@ -74,7 +74,7 @@ const App = () => {
             
             <Route path="/analytics" element={
               <MainLayout>
-                {isDevAdmin ? <Analytics /> : (
+                {isDevMode ? <Analytics /> : (
                   <RequirePermission permission="canAccessAnalytics">
                     <Analytics />
                   </RequirePermission>
@@ -84,7 +84,7 @@ const App = () => {
             
             <Route path="/reports" element={
               <MainLayout>
-                {isDevAdmin ? <Reports /> : (
+                {isDevMode ? <Reports /> : (
                   <RequirePermission permission="canAccessFieldReports">
                     <Reports />
                   </RequirePermission>
@@ -94,7 +94,7 @@ const App = () => {
             
             <Route path="/approvals" element={
               <MainLayout>
-                {isDevAdmin ? <ApprovalsPage /> : (
+                {isDevMode ? <ApprovalsPage /> : (
                   <RequirePermission permission="canApproveRequests">
                     <ApprovalsPage />
                   </RequirePermission>
