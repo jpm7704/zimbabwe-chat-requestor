@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const Dashboard = () => {
   const { userProfile, handleLogout } = useAuth();
   const navigate = useNavigate();
-  const { getRoleInfo } = useRoles(userProfile);
+  const { getRoleInfo, isPatron } = useRoles(userProfile);
   const roleInfo = getRoleInfo();
 
   // Format the user's full name from first_name and last_name
@@ -88,27 +88,36 @@ const Dashboard = () => {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col space-y-2">
-            <Button onClick={() => navigate('/submit')} className="justify-start">
-              New Request
-            </Button>
-            <Button onClick={() => navigate('/requests')} variant="outline" className="justify-start">
-              View Requests
-            </Button>
+            {/* Only show Request options for non-Patrons */}
+            {!isPatron() && (
+              <>
+                <Button onClick={() => navigate('/submit')} className="justify-start">
+                  New Request
+                </Button>
+                <Button onClick={() => navigate('/requests')} variant="outline" className="justify-start">
+                  View Requests
+                </Button>
+              </>
+            )}
+            
             {(roleInfo.title === 'Field Officer' || roleInfo.title === 'Project Officer') && (
               <Button onClick={() => navigate('/field-work')} variant="outline" className="justify-start">
                 Field Reports
               </Button>
             )}
+            
             {(roleInfo.title === 'Director' || roleInfo.title === 'Head of Programs' || roleInfo.title === 'CEO') && (
               <Button onClick={() => navigate('/analytics')} variant="outline" className="justify-start">
                 Analytics Dashboard
               </Button>
             )}
+            
             {(roleInfo.title === 'Director' || roleInfo.title === 'CEO' || roleInfo.title === 'Patron') && (
               <Button onClick={() => navigate('/approvals')} variant="outline" className="justify-start">
                 Pending Approvals
               </Button>
             )}
+            
             <Button onClick={handleLogout} variant="outline" className="justify-start text-destructive hover:text-destructive">
               Logout
             </Button>

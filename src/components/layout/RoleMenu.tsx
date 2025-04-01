@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -68,32 +67,34 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Link>
       </Button>
       
-      {(isRegularUser() || !permissions.canReviewRequests) && (
-        <>
-          <Button 
-            variant={isActive('/submit') ? "default" : buttonVariant} 
-            className={buttonClass}
-            asChild
-          >
-            <Link to="/submit" className="flex items-center gap-2" onClick={handleClick}>
-              <FilePlus size={18} />
-              <span>Submit Request</span>
-            </Link>
-          </Button>
-          
-          <Button 
-            variant={isActive('/requests') ? "default" : buttonVariant} 
-            className={buttonClass}
-            asChild
-          >
-            <Link to="/requests" className="flex items-center gap-2" onClick={handleClick}>
-              <ClipboardList size={18} />
-              <span>My Requests</span>
-            </Link>
-          </Button>
-        </>
+      {/* Regular users and non-reviewing/non-patron staff can submit requests */}
+      {(isRegularUser() || (!permissions.canReviewRequests && !isPatron())) && (
+        <Button 
+          variant={isActive('/submit') ? "default" : buttonVariant} 
+          className={buttonClass}
+          asChild
+        >
+          <Link to="/submit" className="flex items-center gap-2" onClick={handleClick}>
+            <FilePlus size={18} />
+            <span>Submit Request</span>
+          </Link>
+        </Button>
       )}
-
+      
+      {/* Regular users and non-reviewing/non-patron staff can view their requests */}
+      {(isRegularUser() || (!permissions.canReviewRequests && !isPatron())) && (
+        <Button 
+          variant={isActive('/requests') ? "default" : buttonVariant} 
+          className={buttonClass}
+          asChild
+        >
+          <Link to="/requests" className="flex items-center gap-2" onClick={handleClick}>
+            <ClipboardList size={18} />
+            <span>My Requests</span>
+          </Link>
+        </Button>
+      )}
+      
       {(isFieldOfficer() || isProjectOfficer()) && (
         <Button 
           variant={isActive('/field-work') ? "default" : buttonVariant} 

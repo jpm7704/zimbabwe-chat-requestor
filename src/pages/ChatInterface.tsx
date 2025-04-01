@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,16 +6,25 @@ import { useRequestForm } from "@/hooks/useRequestForm";
 import NewRequestForm from "@/components/request/NewRequestForm";
 import { FileText, Send, Stethoscope, GraduationCap, AlertCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRoles } from "@/hooks/useRoles";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const RequestSubmissionPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { isAuthenticated, userProfile } = useAuth();
+  const { isPatron } = useRoles(userProfile);
   const [messages, setMessages] = useState<any[]>([]);
   
   const requestFormProps = useRequestForm(setMessages);
   const { showNewRequest, setShowNewRequest } = requestFormProps;
+
+  // Redirect Patrons to the dashboard since they don't need to submit requests
+  useEffect(() => {
+    if (userProfile && isPatron()) {
+      navigate('/dashboard');
+    }
+  }, [userProfile, navigate, isPatron]);
 
   useEffect(() => {
     const action = searchParams.get("action");
@@ -37,6 +47,11 @@ const RequestSubmissionPage = () => {
   }, [searchParams, requestFormProps.setRequestForm, isAuthenticated, navigate, setShowNewRequest]);
 
   const isStaffUser = userProfile && userProfile.role !== 'user';
+
+  // If it's a Patron, return nothing since they'll be redirected
+  if (userProfile && isPatron()) {
+    return null;
+  }
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">

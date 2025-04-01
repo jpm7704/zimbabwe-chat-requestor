@@ -1,8 +1,10 @@
+
 import { useRequestsData } from "@/hooks/useRequestsData";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useRoles } from "@/hooks/useRoles";
 import RequestsHeader from "@/components/requests/RequestsHeader";
 import RequestsSearchFilter from "@/components/requests/RequestsSearchFilter";
 import RequestsList from "@/components/requests/RequestsList";
@@ -12,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const RequestsPage = () => {
   const { userProfile, isAuthenticated } = useAuth();
+  const { isPatron } = useRoles(userProfile);
   const permissions = usePermissions(userProfile);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -26,12 +29,16 @@ const RequestsPage = () => {
     handleSort,
     refreshRequests
   } = useRequestsData();
-
-  // We're removing the persistent toast for database policy errors since we're handling them at the application level now
   
   // Redirect users to their appropriate dashboard based on role
   useEffect(() => {
     if (!loading && isAuthenticated && userProfile) {
+      // Redirect Patron to approvals page as they don't create or manage individual requests
+      if (isPatron() && window.location.pathname === '/requests') {
+        navigate('/approvals');
+        return;
+      }
+      
       if (userProfile.role === 'field_officer' && window.location.pathname === '/requests') {
         navigate('/field-work');
       } else if (userProfile.role === 'programme_manager' && window.location.pathname === '/requests') {
@@ -40,7 +47,7 @@ const RequestsPage = () => {
         navigate('/admin');
       }
     }
-  }, [userProfile, isAuthenticated, loading, navigate]);
+  }, [userProfile, isAuthenticated, loading, navigate, isPatron]);
 
   // Get counts for different request statuses
   const getStatusCounts = () => {
@@ -55,6 +62,11 @@ const RequestsPage = () => {
   };
 
   const statusCounts = getStatusCounts();
+
+  // If it's a Patron, return nothing since they'll be redirected
+  if (userProfile && isPatron()) {
+    return null;
+  }
 
   // If the user should be redirected based on role, show nothing while redirecting
   if (!loading && isAuthenticated && userProfile) {
