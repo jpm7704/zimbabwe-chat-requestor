@@ -37,12 +37,8 @@ export function useUserProfile(userId: string | null) {
         
         if (error) {
           console.error("Error fetching user profile:", error);
-          // Fall back to mock profile in development
-          if (import.meta.env.DEV) {
-            setUserProfile(getMockProfile(userId));
-          } else {
-            throw error;
-          }
+          // Fall back to mock profile
+          setUserProfile(getMockProfile(userId));
         } else if (data) {
           // Map the database fields to our UserProfile type
           setUserProfile({
@@ -59,10 +55,8 @@ export function useUserProfile(userId: string | null) {
         setProfileError(error);
         console.error("Failed to load user profile:", error);
         
-        // Fall back to mock profile in development
-        if (import.meta.env.DEV) {
-          setUserProfile(getMockProfile(userId));
-        }
+        // Fall back to mock profile
+        setUserProfile(getMockProfile(userId));
       } finally {
         setProfileLoading(false);
       }
@@ -71,34 +65,29 @@ export function useUserProfile(userId: string | null) {
     fetchProfile();
   }, [userId]);
 
-  // Add effect to update profile when dev_role changes in localStorage
+  // Add event listener for role changes
   useEffect(() => {
-    if (import.meta.env.DEV) {
-      const handleStorageChange = () => {
-        setUserProfile(getMockProfile(userId));
-      };
+    const handleRoleChange = () => {
+      setUserProfile(getMockProfile(userId));
+    };
 
-      // Listen for changes to localStorage
-      window.addEventListener('storage', handleStorageChange);
-      
-      // Also check for changes directly (for when the localStorage is updated in the same window)
-      const checkInterval = setInterval(() => {
-        const currentProfileRole = userProfile?.role;
-        const currentDevRole = localStorage.getItem('dev_role');
-        
-        if (currentProfileRole !== currentDevRole && currentDevRole) {
-          setUserProfile(getMockProfile(userId));
-        }
-      }, 1000);
-      
-      return () => {
-        window.removeEventListener('storage', handleStorageChange);
-        clearInterval(checkInterval);
-      };
-    }
-  }, [userId, userProfile]);
+    // Listen for dev role changes
+    window.addEventListener('dev-role-changed', handleRoleChange);
+    
+    // Also listen for localStorage changes
+    window.addEventListener('storage', event => {
+      if (event.key === 'dev_role') {
+        handleRoleChange();
+      }
+    });
 
-  // Helper function to get a mock profile for development
+    return () => {
+      window.removeEventListener('dev-role-changed', handleRoleChange);
+      window.removeEventListener('storage', handleRoleChange);
+    };
+  }, [userId]);
+
+  // Helper function to get a mock profile
   const getMockProfile = (userId: string | null): UserProfile => {
     // Check if we have a role in localStorage
     const savedRole = localStorage.getItem('dev_role');

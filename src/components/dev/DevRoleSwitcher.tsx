@@ -22,20 +22,31 @@ const DevRoleSwitcher = () => {
   ];
 
   const handleRoleChange = (role: string) => {
-    localStorage.setItem('dev_role', role);
-    setCurrentRole(role);
-    
-    // Trigger a custom event to notify components that need to update
-    window.dispatchEvent(new Event('dev-role-changed'));
-    
-    // Show toast notification
-    toast({
-      title: "Role Changed",
-      description: `You are now viewing the app as: ${roles.find(r => r.value === role)?.label || role}`,
-    });
-    
-    // Force refresh the page to ensure all components update
-    window.location.reload();
+    try {
+      localStorage.setItem('dev_role', role);
+      setCurrentRole(role);
+      
+      // Dispatch a custom event for components to react to
+      window.dispatchEvent(new Event('dev-role-changed'));
+      
+      // Show toast notification
+      toast({
+        title: "Role Changed",
+        description: `You are now viewing the app as: ${roles.find(r => r.value === role)?.label || role}`,
+      });
+      
+      // Force refresh the page to ensure all components update
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    } catch (error) {
+      console.error("Error changing role:", error);
+      toast({
+        title: "Error Changing Role",
+        description: "There was a problem changing your role. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

@@ -32,12 +32,11 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Check if we're in development mode
-  const isDevelopment = import.meta.env.DEV;
-  const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
-  const isDevMode = isDevelopment && devRole;
+  // Check for dev_role in localStorage regardless of environment
+  const devRole = localStorage.getItem('dev_role');
+  const isDevMode = !!devRole;
   
-  console.log('App rendering, isDevelopment:', isDevelopment, 'devRole:', devRole, 'isDevMode:', isDevMode);
+  console.log('App rendering, devRole:', devRole, 'isDevMode:', isDevMode);
   
   return (
     <QueryClientProvider client={queryClient}>
