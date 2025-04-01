@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const RequestsPage = () => {
   const { userProfile, isAuthenticated } = useAuth();
-  const { isPatron } = useRoles(userProfile);
+  const { isRegularUser, isPatron, isFieldOfficer } = useRoles(userProfile);
   const permissions = usePermissions(userProfile);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -33,21 +33,26 @@ const RequestsPage = () => {
   // Redirect users to their appropriate dashboard based on role
   useEffect(() => {
     if (!loading && isAuthenticated && userProfile) {
-      // Redirect Patron to approvals page as they don't create or manage individual requests
-      if (isPatron() && window.location.pathname === '/requests') {
-        navigate('/approvals');
-        return;
-      }
-      
-      if (userProfile.role === 'field_officer' && window.location.pathname === '/requests') {
-        navigate('/field-work');
-      } else if (userProfile.role === 'programme_manager' && window.location.pathname === '/requests') {
-        navigate('/analytics');
-      } else if (userProfile.role === 'management' && window.location.pathname === '/requests') {
-        navigate('/admin');
+      // Only regular users should access the requests page
+      // All other roles should be redirected to their respective dashboards
+      if (!isRegularUser()) {
+        // Redirect based on role
+        if (isPatron()) {
+          navigate('/approvals');
+        } else if (isFieldOfficer()) {
+          navigate('/field-work');
+        } else if (userProfile.role === 'programme_manager') {
+          navigate('/analytics');
+        } else if (userProfile.role === 'management' || 
+                  userProfile.role === 'director' || 
+                  userProfile.role === 'ceo') {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
       }
     }
-  }, [userProfile, isAuthenticated, loading, navigate, isPatron]);
+  }, [userProfile, isAuthenticated, loading, navigate, isRegularUser, isPatron, isFieldOfficer]);
 
   // Get counts for different request statuses
   const getStatusCounts = () => {
@@ -63,28 +68,16 @@ const RequestsPage = () => {
 
   const statusCounts = getStatusCounts();
 
-  // If it's a Patron, return nothing since they'll be redirected
-  if (userProfile && isPatron()) {
-    return null;
-  }
-
   // If the user should be redirected based on role, show nothing while redirecting
-  if (!loading && isAuthenticated && userProfile) {
-    if ((userProfile.role === 'field_officer' || 
-         userProfile.role === 'programme_manager' || 
-         userProfile.role === 'management') && 
-        window.location.pathname === '/requests') {
-      return null;
-    }
+  if (!loading && isAuthenticated && userProfile && !isRegularUser()) {
+    return null;
   }
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">
-      <RequestsHeader 
-        showNewRequestButton={!permissions.canReviewRequests || userProfile?.role === 'user'} 
-      />
+      <RequestsHeader showNewRequestButton={isRegularUser()} />
       
-      {userProfile?.role === 'user' && <UserStatsSummary statusCounts={statusCounts} />}
+      {isRegularUser() && <UserStatsSummary statusCounts={statusCounts} />}
       <RoleBasedWorkflow 
         userProfile={userProfile} 
         permissions={permissions} 

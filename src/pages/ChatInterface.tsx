@@ -13,18 +13,18 @@ const RequestSubmissionPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { isAuthenticated, userProfile } = useAuth();
-  const { isPatron } = useRoles(userProfile);
+  const { isRegularUser } = useRoles(userProfile);
   const [messages, setMessages] = useState<any[]>([]);
   
   const requestFormProps = useRequestForm(setMessages);
   const { showNewRequest, setShowNewRequest } = requestFormProps;
 
-  // Redirect Patrons to the dashboard since they don't need to submit requests
+  // Redirect non-regular users to their appropriate dashboard
   useEffect(() => {
-    if (userProfile && isPatron()) {
+    if (userProfile && !isRegularUser()) {
       navigate('/dashboard');
     }
-  }, [userProfile, navigate, isPatron]);
+  }, [userProfile, navigate, isRegularUser]);
 
   useEffect(() => {
     const action = searchParams.get("action");
@@ -46,10 +46,8 @@ const RequestSubmissionPage = () => {
     }
   }, [searchParams, requestFormProps.setRequestForm, isAuthenticated, navigate, setShowNewRequest]);
 
-  const isStaffUser = userProfile && userProfile.role !== 'user';
-
-  // If it's a Patron, return nothing since they'll be redirected
-  if (userProfile && isPatron()) {
+  // If it's not a regular user, return nothing since they'll be redirected
+  if (userProfile && !isRegularUser()) {
     return null;
   }
 
@@ -63,20 +61,7 @@ const RequestSubmissionPage = () => {
           </p>
         </div>
 
-        {isStaffUser && (
-          <Alert variant="default" className="bg-blue-50 border-blue-200">
-            <AlertCircle className="h-5 w-5 text-blue-600" />
-            <AlertTitle className="text-blue-800">Staff Account</AlertTitle>
-            <AlertDescription className="text-blue-700">
-              You are logged in with a staff account. You can view and manage requests in the dashboard instead of submitting new ones.
-            </AlertDescription>
-            <Button variant="outline" className="mt-2" onClick={() => navigate('/dashboard')}>
-              Go to Dashboard
-            </Button>
-          </Alert>
-        )}
-
-        {!showNewRequest && !isStaffUser ? (
+        {!showNewRequest ? (
           <div className="flex flex-col md:flex-row gap-6 mt-8">
             <div 
               onClick={() => requestFormProps.handleRequestTypeSelect("medical_assistance")} 
@@ -112,7 +97,7 @@ const RequestSubmissionPage = () => {
               </div>
             </div>
           </div>
-        ) : !isStaffUser && (
+        ) : (
           <div className="border border-primary/20 p-8 rounded-lg bg-card/40 shadow-sm">
             <NewRequestForm
               requestForm={requestFormProps.requestForm}

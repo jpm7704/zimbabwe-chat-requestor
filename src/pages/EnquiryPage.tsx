@@ -6,12 +6,14 @@ import { useRequestForm } from "@/hooks/useRequestForm";
 import NewRequestForm from "@/components/request/NewRequestForm";
 import { MessageCircle, HelpCircle, AlertCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRoles } from "@/hooks/useRoles";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const EnquiryPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { isAuthenticated, userProfile } = useAuth();
+  const { isRegularUser } = useRoles(userProfile);
   const [messages, setMessages] = useState<any[]>([]);
   
   const requestFormProps = useRequestForm(setMessages);
@@ -21,6 +23,13 @@ const EnquiryPage = () => {
   useEffect(() => {
     requestFormProps.setIsEnquiry(true);
   }, []);
+
+  // Redirect non-regular users to their appropriate dashboard
+  useEffect(() => {
+    if (userProfile && !isRegularUser()) {
+      navigate('/dashboard');
+    }
+  }, [userProfile, navigate, isRegularUser]);
 
   useEffect(() => {
     const type = searchParams.get("type");
@@ -39,7 +48,10 @@ const EnquiryPage = () => {
     }
   }, [searchParams, requestFormProps.setRequestForm, isAuthenticated, navigate, setShowNewRequest]);
 
-  const isStaffUser = userProfile && userProfile.role !== 'user';
+  // If it's not a regular user, return nothing since they'll be redirected
+  if (userProfile && !isRegularUser()) {
+    return null;
+  }
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">
@@ -56,20 +68,7 @@ const EnquiryPage = () => {
           </p>
         </div>
 
-        {isStaffUser && (
-          <Alert variant="default" className="bg-blue-50 border-blue-200">
-            <AlertCircle className="h-5 w-5 text-blue-600" />
-            <AlertTitle className="text-blue-800">Staff Account</AlertTitle>
-            <AlertDescription className="text-blue-700">
-              You are logged in with a staff account. You can view and manage enquiries in the dashboard.
-            </AlertDescription>
-            <Button variant="outline" className="mt-2" onClick={() => navigate('/dashboard')}>
-              Go to Dashboard
-            </Button>
-          </Alert>
-        )}
-
-        {!showNewRequest && !isStaffUser ? (
+        {!showNewRequest ? (
           <Alert variant="default" className="bg-primary/5 border-primary/20">
             <MessageCircle className="h-5 w-5 text-primary" />
             <AlertTitle className="text-primary-foreground">Select an enquiry type</AlertTitle>
@@ -80,7 +79,7 @@ const EnquiryPage = () => {
               Start General Enquiry
             </Button>
           </Alert>
-        ) : !isStaffUser && (
+        ) : (
           <div className="border border-primary/20 p-8 rounded-lg bg-card/40 shadow-sm">
             <div className="mb-6 flex items-center gap-2 pb-3 border-b border-primary/10">
               <HelpCircle className="h-5 w-5 text-primary" />

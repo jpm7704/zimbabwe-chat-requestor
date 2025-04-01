@@ -72,8 +72,8 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Link>
       </Button>
       
-      {/* Regular users and non-reviewing/non-patron staff can submit requests */}
-      {(isRegularUser() || (!permissions.canReviewRequests && !isPatron())) && (
+      {/* Only regular users can submit requests */}
+      {isRegularUser() && (
         <Button 
           variant={isActive('/submit') ? "default" : buttonVariant} 
           className={buttonClass}
@@ -86,8 +86,8 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {/* Regular users and non-reviewing/non-patron staff can view their requests */}
-      {(isRegularUser() || (!permissions.canReviewRequests && !isPatron())) && (
+      {/* Only regular users can view their submitted requests */}
+      {isRegularUser() && (
         <Button 
           variant={isActive('/requests') ? "default" : buttonVariant} 
           className={buttonClass}
@@ -100,6 +100,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
+      {/* Field work for field officers and project officers */}
       {(isFieldOfficer() || isProjectOfficer()) && (
         <Button 
           variant={isActive('/field-work') ? "default" : buttonVariant} 
@@ -113,7 +114,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {/* Analytics access for executives and program managers */}
+      {/* Analytics for executives and program managers */}
       {(isExecutiveRole || isHeadOfPrograms() || isAssistantProjectOfficer() || isAdmin()) && (
         <Button 
           variant={isActive('/analytics') ? "default" : buttonVariant} 
@@ -127,6 +128,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
+      {/* Reports for those with access */}
       {permissions.canAccessFieldReports && (
         <Button 
           variant={isActive('/reports') ? "default" : buttonVariant} 
@@ -140,7 +142,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
       
-      {/* Approvals access for executives */}
+      {/* Approvals for executives */}
       {(isExecutiveRole || isAdmin()) && (
         <Button 
           variant={isActive('/approvals') ? "default" : buttonVariant} 
@@ -154,6 +156,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </Button>
       )}
 
+      {/* Admin sections */}
       {isUserAdmin && (
         <>
           <Button 
@@ -191,6 +194,7 @@ const RoleMenu = ({ variant = "default", onItemClick }: RoleMenuProps) => {
         </>
       )}
 
+      {/* Settings for everyone */}
       <Button 
         variant={isActive('/settings') ? "default" : buttonVariant} 
         className={buttonClass}
