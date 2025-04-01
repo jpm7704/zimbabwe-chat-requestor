@@ -9,14 +9,44 @@ import { ChevronRight, CheckCircle2, Clock, AlertCircle, Search } from "lucide-r
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 
+// Define interfaces for approval types
+interface BaseApproval {
+  id: number;
+  title: string;
+  applicant: string;
+  submittedDate: string;
+  type: string;
+  status: string;
+}
+
+interface PendingApproval extends BaseApproval {
+  priority: "high" | "medium" | "low";
+}
+
+interface ReviewedApproval extends BaseApproval {
+  reviewedDate: string;
+}
+
+type Approval = PendingApproval | ReviewedApproval;
+
+// Type guard to check if an approval is a PendingApproval
+function isPendingApproval(approval: Approval): approval is PendingApproval {
+  return 'priority' in approval;
+}
+
+// Type guard to check if an approval is a ReviewedApproval
+function isReviewedApproval(approval: Approval): approval is ReviewedApproval {
+  return 'reviewedDate' in approval;
+}
+
 const ApprovalsPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("pending");
   const [searchTerm, setSearchTerm] = useState("");
   
-  // Sample data
-  const pendingApprovals = [
+  // Sample data with proper typing
+  const pendingApprovals: PendingApproval[] = [
     {
       id: 1,
       title: "Financial Aid Request #FA-2025-0042",
@@ -46,7 +76,7 @@ const ApprovalsPage = () => {
     }
   ];
   
-  const reviewedApprovals = [
+  const reviewedApprovals: ReviewedApproval[] = [
     {
       id: 4,
       title: "Education Grant Request #EG-2025-0015",
@@ -176,7 +206,7 @@ const ApprovalsPage = () => {
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-lg">{item.title}</CardTitle>
-                    {item.priority && getPriorityBadge(item.priority)}
+                    {isPendingApproval(item) && getPriorityBadge(item.priority)}
                   </div>
                 </CardHeader>
                 <CardContent className="pb-2">
@@ -245,10 +275,12 @@ const ApprovalsPage = () => {
                       <p className="text-sm font-medium">Submitted</p>
                       <p className="text-sm text-muted-foreground">{new Date(item.submittedDate).toLocaleDateString()}</p>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">Reviewed</p>
-                      <p className="text-sm text-muted-foreground">{new Date(item.reviewedDate).toLocaleDateString()}</p>
-                    </div>
+                    {isReviewedApproval(item) && (
+                      <div>
+                        <p className="text-sm font-medium">Reviewed</p>
+                        <p className="text-sm text-muted-foreground">{new Date(item.reviewedDate).toLocaleDateString()}</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-end pt-2">

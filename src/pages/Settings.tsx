@@ -22,7 +22,7 @@ const Settings = () => {
     firstName: userProfile?.first_name || "",
     lastName: userProfile?.last_name || "",
     email: userProfile?.email || "",
-    phone: userProfile?.phone || "",
+    phone: userProfile?.phone || "", // Handle missing phone property
   });
   
   const [notifications, setNotifications] = useState({

@@ -8,7 +8,17 @@ import { ClipboardCheck, HelpCircle, BarChart3, FileText, UserCheck } from "luci
 
 const Dashboard = () => {
   const { userProfile } = useAuth();
-  const { isRegularUser, isStaff, isManagement } = useRoles(userProfile);
+  const { isRegularUser, isFieldOfficer, isDirector } = useRoles(userProfile);
+
+  // Helper function to determine if user is staff
+  const isStaff = () => isFieldOfficer() || 
+                         userProfile?.role?.toLowerCase() === 'programme_manager' || 
+                         userProfile?.role?.toLowerCase() === 'head_of_programs';
+  
+  // Helper function to check if user is management
+  const isManagement = () => isDirector() || 
+                             userProfile?.role?.toLowerCase() === 'ceo' ||
+                             userProfile?.role?.toLowerCase() === 'patron';
 
   return (
     <div className="container px-4 mx-auto max-w-7xl py-8">
