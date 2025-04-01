@@ -1,5 +1,5 @@
 
-import { Request, RequestStatus } from "@/types";
+import { Request, RequestStatus, RequestType, Note } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -22,12 +22,15 @@ export const getRequestById = async (requestId: string): Promise<Request | null>
       throw error;
     }
     
+    if (!data) {
+      return null;
+    }
+    
     return {
       id: data.id,
       ticketNumber: data.ticket_number,
       userId: data.user_id,
-      user: data.user,
-      type: data.type as Request['type'],
+      type: data.type as RequestType,
       title: data.title,
       description: data.description,
       status: data.status as RequestStatus,
@@ -35,7 +38,7 @@ export const getRequestById = async (requestId: string): Promise<Request | null>
       updatedAt: data.updated_at,
       fieldOfficer: data.field_officer,
       programManager: data.program_manager,
-      notes: data.notes || [],
+      notes: data.notes ? [data.notes] as Note[] : [],
       documents: [],
       timeline: []
     };
@@ -82,7 +85,7 @@ export const getUserRequests = async (): Promise<Request[]> => {
       id: request.id,
       ticketNumber: request.ticket_number,
       userId: request.user_id,
-      type: request.type as Request['type'],
+      type: request.type as RequestType,
       title: request.title,
       description: request.description,
       status: request.status as RequestStatus,
@@ -147,7 +150,7 @@ export const searchRequests = async (searchTerm: string): Promise<Request[]> => 
       id: request.id,
       ticketNumber: request.ticket_number,
       userId: request.user_id,
-      type: request.type as Request['type'],
+      type: request.type as RequestType,
       title: request.title,
       description: request.description,
       status: request.status as RequestStatus,

@@ -1,5 +1,5 @@
 
-import { Notification } from '@/types';
+import { Notification, NotificationType } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -37,7 +37,7 @@ export async function getNotifications(): Promise<Notification[]> {
 
     return data.map(notification => ({
       id: notification.id,
-      type: notification.type,
+      type: notification.type as NotificationType,
       title: notification.title,
       message: notification.message,
       createdAt: notification.created_at,
@@ -93,15 +93,14 @@ export async function getUnreadNotificationCount(): Promise<number> {
 }
 
 /**
- * Marks a notification as read
+ * Mark a specific notification as read
  */
 export async function markNotificationRead(notificationId: string): Promise<boolean> {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('notifications')
       .update({ read: true })
-      .eq('id', notificationId)
-      .select();
+      .eq('id', notificationId);
 
     if (error) {
       console.error('Error marking notification as read:', error);
@@ -116,7 +115,7 @@ export async function markNotificationRead(notificationId: string): Promise<bool
 }
 
 /**
- * Marks all notifications as read for the current user's role
+ * Mark all notifications for the current user as read
  */
 export async function markAllNotificationsRead(): Promise<boolean> {
   try {
@@ -125,7 +124,7 @@ export async function markAllNotificationsRead(): Promise<boolean> {
       return false;
     }
 
-    // Get the user's role from their profile
+    // Get the user's role
     const { data: userProfile } = await supabase
       .from('user_profiles')
       .select('role')
@@ -136,7 +135,6 @@ export async function markAllNotificationsRead(): Promise<boolean> {
       return false;
     }
 
-    // Update all unread notifications for this role
     const { error } = await supabase
       .from('notifications')
       .update({ read: true })
@@ -156,31 +154,28 @@ export async function markAllNotificationsRead(): Promise<boolean> {
 }
 
 /**
- * Creates a new notification
+ * Create a notification for specific roles
  */
 export async function createNotification(
-  type: string,
+  type: NotificationType,
   title: string,
   message: string,
   targetRoles: string[],
-  link?: string,
-  relatedId?: string
+  relatedId?: string,
+  link?: string
 ): Promise<boolean> {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('notifications')
-      .insert([
-        {
-          type,
-          title,
-          message,
-          target_roles: targetRoles,
-          link,
-          related_id: relatedId,
-          read: false
-        }
-      ])
-      .select();
+      .insert({
+        type,
+        title,
+        message,
+        target_roles: targetRoles,
+        related_id: relatedId,
+        link,
+        read: false
+      });
 
     if (error) {
       console.error('Error creating notification:', error);
@@ -191,5 +186,35 @@ export async function createNotification(
   } catch (error) {
     console.error('Error in createNotification:', error);
     return false;
+  }
+}
+
+/**
+ * Create a notification for document upload
+ */
+export async function createDocumentUploadNotification(
+  requestId: string,
+  documentName: string
+): Promise<void> {
+  try {
+    // Get request details
+    const { data: request } = await supabase
+      .from('requests')
+      .select('title, ticket_number')
+      .eq('id', requestId)
+      .single();
+
+    if (!request) return;
+
+    await createNotification(
+      'document_upload',
+      'New Document Uploaded',
+      `A new document "${documentName}" was uploaded for request ${request.ticket_number}: ${request.title}`,
+      ['field_officer', 'programme_manager', 'management'],
+      requestId,
+      `/requests/${requestId}`
+    );
+  } catch (error) {
+    console.error('Error creating document upload notification:', error);
   }
 }

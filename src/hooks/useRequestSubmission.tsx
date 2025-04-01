@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RequestType, RequestTypeInfo, ChatMessage } from "@/types";
-import { createRequest } from "@/services/requestService";
+import { createRequest, uploadDocument } from "@/services/requestService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 
 interface RequestSubmissionResult {
   isSuccess: boolean;
@@ -14,29 +15,40 @@ interface RequestSubmissionResult {
   isLoading: boolean;
 }
 
-/**
- * Hook for handling request form submission
- */
-export const useRequestSubmission = (
+interface RequestSubmissionProps {
   requestForm: { 
     type: string; 
     title: string; 
     description: string; 
     isEnquiry: boolean 
-  },
-  selectedFiles: File[],
-  requestTypeInfo: RequestTypeInfo | null,
-  setShowNewRequest: (show: boolean) => void,
+  };
+  selectedFiles: File[];
+  requestTypeInfo: RequestTypeInfo | null;
+  setShowNewRequest: (show: boolean) => void;
   setRequestForm: React.Dispatch<React.SetStateAction<{
     type: string;
     title: string;
     description: string;
     isEnquiry: boolean;
-  }>>,
-  setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
-  setSelectedFiles: React.Dispatch<React.SetStateAction<File[]>>,
-  isEnquiry: boolean
-) => {
+  }>>;
+  setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+  setSelectedFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  isEnquiry: boolean;
+}
+
+/**
+ * Hook for handling request form submission
+ */
+export const useRequestSubmission = ({
+  requestForm,
+  selectedFiles,
+  requestTypeInfo,
+  setShowNewRequest,
+  setRequestForm,
+  setMessages,
+  setSelectedFiles,
+  isEnquiry
+}: RequestSubmissionProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { userProfile, isAuthenticated } = useAuth();
@@ -83,7 +95,6 @@ export const useRequestSubmission = (
     
     try {
       // Cast the string type to RequestType before submitting
-      // Include isEnquiry flag with the request
       const result = await createRequest({
         type: requestForm.type as RequestType,
         title: requestForm.title,
@@ -162,80 +173,3 @@ export const useRequestSubmission = (
 
   return { submitting, handleRequestSubmit, handleRequestTypeSelect };
 };
-
-export function useRequestSubmission() {
-  const [result, setResult] = useState<RequestSubmissionResult>({
-    isSuccess: false,
-    isLoading: false,
-  });
-  
-  const { mutate, isLoading } = useMutation({
-    mutationFn: async (formData: {
-      title: string;
-      description: string;
-      type: string;
-      documents: File[];
-      isEnquiry?: boolean;
-    }) => {
-      // Create the request
-      const requestResult = await createRequest({
-        title: formData.title,
-        description: formData.description,
-        type: formData.type,
-      });
-
-      if (!requestResult) {
-        throw new Error('Failed to create request');
-      }
-
-      const { requestId, ticketNumber } = requestResult;
-
-      // Upload any documents
-      if (formData.documents && formData.documents.length > 0) {
-        await Promise.all(
-          formData.documents.map(async (file) => {
-            await uploadDocument(
-              requestId,
-              file,
-              'supporting_letter' as DocumentType
-            );
-          })
-        );
-      }
-
-      return { requestId, ticketNumber };
-    },
-    onSuccess: (data) => {
-      setResult({
-        isSuccess: true,
-        requestId: data.requestId,
-        ticketNumber: data.ticketNumber,
-        isLoading: false,
-      });
-    },
-    onError: (error: any) => {
-      setResult({
-        isSuccess: false,
-        errorMessage: error.message || 'Failed to submit request',
-        isLoading: false,
-      });
-    },
-  });
-
-  const submitRequest = (formData: {
-    title: string;
-    description: string;
-    type: string;
-    documents: File[];
-    isEnquiry?: boolean;
-  }) => {
-    setResult((prev) => ({ ...prev, isLoading: true }));
-    mutate(formData);
-  };
-
-  return {
-    submitRequest,
-    isLoading,
-    ...result,
-  };
-}

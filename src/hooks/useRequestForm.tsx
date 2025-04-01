@@ -25,7 +25,7 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
   
   // Use the extracted hooks
   const { requestTypeInfo } = useRequestTypes(requestForm.type);
-  const { submitting, handleRequestSubmit, handleRequestTypeSelect } = useRequestSubmission(
+  const { submitting, handleRequestSubmit, handleRequestTypeSelect } = useRequestSubmission({
     requestForm, 
     selectedFiles, 
     requestTypeInfo, 
@@ -34,7 +34,7 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
     setMessages,
     setSelectedFiles,
     isEnquiry
-  );
+  });
 
   // Initialize form with URL parameters if available
   useEffect(() => {

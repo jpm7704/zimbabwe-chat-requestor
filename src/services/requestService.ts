@@ -13,12 +13,13 @@ export {
 
 export {
   createRequest,
-  uploadDocument,
+  updateRequest,
   updateRequestStatus,
   addNoteToRequest,
   addNote,
   getRequestDocuments,
-  deleteDocument
+  deleteDocument,
+  uploadDocument
 } from './api/requestMutationApi';
 
 // Field Work related exports

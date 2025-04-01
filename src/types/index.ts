@@ -60,6 +60,18 @@ export interface Request {
   documents: Document[];
   notes: Note[];
   timeline: TimelineEvent[];
+  fieldOfficer?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  } | null;
+  programManager?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  } | null;
 }
 
 // Document interface

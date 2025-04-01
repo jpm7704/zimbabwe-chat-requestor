@@ -1,11 +1,12 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Document, DocumentType, Note, Request, RequestStatus } from "@/types";
+import { Document, DocumentType, Note, Request, RequestStatus, RequestType } from "@/types";
 
 type RequestParams = {
   title: string;
   description: string;
   type: string;
+  isEnquiry?: boolean;
 };
 
 type RequestResult = {
@@ -32,6 +33,8 @@ export const createRequest = async (params: RequestParams): Promise<RequestResul
         title: params.title,
         description: params.description,
         type: params.type,
+        status: 'submitted', // Default status
+        is_enquiry: params.isEnquiry || false
       })
       .select()
       .single();
@@ -55,14 +58,7 @@ export const createRequest = async (params: RequestParams): Promise<RequestResul
  */
 export const updateRequest = async (
   id: string,
-  updates: Partial<{
-    title: string;
-    description: string;
-    status: RequestStatus;
-    notes: string;
-    field_officer_id?: string;
-    program_manager_id?: string;
-  }>
+  updates: Record<string, any>
 ): Promise<Request | null> => {
   try {
     const { data, error } = await supabase
@@ -95,15 +91,13 @@ export const updateRequest = async (
       userId: data.user_id,
       title: data.title,
       description: data.description,
-      type: data.type,
-      status: data.status,
+      type: data.type as RequestType,
+      status: data.status as RequestStatus,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
-      notes: data.notes ? [data.notes] : [],
+      notes: data.notes ? [data.notes] as Note[] : [],
       documents: [],
-      timeline: [],
-      fieldOfficer: null,
-      programManager: null
+      timeline: []
     };
   } catch (error: any) {
     console.error("Error updating request:", error);
@@ -310,18 +304,6 @@ export const getRequestDocuments = async (requestId: string): Promise<Document[]
  */
 export const deleteDocument = async (documentId: string): Promise<boolean> => {
   try {
-    // First get the document to find the file path
-    const { data: document, error: fetchError } = await supabase
-      .from('attachments')
-      .select('*')
-      .eq('id', documentId)
-      .single();
-    
-    if (fetchError) {
-      console.error("Error fetching document:", fetchError);
-      return false;
-    }
-    
     // Delete database record
     const { error: dbError } = await supabase
       .from('attachments')

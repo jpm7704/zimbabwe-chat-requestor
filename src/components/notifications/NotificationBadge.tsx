@@ -13,15 +13,16 @@ const NotificationBadge = ({ onClick }: NotificationBadgeProps) => {
   const { userProfile } = useAuth();
   const { unreadCount, isLoading } = useUnreadNotificationsCount();
   const [isAnimating, setIsAnimating] = useState(false);
+  const count = typeof unreadCount === 'number' ? unreadCount : 0;
 
   // Add animation when new notifications arrive
   useEffect(() => {
-    if (unreadCount > 0) {
+    if (count > 0) {
       setIsAnimating(true);
       const timer = setTimeout(() => setIsAnimating(false), 2000);
       return () => clearTimeout(timer);
     }
-  }, [unreadCount]);
+  }, [count]);
 
   // Don't show for regular users who don't receive notifications
   if (!userProfile || userProfile.role === 'user') {
@@ -33,20 +34,20 @@ const NotificationBadge = ({ onClick }: NotificationBadgeProps) => {
       <button
         onClick={onClick}
         className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        aria-label={`${unreadCount || 0} unread notifications`}
+        aria-label={`${count || 0} unread notifications`}
       >
-        {unreadCount > 0 ? (
+        {count > 0 ? (
           <BellRing className={`h-5 w-5 ${isAnimating ? 'text-primary animate-bounce' : 'text-primary'}`} />
         ) : (
           <Bell className="h-5 w-5" />
         )}
         
-        {unreadCount > 0 && (
+        {count > 0 && (
           <Badge 
             variant="destructive" 
             className="absolute -top-1 -right-1 px-1.5 h-5 min-w-[20px] flex items-center justify-center rounded-full"
           >
-            {unreadCount > 99 ? '99+' : unreadCount}
+            {count > 99 ? '99+' : count}
           </Badge>
         )}
       </button>

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -35,7 +35,7 @@ const RequestAssignmentPanel = ({ request, onAssignmentChange }: RequestAssignme
   const { toast } = useToast();
   
   // Load staff members on initial render
-  useState(() => {
+  useEffect(() => {
     const loadStaffMembers = async () => {
       try {
         setLoading(true);

@@ -27,8 +27,7 @@ const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
             notes,
             timestamp,
             updated_by,
-            request_id,
-            updater:user_profiles!updated_by(name, role)
+            request_id
           `)
           .eq('request_id', requestId)
           .order('timestamp', { ascending: false });
@@ -36,22 +35,33 @@ const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
         if (statusError) throw statusError;
         
         // Transform into timeline events
-        const timelineEvents: TimelineEvent[] = statusUpdates.map(update => ({
-          id: update.id,
-          type: 'status_change',
-          description: `Status changed to ${update.status.replace('_', ' ')}`,
-          createdAt: update.timestamp,
-          requestId: update.request_id,
-          createdBy: {
-            id: update.updated_by,
-            name: update.updater?.name || 'Unknown User',
-            role: update.updater?.role || 'user'
-          },
-          metadata: {
-            status: update.status,
-            notes: update.notes
-          }
-        }));
+        const timelineEvents: TimelineEvent[] = [];
+        
+        for (const update of statusUpdates) {
+          // Get user info for each update
+          const { data: updater } = await supabase
+            .from('user_profiles')
+            .select('name, role')
+            .eq('id', update.updated_by)
+            .single();
+          
+          timelineEvents.push({
+            id: update.id,
+            type: 'status_change',
+            description: `Status changed to ${update.status.replace('_', ' ')}`,
+            createdAt: update.timestamp,
+            requestId: update.request_id,
+            createdBy: {
+              id: update.updated_by,
+              name: updater?.name || 'Unknown User',
+              role: updater?.role || 'user'
+            },
+            metadata: {
+              status: update.status,
+              notes: update.notes
+            }
+          });
+        }
         
         setEvents(timelineEvents);
       } catch (error) {

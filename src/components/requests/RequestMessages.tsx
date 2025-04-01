@@ -34,24 +34,34 @@ const RequestMessages = ({ requestId }: RequestMessagesProps) => {
             content,
             timestamp,
             is_system_message,
-            sender:user_profiles!sender_id(id, name, email, role)
+            sender_id
           `)
           .eq('request_id', requestId)
           .order('timestamp', { ascending: true });
         
         if (error) throw error;
         
-        // Transform into notes
-        const notes: Note[] = messages.map(msg => ({
-          id: msg.id,
-          requestId,
-          authorId: msg.sender?.id || '',
-          authorName: msg.sender?.name || 'Unknown User',
-          authorRole: msg.sender?.role || 'user',
-          content: msg.content,
-          createdAt: msg.timestamp,
-          isInternal: msg.is_system_message
-        }));
+        // Get user information for each message
+        const notes: Note[] = [];
+        for (const msg of messages) {
+          // Get user info for this message
+          const { data: sender } = await supabase
+            .from('user_profiles')
+            .select('name, role')
+            .eq('id', msg.sender_id)
+            .single();
+          
+          notes.push({
+            id: msg.id,
+            requestId,
+            authorId: msg.sender_id,
+            authorName: sender?.name || 'Unknown User',
+            authorRole: sender?.role || 'user',
+            content: msg.content,
+            createdAt: msg.timestamp,
+            isInternal: msg.is_system_message
+          });
+        }
         
         setMessages(notes);
       } catch (error) {
@@ -77,6 +87,7 @@ const RequestMessages = ({ requestId }: RequestMessagesProps) => {
       const tempId = `temp-${Date.now()}`;
       const { data: userData } = await supabase.auth.getUser();
       
+      // Get the user profile
       const { data: userProfile } = await supabase
         .from('user_profiles')
         .select('name, role')

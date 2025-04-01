@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   getNotifications, 
-  markNotificationAsRead, 
-  markAllNotificationsAsRead,
-  getUnreadNotificationsCount
+  markNotificationRead, 
+  markAllNotificationsRead,
+  getUnreadNotificationCount
 } from '@/services/notificationService';
 import { useAuth } from './useAuth';
 
@@ -42,7 +42,7 @@ export const useUnreadNotificationsCount = () => {
     refetch
   } = useQuery({
     queryKey: ['unreadNotificationsCount'],
-    queryFn: getUnreadNotificationsCount,
+    queryFn: getUnreadNotificationCount,
     enabled: !!userProfile && userProfile.role !== 'user',
     staleTime: 1000 * 60, // 1 minute
     refetchInterval: 1000 * 60 * 2, // Refresh every 2 minutes
@@ -63,7 +63,7 @@ export const useMarkNotificationAsRead = (notificationId: string) => {
   const markAsRead = async () => {
     try {
       setIsMarking(true);
-      await markNotificationAsRead(notificationId);
+      await markNotificationRead(notificationId);
       
       // Update the notifications cache
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -88,7 +88,7 @@ export const useMarkAllNotificationsAsRead = () => {
   const markAllAsRead = async () => {
     try {
       setIsMarking(true);
-      await markAllNotificationsAsRead();
+      await markAllNotificationsRead();
       
       // Update the notifications cache
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
