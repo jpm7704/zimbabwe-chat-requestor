@@ -1,11 +1,20 @@
 
 import React from 'react';
+import HeroSection from '@/components/home/HeroSection';
+import ProcessSection from '@/components/home/ProcessSection';
+import StatsSection from '@/components/home/StatsSection';
+import SupportTypesSection from '@/components/home/SupportTypesSection';
+import CTASection from '@/components/home/CTASection';
 
 const Home = () => {
   return (
-    <div className="w-full min-h-screen flex items-center justify-center">
-      <h1 className="text-2xl text-muted-foreground">Home Page (Under Construction)</h1>
-    </div>
+    <>
+      <HeroSection />
+      <StatsSection />
+      <ProcessSection />
+      <SupportTypesSection />
+      <CTASection />
+    </>
   );
 };
 

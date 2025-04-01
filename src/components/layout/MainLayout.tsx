@@ -35,7 +35,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <div className="min-h-screen flex w-full">
           <AppSidebar />
           <div className="flex flex-col min-h-screen flex-1">
-            <main className="flex-grow pt-24 px-4 container mx-auto max-w-7xl">
+            <main className="flex-grow pt-16 px-4 container mx-auto max-w-7xl">
               {children}
             </main>
           </div>
@@ -52,7 +52,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="min-h-screen flex flex-col w-full">
         <Navbar />
         <div className="flex flex-col min-h-screen flex-1">
-          <main className="flex-grow px-4 container mx-auto max-w-5xl">
+          <main className="flex-grow">
             {children}
           </main>
           <Footer />

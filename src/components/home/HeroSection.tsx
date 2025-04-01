@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 
 const HeroSection = () => {
   return (
-    <section className="relative bg-background py-16 md:py-24 min-h-screen w-full flex items-center justify-center -mt-20">
+    <section className="relative bg-background py-16 md:py-24 min-h-[95vh] w-full flex items-center justify-center">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-7xl">
-        <div className="max-w-5xl mx-auto text-center pt-24 md:pt-32">
+        <div className="max-w-5xl mx-auto text-center pt-16 md:pt-24">
           <h1 className="mb-6 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
             Zimbabwe <span className="text-primary">Healthcare & Education</span> Initiative
           </h1>
