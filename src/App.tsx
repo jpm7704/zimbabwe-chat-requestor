@@ -60,7 +60,7 @@ const App = () => {
             <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
             
-            {/* Special route for Field Officers - Allow direct access */}
+            {/* Field Officer routes with direct access - no permission checking */}
             <Route path="/field-work" element={<MainLayout><FieldWork /></MainLayout>} />
             <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
             
