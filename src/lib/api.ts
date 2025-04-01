@@ -1,13 +1,8 @@
+
 // API functions for the Zimbabwe Chat Requestor
-// This provides the core functionality for the request workflow
+// Core functionality for the request workflow
 
-import { Request, RequestStatus, RequestType } from "@/types";
-
-// Mock data for demonstration purposes
-const mockRequests = [];
-
-// Mock users for the system
-const mockUsers = [];
+import { RequestStatus } from "@/types";
 
 // Simulated delay to mimic API calls
 const simulateApiDelay = () => new Promise(resolve => setTimeout(resolve, 500));
@@ -16,109 +11,48 @@ export const createRequest = async (data: any) => {
   console.log('Creating request:', data);
   await simulateApiDelay();
   
-  // Generate a mock ID and ticket number
-  const newId = `mock-request-${Date.now()}`;
+  // Generate a ticket number
   const ticketNumber = `BGF-${new Date().getFullYear().toString().substr(-2)}${(new Date().getMonth() + 1).toString().padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
   
-  const newRequest = {
-    id: newId,
-    ticketNumber,
-    userId: 'user-1', // Default to first user
-    type: data.type,
-    title: data.title,
-    description: data.description,
-    status: 'submitted' as RequestStatus,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    documents: [],
-    notes: [],
-    timeline: []
-  };
-  
-  // Add to our mock data
-  mockRequests.push(newRequest);
-  
   return { 
-    id: newId, 
-    ticketNumber, 
-    ...data, 
-    requestId: newId // Include both id and requestId for flexibility
+    id: `request-${Date.now()}`,
+    ticketNumber,
+    ...data
   };
 };
 
 export const getRequests = async () => {
   console.log('Fetching all requests');
   await simulateApiDelay();
-  return mockRequests;
+  return [];
 };
 
 export const getRequestById = async (id: string) => {
   console.log('Fetching request by ID:', id);
   await simulateApiDelay();
-  
-  const request = mockRequests.find(req => req.id === id);
-  if (!request) {
-    throw new Error(`Request with ID ${id} not found`);
-  }
-  
-  return request;
+  throw new Error(`Request with ID ${id} not found`);
 };
 
 export const updateRequest = async (id: string, data: any) => {
   console.log('Updating request:', id, data);
   await simulateApiDelay();
-  
-  const requestIndex = mockRequests.findIndex(req => req.id === id);
-  if (requestIndex === -1) {
-    throw new Error(`Request with ID ${id} not found`);
-  }
-  
-  // Merge the updates with existing request
-  const updatedRequest = {
-    ...mockRequests[requestIndex],
-    ...data,
-    updatedAt: new Date().toISOString()
-  };
-  
-  // Update the request in our mock data
-  mockRequests[requestIndex] = updatedRequest;
-  
-  return updatedRequest;
+  return { id, ...data };
 };
 
 export const updateRequestStatus = async (id: string, status: RequestStatus, notes?: string) => {
   console.log('Updating request status:', id, status, notes);
-  return updateRequest(id, { status, notes });
+  return { id, status, notes };
 };
 
 export const assignRequest = async (requestId: string, assigneeId: string, assigneeRole: string) => {
   console.log('Assigning request:', requestId, 'to', assigneeId, '(', assigneeRole, ')');
   await simulateApiDelay();
-  
-  const data: any = { status: 'assigned' };
-  
-  // Set the appropriate field based on role
-  if (assigneeRole === 'field_officer') {
-    data.field_officer_id = assigneeId;
-  } else if (assigneeRole === 'programme_manager') {
-    data.program_manager_id = assigneeId;
-  }
-  
-  return updateRequest(requestId, data);
+  return { id: requestId, status: 'assigned' };
 };
 
 export const deleteRequest = async (id: string) => {
   console.log('Deleting request:', id);
   await simulateApiDelay();
-  
-  const requestIndex = mockRequests.findIndex(req => req.id === id);
-  if (requestIndex === -1) {
-    throw new Error(`Request with ID ${id} not found`);
-  }
-  
-  // Remove the request from our mock data
-  mockRequests.splice(requestIndex, 1);
-  
   return { success: true, id };
 };
 
@@ -131,19 +65,13 @@ export const getEnquiries = async () => {
 export const getUsers = async () => {
   console.log('Fetching users');
   await simulateApiDelay();
-  return mockUsers;
+  return [];
 };
 
 export const getUserById = async (id: string) => {
   console.log('Fetching user by ID:', id);
   await simulateApiDelay();
-  
-  const user = mockUsers.find(user => user.id === id);
-  if (!user) {
-    throw new Error(`User with ID ${id} not found`);
-  }
-  
-  return user;
+  throw new Error(`User with ID ${id} not found`);
 };
 
 export const getRoles = async () => {
@@ -205,23 +133,6 @@ export const getLogs = async () => {
   return [];
 };
 
-// Helper function to generate realistic mock data based on the Zimbabwe context
-export const generateMockRequests = (count: number) => {
-  return [];
-};
-
-// Helper function to get representative titles for mock data
-function getMockTitle(type: RequestType): string {
-  return 'Support request';
-}
-
-// Helper function to get representative descriptions for mock data
-function getMockDescription(type: RequestType): string {
-  return 'Request description';
-}
-
-// Mock data for backward compatibility
-export const getMockRequest = getRequestById;
 export const requestTypes = [
   { value: 'medical_assistance', label: 'Medical Assistance' },
   { value: 'educational_support', label: 'Educational Support' },
@@ -234,3 +145,6 @@ export const requestTypes = [
   { value: 'livelihood_development', label: 'Livelihood Development' },
   { value: 'community_development', label: 'Community Development' }
 ];
+
+// Clean API without mock data generation
+export const getMockRequest = getRequestById;

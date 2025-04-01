@@ -8,7 +8,7 @@ import { Download, FileText, Search } from "lucide-react";
 const Reports = () => {
   const { userProfile } = useAuth();
 
-  // Empty reports data
+  // Clean reports data
   const reports = [];
 
   return (

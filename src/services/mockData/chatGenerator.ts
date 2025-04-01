@@ -1,7 +1,7 @@
 
 import { ChatMessage } from "../../types";
 
-// Generate empty chat messages
+// Return empty chat data instead of generating mocks
 export const generateMockChatMessages = (): ChatMessage[] => {
   return [];
 };
