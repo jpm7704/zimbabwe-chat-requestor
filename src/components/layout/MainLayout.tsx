@@ -2,8 +2,7 @@
 import { useEffect } from "react";
 import { useLocation, Navigate } from "react-router-dom";
 import Navbar from "./Navbar";
-import Footer from "./Footer";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import ThemeToggle from "@/components/theme/ThemeToggle";
@@ -16,7 +15,6 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   const location = useLocation();
   const { isAuthenticated, loading } = useAuth();
-  const isHomePage = location.pathname === "/";
   
   // Scroll to top on route change
   useEffect(() => {
@@ -46,22 +44,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     );
   }
   
-  // For public pages like home, render the regular layout with footer
-  if (isHomePage) {
-    return (
-      <div className="min-h-screen flex flex-col w-full">
-        <Navbar />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
-        <ThemeToggle />
-        <DevRoleSwitcher />
-      </div>
-    );
-  }
-  
-  // For other non-authenticated routes that aren't the home page, redirect to login
+  // For non-authenticated routes, redirect to login
   return <Navigate to="/login" replace />;
 };
 

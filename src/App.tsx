@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
-import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
 import RequestSubmissionPage from "./pages/ChatInterface";
 import EnquiryPage from "./pages/EnquiryPage";
 import RequestsPage from "./pages/RequestsPage";
@@ -17,7 +17,6 @@ import NotFound from "./pages/NotFound";
 import FieldWork from "./pages/FieldWork";
 import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
-import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import ApprovalsPage from "./pages/ApprovalsPage";
 import RequirePermission from "./components/auth/RequirePermission";
@@ -32,7 +31,6 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Check for dev_role in localStorage regardless of environment
   const devRole = localStorage.getItem('dev_role');
   const isDevMode = !!devRole;
   
@@ -45,8 +43,9 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public routes - accessible without authentication */}
-            <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+            {/* Redirect root to dashboard */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/staff-verification" element={<StaffVerification />} />
@@ -74,9 +73,6 @@ const App = () => {
                 )}
               </MainLayout>
             } />
-            
-            {/* Redirect admin page to dashboard */}
-            <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
             
             {/* Fallback route for not found pages */}
             <Route path="*" element={<NotFound />} />
