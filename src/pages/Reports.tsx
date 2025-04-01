@@ -8,44 +8,8 @@ import { Download, FileText, Search } from "lucide-react";
 const Reports = () => {
   const { userProfile } = useAuth();
 
-  // Sample reports data
-  const reports = [
-    {
-      id: "REP-2503-001",
-      title: "Harare District Educational Needs Assessment",
-      date: "March 25, 2025",
-      author: "John Doe",
-      status: "Published"
-    },
-    {
-      id: "REP-2103-002",
-      title: "Bulawayo Medical Support Initiative Impact Report",
-      date: "March 21, 2025",
-      author: "Jane Smith",
-      status: "Published"
-    },
-    {
-      id: "REP-1903-003",
-      title: "Mutare Food Security Assessment Q1 2025",
-      date: "March 19, 2025",
-      author: "Robert Johnson",
-      status: "Published"
-    },
-    {
-      id: "REP-1503-004",
-      title: "Gweru Livelihood Development Project Evaluation",
-      date: "March 15, 2025",
-      author: "Alice Williams",
-      status: "Draft"
-    },
-    {
-      id: "REP-1003-005",
-      title: "Masvingo Water & Sanitation Program Progress Report",
-      date: "March 10, 2025",
-      author: "David Chen",
-      status: "Draft"
-    }
-  ];
+  // Empty reports data
+  const reports = [];
 
   return (
     <div className="container px-4 mx-auto max-w-6xl py-8">
@@ -81,33 +45,41 @@ const Reports = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reports.map((report) => (
-                  <TableRow key={report.id}>
-                    <TableCell className="font-medium">{report.id}</TableCell>
-                    <TableCell>{report.title}</TableCell>
-                    <TableCell>{report.date}</TableCell>
-                    <TableCell>{report.author}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        report.status === 'Published' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
-                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                      }`}>
-                        {report.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Search className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
+                {reports.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      No reports available
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  reports.map((report) => (
+                    <TableRow key={report.id}>
+                      <TableCell className="font-medium">{report.id}</TableCell>
+                      <TableCell>{report.title}</TableCell>
+                      <TableCell>{report.date}</TableCell>
+                      <TableCell>{report.author}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          report.status === 'Published' 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                        }`}>
+                          {report.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="icon">
+                            <Search className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>
@@ -120,15 +92,8 @@ const Reports = () => {
               <CardDescription>Reports awaiting review or approval</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <div className="p-3 border rounded-md">
-                  <div className="font-medium">Chitungwiza Food Assistance Distribution Report</div>
-                  <div className="text-sm text-muted-foreground">Created on March 26, 2025 • Awaiting review</div>
-                </div>
-                <div className="p-3 border rounded-md">
-                  <div className="font-medium">Norton School Supplies Distribution Impact Assessment</div>
-                  <div className="text-sm text-muted-foreground">Created on March 25, 2025 • Awaiting approval</div>
-                </div>
+              <div className="space-y-2 p-4 text-center text-muted-foreground">
+                No pending reports
               </div>
             </CardContent>
           </Card>
