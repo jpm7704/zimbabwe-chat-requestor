@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ClipboardCheck, Plus, FileText, User, HelpCircle } from "lucide-react";
+import { ClipboardCheck, HelpCircle, FileText, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserProfile } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
@@ -51,12 +51,6 @@ const RegularUserView = ({ userProfile }: RegularUserViewProps) => {
       </div>
       
       <div className="flex flex-wrap gap-3 mt-3">
-        <Button size="sm" asChild>
-          <Link to="/submit?action=new" className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            New Application
-          </Link>
-        </Button>
         <Button size="sm" variant="secondary" asChild>
           <Link to="/enquiry" className="flex items-center gap-2">
             <HelpCircle className="h-4 w-4" />
