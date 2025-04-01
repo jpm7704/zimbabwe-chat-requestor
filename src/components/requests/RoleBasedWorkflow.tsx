@@ -1,5 +1,7 @@
 
 import { UserProfile } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import RegularUserView from "./role-views/RegularUserView";
 import FieldOfficerView from "./role-views/FieldOfficerView";
 import ProjectOfficerView from "./role-views/ProjectOfficerView";
@@ -27,6 +29,42 @@ interface RoleBasedWorkflowProps {
 }
 
 const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBasedWorkflowProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Handle role-specific page access and redirects
+  useEffect(() => {
+    if (!userProfile) return;
+    
+    const currentPath = location.pathname;
+    const userRole = userProfile.role?.toLowerCase() || '';
+    
+    // Redirect from inappropriate pages based on role
+    if (currentPath === '/field-work' && !['field_officer', 'project_officer', 'regional_project_officer'].includes(userRole)) {
+      // Redirect non-field officers from field work page
+      navigate('/dashboard');
+      return;
+    }
+    
+    if (currentPath === '/reports' && !permissions.canAccessFieldReports) {
+      // Redirect users without report access
+      navigate('/dashboard');
+      return;
+    }
+    
+    if (currentPath === '/approvals' && !permissions.canApproveRequests) {
+      // Redirect users who can't approve requests
+      navigate('/dashboard');
+      return;
+    }
+    
+    if (currentPath === '/analytics' && !permissions.canAccessAnalytics) {
+      // Redirect users without analytics access
+      navigate('/dashboard');
+      return;
+    }
+  }, [userProfile, location.pathname, permissions, navigate]);
+
   if (!userProfile) {
     return null;
   }

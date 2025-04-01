@@ -4,10 +4,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const DevRoleSwitcher = () => {
   const [currentRole, setCurrentRole] = useState(localStorage.getItem('dev_role') || 'director');
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   const roles = [
     { value: 'user', label: 'Regular User' },
@@ -23,6 +26,11 @@ const DevRoleSwitcher = () => {
 
   const handleRoleChange = (role: string) => {
     try {
+      // Store previous role and path for comparison
+      const previousRole = currentRole;
+      const currentPath = location.pathname;
+      
+      // Set new role in localStorage
       localStorage.setItem('dev_role', role);
       setCurrentRole(role);
       
@@ -35,10 +43,26 @@ const DevRoleSwitcher = () => {
         description: `You are now viewing the app as: ${roles.find(r => r.value === role)?.label || role}`,
       });
       
-      // Force refresh the page to ensure all components update
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
+      // Determine if we should redirect based on role-specific pages
+      const shouldRedirect = 
+        // If switching to/from field officer and on field-work page
+        ((previousRole === 'field_officer' && role !== 'field_officer' && currentPath === '/field-work') ||
+        // If switching to/from approval roles and on approvals page
+        ((['director', 'ceo', 'patron'].includes(previousRole) && !['director', 'ceo', 'patron'].includes(role) && currentPath === '/approvals')) ||
+        // If switching to/from roles with analytics access and on analytics page
+        ((['director', 'head_of_programs', 'assistant_project_officer'].includes(previousRole) && 
+          !['director', 'head_of_programs', 'assistant_project_officer'].includes(role) && 
+          currentPath === '/analytics')));
+      
+      // If we should redirect or if we're on a restricted page, go to dashboard
+      if (shouldRedirect) {
+        navigate('/dashboard');
+      } else {
+        // Force refresh the page to ensure all components update
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
     } catch (error) {
       console.error("Error changing role:", error);
       toast({
