@@ -3,13 +3,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, PieChart, ResponsiveContainer, XAxis, YAxis, Bar, Pie, Tooltip, Legend, Cell } from "recharts";
 import { useAnalyticsData } from "@/hooks/useAnalyticsData";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 const Analytics = () => {
   const { userProfile } = useAuth();
-  const { data, loading, error } = useAnalyticsData();
+  const { data, loading } = useAnalyticsData();
 
   // Handle loading state
   if (loading) {
@@ -17,28 +15,6 @@ const Analytics = () => {
       <div className="container px-4 mx-auto max-w-6xl py-8 flex flex-col items-center justify-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
         <p className="text-muted-foreground">Loading analytics data...</p>
-      </div>
-    );
-  }
-
-  // Handle error state with retry option
-  if (error) {
-    return (
-      <div className="container px-4 mx-auto max-w-6xl py-8">
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            {error.message || "Failed to load analytics data. Please try again."}
-          </AlertDescription>
-        </Alert>
-        <Button 
-          onClick={() => window.location.reload()} 
-          variant="outline"
-          className="mt-2"
-        >
-          Retry
-        </Button>
       </div>
     );
   }
@@ -119,7 +95,7 @@ const Analytics = () => {
                     </PieChart>
                   ) : (
                     <div className="flex items-center justify-center h-full">
-                      <p className="text-muted-foreground text-center">No request type data available</p>
+                      <p className="text-muted-foreground text-center">No request type data available yet</p>
                     </div>
                   )}
                 </ResponsiveContainer>
@@ -145,7 +121,7 @@ const Analytics = () => {
                     </BarChart>
                   ) : (
                     <div className="flex items-center justify-center h-full">
-                      <p className="text-muted-foreground text-center">No monthly data available</p>
+                      <p className="text-muted-foreground text-center">No monthly data available yet</p>
                     </div>
                   )}
                 </ResponsiveContainer>
@@ -184,7 +160,7 @@ const Analytics = () => {
                   </PieChart>
                 ) : (
                   <div className="flex items-center justify-center h-full">
-                    <p className="text-muted-foreground text-center">No status data available</p>
+                    <p className="text-muted-foreground text-center">No status data available yet</p>
                   </div>
                 )}
               </ResponsiveContainer>
