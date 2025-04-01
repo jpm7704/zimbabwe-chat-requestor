@@ -1,298 +1,297 @@
-import { Document as RequestDocument, DocumentType } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from "uuid";
-import { toast } from "@/hooks/use-toast";
-import { createDocumentUploadNotification } from "@/services/notificationService";
+import { Request, RequestType, RequestStatus } from "@/types";
 
-/**
- * Upload a document for a request
- */
-export const uploadDocument = async (
-  requestId: string,
-  file: File,
-  documentType: DocumentType
-): Promise<RequestDocument | null> => {
-  try {
-    // Create a unique file name to prevent collisions
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${uuidv4()}.${fileExt}`;
-    const filePath = `${requestId}/${fileName}`;
-    
-    // Upload the file to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('requests')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-    
-    if (uploadError) {
-      console.error("Error uploading file:", uploadError);
-      toast({
-        title: "Upload failed",
-        description: uploadError.message,
-        variant: "destructive"
-      });
-      return null;
-    }
-    
-    // Get the public URL for the uploaded file
-    const { data: publicUrlData } = supabase.storage
-      .from('requests')
-      .getPublicUrl(filePath);
+type RequestParams = {
+  title: string;
+  description: string;
+  type: RequestType;
+};
 
-    // Insert record into attachments table
-    const { data: attachmentData, error: attachmentError } = await supabase
-      .from('attachments')
-      .insert({
-        request_id: requestId,
-        name: file.name,
-        type: documentType,
-        size: file.size,
-        url: publicUrlData.publicUrl
-      })
-      .select()
-      .single();
-    
-    if (attachmentError) {
-      console.error("Error recording attachment:", attachmentError);
-      toast({
-        title: "Error saving document reference",
-        description: attachmentError.message,
-        variant: "destructive"
-      });
-      return null;
-    }
-    
-    // Get the request ticket number for the notification
-    const { data: requestData, error: requestError } = await supabase
-      .from('requests')
-      .select('ticket_number')
-      .eq('id', requestId)
-      .single();
-    
-    if (!requestError && requestData) {
-      // Create a notification for relevant staff roles
-      await createDocumentUploadNotification(
-        requestId,
-        requestData.ticket_number,
-        file.name
-      );
-    }
-    
-    return {
-      id: attachmentData.id,
-      requestId: attachmentData.request_id,
-      name: attachmentData.name,
-      type: documentType,
-      url: attachmentData.url,
-      uploadedAt: attachmentData.uploaded_at
-    };
-  } catch (error: any) {
-    console.error("Document upload error:", error);
-    toast({
-      title: "Upload failed",
-      description: error.message || "An unexpected error occurred",
-      variant: "destructive"
-    });
-    return null;
-  }
+type RequestResult = {
+  data: Request | null;
+  error: Error | null;
 };
 
 /**
- * Get all documents for a request
+ * Creates a new request.
+ * @param {RequestParams} params - The parameters for creating the request.
+ * @returns {Promise<RequestResult>} - The result of the request creation.
  */
-export const getRequestDocuments = async (requestId: string): Promise<RequestDocument[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('attachments')
-      .select('*')
-      .eq('request_id', requestId);
-    
-    if (error) {
-      console.error("Error fetching documents:", error);
-      throw error;
-    }
-    
-    return data.map(doc => ({
-      id: doc.id,
-      requestId: doc.request_id,
-      name: doc.name,
-      type: doc.type as DocumentType,
-      url: doc.url,
-      uploadedAt: doc.uploaded_at
-    }));
-  } catch (error) {
-    console.error("Error in getRequestDocuments:", error);
-    return [];
-  }
-};
-
-/**
- * Delete a document
- */
-export const deleteDocument = async (documentId: string): Promise<boolean> => {
-  try {
-    // First get the document to find the file path
-    const { data: document, error: fetchError } = await supabase
-      .from('attachments')
-      .select('*')
-      .eq('id', documentId)
-      .single();
-    
-    if (fetchError) {
-      console.error("Error fetching document:", fetchError);
-      return false;
-    }
-    
-    // Extract the storage path from the URL
-    const pathMatch = document.url.match(/\/storage\/v1\/object\/public\/requests\/(.+)/);
-    if (!pathMatch || !pathMatch[1]) {
-      console.error("Could not extract file path from URL");
-      return false;
-    }
-    
-    const filePath = decodeURIComponent(pathMatch[1]);
-    
-    // Delete from storage
-    const { error: storageError } = await supabase.storage
-      .from('requests')
-      .remove([filePath]);
-    
-    if (storageError) {
-      console.error("Error deleting file from storage:", storageError);
-      // Continue anyway to remove the database reference
-    }
-    
-    // Delete database record
-    const { error: dbError } = await supabase
-      .from('attachments')
-      .delete()
-      .eq('id', documentId);
-    
-    if (dbError) {
-      console.error("Error deleting attachment record:", dbError);
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error("Error in deleteDocument:", error);
-    return false;
-  }
-};
-
-/**
- * Add a note to a request
- */
-export const addNoteToRequest = async (
-  requestId: string,
-  content: string,
-  isInternal: boolean = false
-): Promise<void> => {
+export const createRequest = async (params: RequestParams): Promise<RequestResult> => {
   try {
     // Get the current user session
     const { data: session } = await supabase.auth.getSession();
     if (!session?.session?.user) {
-      console.error("No user session found");
-      return;
+      throw new Error("No user session found");
     }
-    
-    // Insert the new message into the messages table
-    const { error } = await supabase
-      .from('messages')
-      .insert({
-        request_id: requestId,
-        sender_id: session.session.user.id,
-        content: content,
-        is_system_message: false
-      });
-    
+
+    // Create a unique ticket number
+    const ticketNumber = `REQ-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
+    // Insert the new request into the database
+    const { data, error } = await supabase
+      .from('requests')
+      .insert([
+        {
+          user_id: session.session.user.id,
+          title: params.title,
+          description: params.description,
+          ticket_number: ticketNumber,
+          type: params.type,
+        },
+      ])
+      .select()
+      .single();
+
     if (error) {
-      console.error("Error adding note to request:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add note to request",
-        variant: "destructive"
-      });
       throw error;
     }
-  } catch (error) {
-    console.error("Error in addNoteToRequest:", error);
-    toast({
-      title: "Error",
-      description: "Failed to add note to request",
-      variant: "destructive"
-    });
-    throw error;
+
+    return { data: data as Request, error: null };
+  } catch (error: any) {
+    console.error("Error creating request:", error);
+    return { data: null, error: error };
   }
 };
 
 /**
- * Get all notes for a request
+ * Updates an existing request.
+ * @param {string} id - The ID of the request to update.
+ * @param {Partial<Request>} updates - The updates to apply to the request.
+ * @returns {Promise<RequestResult>} - The result of the request update.
  */
-export const getRequestNotes = async (requestId: string, canSeeInternalNotes: boolean = false): Promise<any[]> => {
+export const updateRequest = async (
+  id: string,
+  updates: Partial<Request>
+): Promise<RequestResult> => {
   try {
-    let query = supabase
-      .from('messages')
-      .select(`
-        id,
-        request_id,
-        sender_id,
-        content,
-        is_system_message,
-        timestamp
-      `)
-      .eq('request_id', requestId)
-      .order('timestamp', { ascending: true });
-    
-    if (!canSeeInternalNotes) {
-      // Filter out internal notes if the user doesn't have permission to see them
-      query = query.eq('is_internal', false);
-    }
-    
-    const { data, error } = await query;
-    
+    const { data, error } = await supabase
+      .from('requests')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
     if (error) {
-      console.error("Error fetching notes:", error);
       throw error;
     }
-    
-    // Get user profiles for sender IDs
-    const senderIds = [...new Set(data.map(item => item.sender_id))];
-    const { data: userProfiles } = await supabase
-      .from('user_profiles')
-      .select('id, name, role')
-      .in('id', senderIds);
-    
-    const profileMap = new Map();
-    userProfiles?.forEach(profile => {
-      profileMap.set(profile.id, profile);
-    });
-    
-    // Map the data to the Note interface
-    return data.map(item => {
-      const authorProfile = profileMap.get(item.sender_id) || { name: 'System', role: 'system' };
-      
-      return {
-        id: item.id,
-        requestId: item.request_id,
-        authorId: item.sender_id,
-        authorName: authorProfile.name || 'System',
-        authorRole: authorProfile.role || 'System',
-        content: item.content,
-        createdAt: item.timestamp,
-        isInternal: item.is_system_message
-      };
-    });
-  } catch (error) {
-    console.error("Error in getRequestNotes:", error);
-    return [];
+
+    return { data: data as Request, error: null };
+  } catch (error: any) {
+    console.error("Error updating request:", error);
+    return { data: null, error: error };
   }
 };
 
-// Export the createRequest function directly
-export { createRequest } from '@/services/api/request/createRequest';
+/**
+ * Deletes a request.
+ * @param {string} id - The ID of the request to delete.
+ * @returns {Promise<void>} - A promise that resolves when the request is deleted.
+ * @throws {Error} - If there is an error deleting the request.
+ */
+export const deleteRequest = async (id: string): Promise<void> => {
+  try {
+    const { error } = await supabase.from('requests').delete().eq('id', id);
 
-// Export other functions from the request folder
-export { updateRequestStatus } from '@/services/api/request/statusApi';
+    if (error) {
+      throw error;
+    }
+  } catch (error: any) {
+    console.error("Error deleting request:", error);
+    throw error;
+  }
+};
+
+type StatusUpdateParams = {
+  requestId: string;
+  status: RequestStatus;
+  notes?: string;
+};
+
+type StatusUpdateResult = {
+  data: any | null;
+  error: Error | null;
+};
+
+/**
+ * Adds a status update to a request.
+ * @param {StatusUpdateParams} params - The parameters for adding the status update.
+ * @returns {Promise<StatusUpdateResult>} - The result of the status update.
+ */
+export const addStatusUpdate = async (
+  params: StatusUpdateParams
+): Promise<StatusUpdateResult> => {
+  try {
+    // Get the current user session
+    const { data: session } = await supabase.auth.getSession();
+    if (!session?.session?.user) {
+      throw new Error("No user session found");
+    }
+
+    // Insert the new status update into the database
+    const { data, error } = await supabase
+      .from('status_updates')
+      .insert([
+        {
+          request_id: params.requestId,
+          status: params.status,
+          notes: params.notes,
+          updated_by: session.session.user.id,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    // Update the request status
+    await updateRequest(params.requestId, { status: params.status });
+
+    return { data: data, error: null };
+  } catch (error: any) {
+    console.error("Error adding status update:", error);
+    return { data: null, error: error };
+  }
+};
+
+type MessageParams = {
+  requestId: string;
+  content: string;
+};
+
+type MessageResult = {
+  data: any | null;
+  error: Error | null;
+};
+
+/**
+ * Adds a message to a request.
+ * @param {MessageParams} params - The parameters for adding the message.
+ * @returns {Promise<MessageResult>} - The result of the message.
+ */
+export const addMessage = async (
+  params: MessageParams
+): Promise<MessageResult> => {
+  try {
+    // Get the current user session
+    const { data: session } = await supabase.auth.getSession();
+    if (!session?.session?.user) {
+      throw new Error("No user session found");
+    }
+
+    // Insert the new message into the database
+    const { data, error } = await supabase
+      .from('messages')
+      .insert([
+        {
+          request_id: params.requestId,
+          sender_id: session.session.user.id,
+          content: params.content,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return { data: data, error: null };
+  } catch (error: any) {
+    console.error("Error adding message:", error);
+    return { data: null, error: error };
+  }
+};
+
+type AttachmentParams = {
+  requestId: string;
+  messageId?: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+};
+
+type AttachmentResult = {
+  data: any | null;
+  error: Error | null;
+};
+
+/**
+ * Adds an attachment to a request.
+ * @param {AttachmentParams} params - The parameters for adding the attachment.
+ * @returns {Promise<AttachmentResult>} - The result of the attachment.
+ */
+export const addAttachment = async (
+  params: AttachmentParams
+): Promise<AttachmentResult> => {
+  try {
+    // Insert the new attachment into the database
+    const { data, error } = await supabase
+      .from('attachments')
+      .insert([
+        {
+          request_id: params.requestId,
+          message_id: params.messageId,
+          name: params.name,
+          type: params.type,
+          size: params.size,
+          url: params.url,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return { data: data, error: null };
+  } catch (error: any) {
+    console.error("Error adding attachment:", error);
+    return { data: null, error: error };
+  }
+};
+
+type NoteParams = {
+  requestId: string;
+  note: string;
+};
+
+type NoteResult = {
+  data: any | null;
+  error: Error | null;
+};
+
+/**
+ * Adds a note to a request.
+ */
+export const addNote = async (requestId: string, note: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('requests')
+      .update({ notes: note })
+      .eq('id', requestId)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return { data: data, error: null };
+  } catch (error: any) {
+    console.error("Error adding note:", error);
+    return { data: null, error: error };
+  }
+};
+
+export const createEntryPoint = async (params: RequestParams): Promise<RequestResult> => {
+  // Implementation
+  return { data: null, error: null };
+};
+
+// Make sure to export createRequest
+export { createRequest };

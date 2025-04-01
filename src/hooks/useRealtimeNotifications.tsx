@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 import { Notification } from '@/types';
+import { ToastAction } from '@/components/ui/toast';
 
 export const useRealtimeNotifications = () => {
   const { userProfile } = useAuth();
@@ -47,11 +48,11 @@ export const useRealtimeNotifications = () => {
             toast({
               title: newNotification.title,
               description: newNotification.message,
-              action: {
-                altText: "View notification",
-                children: "View",
-                onClick: () => window.location.href = newNotification.link || ''
-              }
+              action: <ToastAction 
+                onClick={() => window.location.href = newNotification.link || ''}
+              >
+                View
+              </ToastAction>
             });
             
             // Add to the existing notifications or create new array

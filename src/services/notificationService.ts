@@ -2,33 +2,11 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Notification, NotificationType } from "@/types";
 
-// Helper function to check if notifications table exists
-const checkForNotificationsTable = async (): Promise<boolean> => {
-  try {
-    const { data, error } = await supabase
-      .from('notifications')
-      .select('id')
-      .limit(1);
-      
-    return !error;
-  } catch (error) {
-    console.error("Error checking for notifications table:", error);
-    return false;
-  }
-};
-
 /**
  * Get all notifications for the current user based on their role
  */
 export const getNotifications = async (): Promise<Notification[]> => {
   try {
-    // Check if table exists
-    const tableExists = await checkForNotificationsTable();
-    if (!tableExists) {
-      console.warn("Notifications table does not exist yet");
-      return [];
-    }
-    
     // Get the current user session
     const { data: session } = await supabase.auth.getSession();
     if (!session?.session?.user) {
@@ -55,7 +33,7 @@ export const getNotifications = async (): Promise<Notification[]> => {
     }
     
     // Transform received data to match our Notification type
-    return (data || []).map((item): Notification => ({
+    return Array.isArray(data) ? data.map((item): Notification => ({
       id: item.id,
       type: item.type as NotificationType,
       title: item.title,
@@ -65,7 +43,7 @@ export const getNotifications = async (): Promise<Notification[]> => {
       link: item.link || '',
       targetRoles: item.target_roles,
       relatedId: item.related_id
-    }));
+    })) : [];
   } catch (error) {
     console.error("Error in getNotifications:", error);
     return [];
@@ -77,12 +55,6 @@ export const getNotifications = async (): Promise<Notification[]> => {
  */
 export const getUnreadNotificationsCount = async (): Promise<number> => {
   try {
-    // Check if table exists
-    const tableExists = await checkForNotificationsTable();
-    if (!tableExists) {
-      return 0;
-    }
-    
     // Get the current user session
     const { data: session } = await supabase.auth.getSession();
     if (!session?.session?.user) {
@@ -100,7 +72,7 @@ export const getUnreadNotificationsCount = async (): Promise<number> => {
     }
     
     // Count unread notifications for the user based on their role
-    const { count, error } = await supabase
+    const { data, error } = await supabase
       .rpc('get_unread_notification_count', { user_role: userProfile.role });
     
     if (error) {
@@ -108,7 +80,7 @@ export const getUnreadNotificationsCount = async (): Promise<number> => {
       return 0;
     }
     
-    return count || 0;
+    return data || 0;
   } catch (error) {
     console.error("Error in getUnreadNotificationsCount:", error);
     return 0;
@@ -120,12 +92,6 @@ export const getUnreadNotificationsCount = async (): Promise<number> => {
  */
 export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
   try {
-    // Check if table exists
-    const tableExists = await checkForNotificationsTable();
-    if (!tableExists) {
-      return;
-    }
-    
     // Update the notification
     const { error } = await supabase
       .rpc('mark_notification_read', { notification_id: notificationId });
@@ -145,12 +111,6 @@ export const markNotificationAsRead = async (notificationId: string): Promise<vo
  */
 export const markAllNotificationsAsRead = async (): Promise<void> => {
   try {
-    // Check if table exists
-    const tableExists = await checkForNotificationsTable();
-    if (!tableExists) {
-      return;
-    }
-    
     // Get the current user session
     const { data: session } = await supabase.auth.getSession();
     if (!session?.session?.user) {
@@ -190,13 +150,6 @@ export const createDocumentUploadNotification = async (
   documentName: string,
 ): Promise<void> => {
   try {
-    // Check if table exists before attempting to create notification
-    const tableExists = await checkForNotificationsTable();
-    if (!tableExists) {
-      console.warn("Skipping notification creation - table does not exist yet");
-      return;
-    }
-
     // Create a notification for relevant roles
     // Field officers and project officers should be notified
     const targetRoles = ['field_officer', 'project_officer', 'regional_project_officer', 'assistant_project_officer', 'programme_manager', 'head_of_programs'];
