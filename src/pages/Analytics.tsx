@@ -1,27 +1,10 @@
 
 import { useAuth } from "@/hooks/useAuth";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, PieChart, LineChart, ResponsiveContainer, XAxis, YAxis, Bar, Pie, Line, Tooltip, Legend, Cell } from "recharts";
 
 const Analytics = () => {
-  const { userProfile, isAuthenticated } = useAuth();
-  const permissions = usePermissions(userProfile);
-  const navigate = useNavigate();
-
-  // Redirect if user doesn't have permission to view this page
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    
-    if (!permissions.canAccessAnalytics) {
-      navigate('/');
-    }
-  }, [isAuthenticated, permissions, navigate]);
+  const { userProfile } = useAuth();
 
   // Sample data for charts
   const requestsByTypeData = [

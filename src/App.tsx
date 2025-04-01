@@ -60,20 +60,10 @@ const App = () => {
             <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
             
-            {/* Field Officer routes with direct access - no permission checking */}
+            {/* Role-specific routes - direct access with no permission checking */}
             <Route path="/field-work" element={<MainLayout><FieldWork /></MainLayout>} />
             <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
-            
-            {/* Role-specific routes - kept for other roles */}
-            <Route path="/analytics" element={
-              <MainLayout>
-                {isDevMode ? <Analytics /> : (
-                  <RequirePermission permission="canAccessAnalytics">
-                    <Analytics />
-                  </RequirePermission>
-                )}
-              </MainLayout>
-            } />
+            <Route path="/analytics" element={<MainLayout><Analytics /></MainLayout>} />
             
             <Route path="/approvals" element={
               <MainLayout>
