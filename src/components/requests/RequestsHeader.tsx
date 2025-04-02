@@ -24,6 +24,8 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
           description: "Verify requests and conduct assessments for BGF Zimbabwe support applications" 
         };
       case 'programme_manager':
+      case 'head_of_programs':
+      case 'hop':
         return { 
           title: "Programme Manager Dashboard", 
           description: "Review field verifications and manage request processing" 
@@ -42,6 +44,20 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
   };
   
   const { title, description } = getRoleSpecificHeader();
+  
+  // Helper function to check if the user has a management role
+  const hasManagementRole = () => {
+    if (!userProfile || !userProfile.role) return false;
+    
+    const managementRoles = [
+      'head_of_department', 
+      'head_of_programs', 
+      'hop', 
+      'programme_manager'
+    ];
+    
+    return managementRoles.includes(userProfile.role.toLowerCase());
+  };
   
   return (
     <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
@@ -63,7 +79,7 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
       {showNewRequestButton && 
        permissions.canViewRequests && 
        !permissions.canReviewRequests && 
-       !['head_of_department', 'head_of_programs', 'programme_manager', 'hop'].includes(userProfile?.role?.toLowerCase() || '') && (
+       !hasManagementRole() && (
         <Button asChild>
           <Link to="/submit?action=new" className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
