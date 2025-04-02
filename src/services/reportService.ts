@@ -20,37 +20,44 @@ export interface ReportFilters {
 // Fetch reports from the API
 export const fetchReports = async (filters?: ReportFilters): Promise<Report[]> => {
   try {
-    // In the future, this will connect to Supabase
-    // For now, return mock data
-    const mockReports: Report[] = [];
+    let query = supabase
+      .from('reports')
+      .select('*');
     
-    // Filter the reports based on the filters
-    let filteredReports = [...mockReports];
-    
+    // Apply filters if provided
     if (filters) {
       if (filters.status && filters.status !== 'all') {
-        filteredReports = filteredReports.filter(report => 
-          report.status.toLowerCase() === filters.status?.toLowerCase()
-        );
+        query = query.eq('status', filters.status);
       }
       
       if (filters.category && filters.category !== 'all') {
-        filteredReports = filteredReports.filter(report => 
-          report.category?.toLowerCase() === filters.category?.toLowerCase()
-        );
+        query = query.eq('category', filters.category);
       }
       
       if (filters.searchTerm) {
-        const searchLower = filters.searchTerm.toLowerCase();
-        filteredReports = filteredReports.filter(report => 
-          report.title.toLowerCase().includes(searchLower) || 
-          report.author.toLowerCase().includes(searchLower) ||
-          (report.content && report.content.toLowerCase().includes(searchLower))
-        );
+        const term = filters.searchTerm.toLowerCase();
+        query = query.or(`title.ilike.%${term}%,content.ilike.%${term}%`);
       }
     }
     
-    return filteredReports;
+    // Sort by creation date, newest first
+    query = query.order('created_at', { ascending: false });
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data.map(report => ({
+      id: report.id,
+      title: report.title,
+      date: report.created_at,
+      author: report.author_name || 'Unknown',
+      category: report.category,
+      status: report.status,
+      content: report.content
+    })) || [];
   } catch (error) {
     console.error("Error fetching reports:", error);
     throw new Error("Failed to fetch reports. Please try again later.");
@@ -60,9 +67,29 @@ export const fetchReports = async (filters?: ReportFilters): Promise<Report[]> =
 // Fetch a single report by ID
 export const fetchReportById = async (reportId: string): Promise<Report | null> => {
   try {
-    // This function will connect to a real API in the future
-    // For now, return null
-    return null;
+    const { data, error } = await supabase
+      .from('reports')
+      .select('*')
+      .eq('id', reportId)
+      .single();
+    
+    if (error) {
+      throw error;
+    }
+    
+    if (!data) {
+      return null;
+    }
+    
+    return {
+      id: data.id,
+      title: data.title,
+      date: data.created_at,
+      author: data.author_name || 'Unknown',
+      category: data.category,
+      status: data.status,
+      content: data.content
+    };
   } catch (error) {
     console.error(`Error fetching report ${reportId}:`, error);
     throw new Error("Failed to fetch report details. Please try again later.");
@@ -72,16 +99,46 @@ export const fetchReportById = async (reportId: string): Promise<Report | null> 
 // Create a new report
 export const createReport = async (reportData: Omit<Report, 'id' | 'date'>): Promise<Report> => {
   try {
-    // This function will connect to a real API in the future
-    // For now, return a mock response
-    const newReport = {
-      id: 'temp-' + Date.now(),
-      date: new Date().toISOString(),
-      ...reportData
-    };
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session?.user) {
+      throw new Error("You must be logged in to create reports");
+    }
+    
+    // Get user profile to add author name
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', session.session.user.id)
+      .single();
+    
+    const authorName = profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 'Anonymous';
+    
+    const { data, error } = await supabase
+      .from('reports')
+      .insert({
+        title: reportData.title,
+        content: reportData.content,
+        category: reportData.category,
+        status: reportData.status,
+        author_id: session.session.user.id,
+        author_name: authorName
+      })
+      .select()
+      .single();
 
-    console.log('Created new report:', newReport);
-    return newReport;
+    if (error) {
+      throw error;
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      date: data.created_at,
+      author: data.author_name,
+      category: data.category,
+      status: data.status,
+      content: data.content
+    };
   } catch (error) {
     console.error("Error creating report:", error);
     throw new Error("Failed to create report. Please try again later.");
