@@ -5,11 +5,7 @@ import { Plus, ClipboardCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
 
-interface RequestsHeaderProps {
-  showNewRequestButton?: boolean;
-}
-
-const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) => {
+const RequestsHeader = () => {
   const { userProfile, formatRole } = useAuth();
   const { isRegularUser, isFieldOfficer, isProjectOfficer, isAssistantProjectOfficer } = useRoles(userProfile);
   
@@ -81,16 +77,6 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
         </p>
       </div>
       
-      {/* Remove the showNewRequestButton prop condition to hide it completely for non-regular users */}
-      {isRegularUser() && (
-        <Button asChild>
-          <Link to="/submit?action=new" className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            New Request
-          </Link>
-        </Button>
-      )}
-      
       {isFieldStaff() && (
         <Button asChild variant="outline">
           <Link to="/field-work" className="flex items-center gap-2">
@@ -104,3 +90,4 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
 };
 
 export default RequestsHeader;
+
