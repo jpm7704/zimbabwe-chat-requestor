@@ -195,6 +195,10 @@ const FieldWork = () => {
             <div className="flex items-center justify-center py-10">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
+          ) : error ? (
+            <div className="text-center py-10 text-red-500">
+              {error.message || "Failed to load field visits"}
+            </div>
           ) : filteredVisits.length > 0 ? (
             filteredVisits.map(renderVisitCard)
           ) : (
@@ -208,6 +212,10 @@ const FieldWork = () => {
           {loading ? (
             <div className="flex items-center justify-center py-10">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-10 text-red-500">
+              {error.message || "Failed to load field visits"}
             </div>
           ) : filteredVisits.length > 0 ? (
             filteredVisits.map(renderVisitCard)

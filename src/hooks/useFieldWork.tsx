@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -27,15 +26,16 @@ export function useFieldWork() {
   const { toast } = useToast();
 
   const fetchFieldVisits = async () => {
-    if (!userProfile) {
-      setFieldVisits([]);
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
+      
+      // Return empty array if no user profile
+      if (!userProfile) {
+        setFieldVisits([]);
+        setLoading(false);
+        return;
+      }
 
       // Use any type to bypass TypeScript errors until Supabase types are updated
       let query = (supabase as any).from('field_visits').select(`
@@ -57,7 +57,10 @@ export function useFieldWork() {
         throw fetchError;
       }
 
-      if (data) {
+      // Handle case when data is null or empty
+      if (!data || data.length === 0) {
+        setFieldVisits([]);
+      } else {
         const transformedVisits: FieldWorkRequest[] = data.map(visit => ({
           id: visit.id,
           ticketNumber: visit.request?.ticket_number || 'N/A',
@@ -77,11 +80,15 @@ export function useFieldWork() {
     } catch (err) {
       console.error('Error fetching field visits:', err);
       setError(err instanceof Error ? err : new Error('Failed to load field visits'));
-      toast({
-        title: 'Error',
-        description: 'Failed to load field visits. Please try again.',
-        variant: 'destructive',
-      });
+      
+      // Show error toast but don't show it for empty data states
+      if (!(err instanceof Error && err.message.includes('no rows returned'))) {
+        toast({
+          title: 'Error',
+          description: 'Failed to load field visits. Please try again.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
