@@ -1,47 +1,24 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, PieChart, LineChart, Legend } from "recharts";
+import { useAnalyticsData } from "@/hooks/useAnalyticsData";
+import { BarChart, PieChart, LineChart } from "recharts";
 import { Bar, Pie, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell as RechartsCell } from "recharts";
+import { Loader2 } from "lucide-react";
 
 const Analytics = () => {
-  // Sample data for charts
-  const monthlyRequestsData = [
-    { name: "Jan", requests: 65 },
-    { name: "Feb", requests: 59 },
-    { name: "Mar", requests: 80 },
-    { name: "Apr", requests: 81 },
-    { name: "May", requests: 56 },
-    { name: "Jun", requests: 55 },
-    { name: "Jul", requests: 40 }
-  ];
-
-  const requestTypeData = [
-    { name: "Financial Aid", value: 400 },
-    { name: "Housing", value: 300 },
-    { name: "Medical", value: 300 },
-    { name: "Education", value: 200 },
-    { name: "Other", value: 100 }
-  ];
-
-  const processingTimeData = [
-    { name: "Week 1", avgTime: 4.5 },
-    { name: "Week 2", avgTime: 3.8 },
-    { name: "Week 3", avgTime: 4.2 },
-    { name: "Week 4", avgTime: 3.5 },
-    { name: "Week 5", avgTime: 2.9 },
-    { name: "Week 6", avgTime: 3.1 }
-  ];
-
-  const regionData = [
-    { name: "Harare", completed: 65, pending: 35 },
-    { name: "Bulawayo", completed: 45, pending: 20 },
-    { name: "Mutare", completed: 30, pending: 15 },
-    { name: "Gweru", completed: 25, pending: 10 },
-    { name: "Victoria Falls", completed: 15, pending: 8 }
-  ];
+  const { data, loading } = useAnalyticsData();
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A28BFF"];
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full py-10">
+        <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
+        <p className="text-muted-foreground">Loading analytics...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container px-4 mx-auto max-w-7xl py-8">
@@ -66,12 +43,12 @@ const Analytics = () => {
               <CardContent>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={monthlyRequestsData}>
+                    <BarChart data={data.requestsByMonth}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
+                      <XAxis dataKey="month" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="requests" fill="#8884d8" />
+                      <Bar dataKey="count" fill="#8884d8" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -90,16 +67,16 @@ const Analytics = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={requestTypeData}
+                        data={data.requestsByType}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
                         label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                         outerRadius={80}
                         fill="#8884d8"
-                        dataKey="value"
+                        dataKey="count"
                       >
-                        {requestTypeData.map((entry, index) => (
+                        {data.requestsByType.map((entry, index) => (
                           <RechartsCell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
@@ -116,28 +93,29 @@ const Analytics = () => {
         <TabsContent value="performance" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Average Processing Time</CardTitle>
+              <CardTitle>Total Requests Overview</CardTitle>
               <CardDescription>
-                Average time (in days) to process requests over the last 6 weeks
+                Overview of request statuses
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={processingTimeData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line 
-                      type="monotone" 
-                      dataKey="avgTime" 
-                      stroke="#8884d8" 
-                      activeDot={{ r: 8 }} 
-                      name="Average Days"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="text-sm text-muted-foreground">Total Requests</h3>
+                  <p className="text-2xl font-bold">{data.totalRequests}</p>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <h3 className="text-sm text-muted-foreground">Pending</h3>
+                  <p className="text-2xl font-bold">{data.pendingRequests}</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="text-sm text-muted-foreground">Completed</h3>
+                  <p className="text-2xl font-bold">{data.completedRequests}</p>
+                </div>
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <h3 className="text-sm text-muted-foreground">Rejected</h3>
+                  <p className="text-2xl font-bold">{data.rejectedRequests}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -146,22 +124,21 @@ const Analytics = () => {
         <TabsContent value="regional" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Regional Request Status</CardTitle>
+              <CardTitle>Request Status by Region</CardTitle>
               <CardDescription>
-                Completed vs pending requests by region
+                Distribution of requests across different statuses
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={regionData}>
+                  <BarChart data={data.requestsByStatus}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="status" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="completed" fill="#4ade80" name="Completed" />
-                    <Bar dataKey="pending" fill="#f97316" name="Pending" />
+                    <Bar dataKey="count" fill="#8884d8" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -174,3 +151,4 @@ const Analytics = () => {
 };
 
 export default Analytics;
+
