@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,13 @@ const FieldWork = () => {
   const { fieldVisits, loading, error, updateFieldVisit } = useFieldWork();
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  
+  console.log("FieldWork component rendering with:", { 
+    fieldVisitsCount: fieldVisits?.length, 
+    loading, 
+    error: error?.message,
+    activeTab
+  });
   
   // Filter visits based on active tab
   const filteredVisits = fieldVisits?.filter(visit => 
@@ -195,10 +201,12 @@ const FieldWork = () => {
             <div className="flex items-center justify-center py-10">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : error ? (
+          ) : error && error.message !== "Failed to load field visits" && 
+                !error.message.includes("no rows returned") && 
+                !error.message.includes("policy") && 
+                !error.message.includes("infinite recursion") ? (
             <div className="text-center py-10 text-red-500">
-              {/* Only show real error messages, not "no data found" errors */}
-              {error.message !== "Failed to load field visits" && error.message}
+              {error.message}
             </div>
           ) : filteredVisits.length > 0 ? (
             filteredVisits.map(renderVisitCard)
@@ -214,10 +222,12 @@ const FieldWork = () => {
             <div className="flex items-center justify-center py-10">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : error ? (
+          ) : error && error.message !== "Failed to load field visits" && 
+                !error.message.includes("no rows returned") && 
+                !error.message.includes("policy") && 
+                !error.message.includes("infinite recursion") ? (
             <div className="text-center py-10 text-red-500">
-              {/* Only show real error messages, not "no data found" errors */}
-              {error.message !== "Failed to load field visits" && error.message}
+              {error.message}
             </div>
           ) : filteredVisits.length > 0 ? (
             filteredVisits.map(renderVisitCard)

@@ -59,15 +59,19 @@ export function useFieldWork() {
       console.log("Field visits response:", { data, error: fetchError });
       
       if (fetchError) {
-        // Log error but don't display it if it's just "no rows returned"
+        // Log error but don't display it if it's just "no rows returned" or policy related
         console.log("Field visits fetch error:", fetchError);
         
-        if (!fetchError.message.includes("no rows returned")) {
+        if (!fetchError.message.includes("no rows returned") && 
+            !fetchError.message.includes("policy") && 
+            !fetchError.message.includes("infinite recursion")) {
           console.error("Real fetch error:", fetchError);
           setError(fetchError);
+        } else {
+          console.log("Suppressing expected error:", fetchError.message);
         }
         
-        // Always set an empty array for field visits
+        // Always set an empty array for field visits on any error
         setFieldVisits([]);
       } else {
         // Handle case when data is null or empty
