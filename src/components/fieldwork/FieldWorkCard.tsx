@@ -1,7 +1,7 @@
-
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { FileText, MapPin, Calendar, Clock, Download, Share, Printer } from "lucide-react";
 import { format } from "date-fns";
 import { RescheduleButton } from "./RescheduleButton";
@@ -43,11 +43,8 @@ export function FieldWorkCard({ fieldWork, onUpdate }: FieldWorkCardProps) {
 
   const handleViewReport = () => {
     if (fieldWork.reportId) {
-      // If report exists, navigate to the report detail view
-      // For now just show a dialog with the report content
       setIsReportDialogOpen(true);
     } else {
-      // If no report exists, open dialog to create one
       setReportContent("");
       setIsReportDialogOpen(true);
     }
@@ -75,7 +72,6 @@ export function FieldWorkCard({ fieldWork, onUpdate }: FieldWorkCardProps) {
       
       setIsReportDialogOpen(false);
       
-      // Trigger refresh of parent component
       if (onUpdate) {
         onUpdate();
       }
@@ -94,7 +90,6 @@ export function FieldWorkCard({ fieldWork, onUpdate }: FieldWorkCardProps) {
   const handleDownload = () => {
     setIsDownloading(true);
     
-    // Simulate file download process
     setTimeout(() => {
       const reportText = fieldWork.reportId 
         ? "Field Report #" + fieldWork.reportId 
@@ -120,7 +115,6 @@ export function FieldWorkCard({ fieldWork, onUpdate }: FieldWorkCardProps) {
   const handlePrint = () => {
     setIsPrinting(true);
     
-    // Prepare content for printing
     const printContent = `
       <h1>${fieldWork.title}</h1>
       <p><strong>Location:</strong> ${fieldWork.location}</p>
@@ -130,7 +124,6 @@ export function FieldWorkCard({ fieldWork, onUpdate }: FieldWorkCardProps) {
       <p><strong>Purpose:</strong> ${fieldWork.purpose || "Field visit"}</p>
     `;
     
-    // Create a new window for printing
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
@@ -149,7 +142,6 @@ export function FieldWorkCard({ fieldWork, onUpdate }: FieldWorkCardProps) {
         </html>
       `);
       
-      // Wait a moment to ensure content is loaded
       setTimeout(() => {
         printWindow.print();
         printWindow.close();
@@ -173,16 +165,13 @@ export function FieldWorkCard({ fieldWork, onUpdate }: FieldWorkCardProps) {
   const handleShare = () => {
     setIsSharing(true);
     
-    // Simulate sharing process
     setTimeout(() => {
-      // In a real app, this would use the Web Share API or a sharing service
       const shareData = {
         title: fieldWork.title,
         text: `Field visit to ${fieldWork.location} on ${formatDate(fieldWork.visitDate)}`,
         url: window.location.href
       };
       
-      // Use Web Share API if available
       if (navigator.share) {
         navigator.share(shareData)
           .then(() => {
@@ -203,8 +192,6 @@ export function FieldWorkCard({ fieldWork, onUpdate }: FieldWorkCardProps) {
             setIsSharing(false);
           });
       } else {
-        // Fallback for browsers that don't support Web Share API
-        // Copy to clipboard
         navigator.clipboard.writeText(`
           Field Visit: ${fieldWork.title}
           Location: ${fieldWork.location}
@@ -320,7 +307,6 @@ export function FieldWorkCard({ fieldWork, onUpdate }: FieldWorkCardProps) {
             <div>
               <p>Report ID: {fieldWork.reportId}</p>
               <p>This report has been submitted and is now complete.</p>
-              {/* In a real app, we would fetch and display the actual report content */}
             </div>
           ) : (
             <div className="space-y-4">

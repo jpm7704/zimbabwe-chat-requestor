@@ -28,7 +28,7 @@ This document tracks the buttons and forms that appear in the UI but don't have 
 
 ## Pages
 
-- [ ] User management page (admin)
+- [x] User management page (admin)
 - [ ] Roles management page (admin)
 - [ ] System settings page (admin)
 - [ ] Report detail view page
@@ -64,5 +64,6 @@ The application currently has implemented:
 - Report creation
 - Basic analytics
 - Role-based navigation and permissions
+- User Management page (admin)
 
 Next development priorities should focus on completing the core workflows and implementing the missing forms and button actions listed above.

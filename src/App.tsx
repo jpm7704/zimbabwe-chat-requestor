@@ -19,6 +19,7 @@ import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import ApprovalsPage from "./pages/ApprovalsPage";
+import UserManagement from "./pages/UserManagement"; // Add import for UserManagement page
 import RequirePermission from "./components/auth/RequirePermission";
 
 const queryClient = new QueryClient({
@@ -98,6 +99,17 @@ const App = () => {
                 {isDevMode ? <ApprovalsPage /> : (
                   <RequirePermission permission="canApproveRequests">
                     <ApprovalsPage />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            {/* Admin routes */}
+            <Route path="/admin/users" element={
+              <MainLayout>
+                {isDevMode ? <UserManagement /> : (
+                  <RequirePermission permission="canManageStaff">
+                    <UserManagement />
                   </RequirePermission>
                 )}
               </MainLayout>

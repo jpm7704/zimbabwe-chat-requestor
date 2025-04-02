@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -17,6 +16,7 @@ export interface FieldWorkRequest {
   reportSubmitted: boolean;
   requestId: string | null;
   purpose: string;
+  reportId: string | null;
 }
 
 export function useFieldWork() {
@@ -91,7 +91,8 @@ export function useFieldWork() {
             assignee: visit.assigned_officer_name || undefined,
             reportSubmitted: visit.report_submitted,
             requestId: visit.request_id,
-            purpose: visit.purpose || ''
+            purpose: visit.purpose || '',
+            reportId: visit.report_id
           }));
 
           setFieldVisits(transformedVisits);
