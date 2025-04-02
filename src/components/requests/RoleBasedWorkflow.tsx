@@ -14,13 +14,6 @@ import { useRoles } from "@/hooks/useRoles";
 
 interface RoleBasedWorkflowProps {
   userProfile: UserProfile | null;
-  permissions: {
-    canApproveRequests: boolean;
-    canReviewRequests: boolean;
-    canAssignRequests: boolean;
-    canAccessAnalytics: boolean;
-    canAccessFieldReports: boolean;
-  };
   statusCounts: {
     pending: number;
     underReview: number;
@@ -30,17 +23,19 @@ interface RoleBasedWorkflowProps {
   };
 }
 
-const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBasedWorkflowProps) => {
+const RoleBasedWorkflow = ({ userProfile, statusCounts }: RoleBasedWorkflowProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { 
     isFieldOfficer, 
     isProjectOfficer, 
+    isAssistantProjectOfficer,
     isHeadOfPrograms, 
     isDirector, 
     isCEO, 
     isPatron,
-    isRegularUser
+    isRegularUser,
+    isAdmin
   } = useRoles(userProfile);
   
   // Enforce role-specific access to pages
@@ -49,17 +44,30 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
     
     const currentPath = location.pathname;
     
-    // Redirect from inappropriate pages based on role
+    // Get dev role from localStorage (for development mode role switching)
+    const isDevelopment = import.meta.env.DEV;
+    const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
+    
+    // Skip role checks in dev mode
+    if (isDevelopment && devRole) return;
+    
+    // Admin has access to all pages
+    if (isAdmin()) return;
+    
+    // Role-based page access
     if (currentPath === '/field-work') {
-      if (!isFieldOfficer() && !isProjectOfficer()) {
+      if (!isFieldOfficer() && !isProjectOfficer() && !isAssistantProjectOfficer()) {
         navigate('/dashboard');
         return;
       }
     }
     
-    if (currentPath === '/reports' && !permissions.canAccessFieldReports) {
-      navigate('/dashboard');
-      return;
+    if (currentPath === '/reports') {
+      if (!isFieldOfficer() && !isProjectOfficer() && !isAssistantProjectOfficer() && 
+          !isHeadOfPrograms() && !isDirector() && !isCEO() && !isPatron()) {
+        navigate('/dashboard');
+        return;
+      }
     }
     
     if (currentPath === '/approvals') {
@@ -69,12 +77,37 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
       }
     }
     
-    if (currentPath === '/analytics' && !permissions.canAccessAnalytics) {
-      navigate('/dashboard');
-      return;
+    if (currentPath === '/analytics') {
+      if (!isHeadOfPrograms() && !isDirector() && !isCEO() && !isPatron()) {
+        navigate('/dashboard');
+        return;
+      }
     }
-  }, [userProfile, location.pathname, permissions, navigate, 
-      isFieldOfficer, isProjectOfficer, isDirector, isCEO, isPatron]);
+    
+    if (currentPath === '/enquiry' || currentPath === '/submit' || currentPath === '/chat') {
+      if (!isRegularUser()) {
+        navigate('/dashboard');
+        return;
+      }
+    }
+    
+    if (currentPath === '/admin/users') {
+      if (!isAdmin() && !isDirector() && !isCEO()) {
+        navigate('/dashboard');
+        return;
+      }
+    }
+    
+    if (currentPath === '/admin/roles' || currentPath === '/admin/system') {
+      if (!isAdmin()) {
+        navigate('/dashboard');
+        return;
+      }
+    }
+  }, [userProfile, location.pathname, navigate, 
+      isFieldOfficer, isProjectOfficer, isAssistantProjectOfficer,
+      isHeadOfPrograms, isDirector, isCEO, isPatron, 
+      isRegularUser, isAdmin]);
 
   if (!userProfile) {
     return null;
@@ -85,7 +118,7 @@ const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBased
     return <FieldOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
   }
   
-  if (isProjectOfficer()) {
+  if (isProjectOfficer() || isAssistantProjectOfficer()) {
     return <ProjectOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
   }
   

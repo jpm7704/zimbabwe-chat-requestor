@@ -24,7 +24,82 @@ import UserManagement from "./pages/UserManagement";
 import RolesManagement from "./pages/RolesManagement";
 import SystemSettings from "./pages/SystemSettings";
 import UserProfile from "./pages/UserProfile";
-import RequirePermission from "./components/auth/RequirePermission";
+import { useAuth } from "./hooks/useAuth";
+import { useRoles } from "./hooks/useRoles";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "./hooks/use-toast";
+
+// Role-based route guard component
+const RoleRoute = ({ 
+  element, 
+  allowedRoles = [],
+  redirectTo = "/dashboard" 
+}) => {
+  const { userProfile, isAuthenticated } = useAuth();
+  const { 
+    isAdmin, 
+    isRegularUser, 
+    isFieldOfficer, 
+    isProjectOfficer, 
+    isAssistantProjectOfficer, 
+    isHeadOfPrograms, 
+    isDirector, 
+    isCEO, 
+    isPatron 
+  } = useRoles(userProfile);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Get dev role from localStorage (for development mode role switching)
+  const isDevelopment = import.meta.env.DEV;
+  const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
+  
+  const checkRole = () => {
+    // Skip role checks in dev mode
+    if (isDevelopment && devRole) return true;
+    
+    // Admin has access to everything
+    if (isAdmin()) return true;
+    
+    // Check if user has any of the allowed roles
+    return allowedRoles.some(role => {
+      switch(role) {
+        case "admin": return isAdmin();
+        case "user": return isRegularUser();
+        case "field_officer": return isFieldOfficer();
+        case "project_officer": return isProjectOfficer();
+        case "assistant_project_officer": return isAssistantProjectOfficer();
+        case "head_of_programs": return isHeadOfPrograms();
+        case "director": return isDirector();
+        case "ceo": return isCEO();
+        case "patron": return isPatron();
+        default: return false;
+      }
+    });
+  };
+  
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    
+    // Skip role checks in dev mode
+    if (isDevelopment && devRole) return;
+    
+    if (!checkRole()) {
+      toast({
+        title: "Access Restricted",
+        description: "You don't have access to this page.",
+        variant: "destructive",
+      });
+      navigate(redirectTo);
+    }
+  }, [userProfile, isAuthenticated]);
+  
+  return element;
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,102 +125,139 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/staff-verification" element={<StaffVerification />} />
             
-            {/* Protected routes - require authentication */}
+            {/* Common routes - accessible by all authenticated users */}
             <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
-            <Route path="/submit" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
-            <Route path="/enquiry" element={<MainLayout><EnquiryPage /></MainLayout>} />
-            <Route path="/chat" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
             <Route path="/profile" element={<MainLayout><UserProfile /></MainLayout>} />
-            
-            {/* Requests page - accessible by all authenticated users */}
+            <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
             <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
             <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
             
-            <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
-            
-            {/* Role-specific routes with improved access control */}
-            <Route path="/field-work" element={
+            {/* Regular User-specific routes */}
+            <Route path="/submit" element={
               <MainLayout>
-                <RequirePermission 
-                  permission="canAccessFieldReports" 
-                  requiredRole={['field_officer', 'project_officer', 'regional_project_officer', 'assistant_project_officer']}
-                >
-                  <FieldWork />
-                </RequirePermission>
+                <RoleRoute
+                  element={<RequestSubmissionPage />}
+                  allowedRoles={["user"]}
+                />
               </MainLayout>
             } />
             
+            <Route path="/enquiry" element={
+              <MainLayout>
+                <RoleRoute
+                  element={<EnquiryPage />}
+                  allowedRoles={["user"]}
+                />
+              </MainLayout>
+            } />
+            
+            <Route path="/chat" element={
+              <MainLayout>
+                <RoleRoute
+                  element={<RequestSubmissionPage />}
+                  allowedRoles={["user"]}
+                />
+              </MainLayout>
+            } />
+            
+            {/* Field Staff routes */}
+            <Route path="/field-work" element={
+              <MainLayout>
+                <RoleRoute
+                  element={<FieldWork />}
+                  allowedRoles={["field_officer", "project_officer", "assistant_project_officer"]}
+                />
+              </MainLayout>
+            } />
+            
+            {/* Report routes - accessible by field staff, management, and program managers */}
             <Route path="/reports" element={
               <MainLayout>
-                <RequirePermission 
-                  permission="canAccessFieldReports"
-                >
-                  <Reports />
-                </RequirePermission>
+                <RoleRoute
+                  element={<Reports />}
+                  allowedRoles={[
+                    "field_officer", 
+                    "project_officer", 
+                    "assistant_project_officer", 
+                    "head_of_programs", 
+                    "director", 
+                    "ceo", 
+                    "patron",
+                    "admin"
+                  ]}
+                />
               </MainLayout>
             } />
             
             <Route path="/reports/:id" element={
               <MainLayout>
-                <RequirePermission 
-                  permission="canAccessFieldReports"
-                >
-                  <ReportDetail />
-                </RequirePermission>
+                <RoleRoute
+                  element={<ReportDetail />}
+                  allowedRoles={[
+                    "field_officer", 
+                    "project_officer", 
+                    "assistant_project_officer", 
+                    "head_of_programs", 
+                    "director", 
+                    "ceo", 
+                    "patron",
+                    "admin"
+                  ]}
+                />
               </MainLayout>
             } />
             
+            {/* Analytics routes - for management and program managers */}
             <Route path="/analytics" element={
               <MainLayout>
-                <RequirePermission 
-                  permission="canAccessAnalytics"
-                >
-                  <Analytics />
-                </RequirePermission>
+                <RoleRoute
+                  element={<Analytics />}
+                  allowedRoles={[
+                    "head_of_programs", 
+                    "director", 
+                    "ceo", 
+                    "patron",
+                    "admin"
+                  ]}
+                />
               </MainLayout>
             } />
             
+            {/* Approvals routes - for directors, CEO, and patrons only */}
             <Route path="/approvals" element={
               <MainLayout>
-                <RequirePermission 
-                  permission="canApproveRequests" 
-                  requiredRole={['director', 'management', 'ceo', 'patron']}
-                >
-                  <ApprovalsPage />
-                </RequirePermission>
+                <RoleRoute
+                  element={<ApprovalsPage />}
+                  allowedRoles={["director", "ceo", "patron"]}
+                />
               </MainLayout>
             } />
             
-            {/* Admin routes with stricter role requirements */}
+            {/* Admin routes */}
             <Route path="/admin/users" element={
               <MainLayout>
-                <RequirePermission 
-                  permission="canManageUsers"
-                >
-                  <UserManagement />
-                </RequirePermission>
+                <RoleRoute
+                  element={<UserManagement />}
+                  allowedRoles={["admin", "director", "ceo"]}
+                />
               </MainLayout>
             } />
             
             <Route path="/admin/roles" element={
               <MainLayout>
-                <RequirePermission 
-                  permission="canManageUsers"
-                  requiredRole="admin"
-                >
-                  <RolesManagement />
-                </RequirePermission>
+                <RoleRoute
+                  element={<RolesManagement />}
+                  allowedRoles={["admin"]}
+                />
               </MainLayout>
             } />
             
             <Route path="/admin/system" element={
               <MainLayout>
-                <RequirePermission 
-                  permission="canAccessSystemSettings"
-                  requiredRole="admin"
-                >
-                  <SystemSettings />
-                </RequirePermission>
+                <RoleRoute
+                  element={<SystemSettings />}
+                  allowedRoles={["admin"]}
+                />
               </MainLayout>
             } />
             
