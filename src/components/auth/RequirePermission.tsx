@@ -10,61 +10,64 @@ interface RequirePermissionProps {
   children: ReactNode;
   permission: keyof ReturnType<typeof usePermissions>;
   redirectTo?: string;
+  requiredRole?: string | string[];
 }
 
-const RequirePermission = ({ children, permission, redirectTo = '/dashboard' }: RequirePermissionProps) => {
+const RequirePermission = ({ 
+  children, 
+  permission, 
+  redirectTo = '/dashboard',
+  requiredRole
+}: RequirePermissionProps) => {
   const { userProfile } = useAuth();
   const permissions = usePermissions(userProfile);
-  const { isAdmin, isFieldOfficer } = useRoles(userProfile);
+  const { isAdmin } = useRoles(userProfile);
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Check if we're in development mode
-  const isDevelopment = import.meta.env.DEV;
-  
   // Get dev role from localStorage (for development mode role switching)
+  const isDevelopment = import.meta.env.DEV;
   const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
   
-  // In development mode, ALL roles should bypass permission checks
-  const isDevMode = isDevelopment && devRole;
+  // Determine if user has the required role
+  const hasRequiredRole = () => {
+    if (!requiredRole || !userProfile?.role) return true; // No role restriction
+    
+    if (Array.isArray(requiredRole)) {
+      return requiredRole.includes(userProfile.role);
+    }
+    
+    return userProfile.role === requiredRole;
+  };
   
-  // Special case for admin panel
-  const isAdminPage = permission === 'canAccessAdminPanel';
+  // Determine if user has permission - with improved logic
+  const hasPermission = 
+    // Admin always has permission
+    isAdmin() || 
+    // User has the specific permission
+    permissions[permission] || 
+    // We're in dev mode
+    (isDevelopment && devRole);
   
-  // Special case for field reports and field work pages for Field Officers
-  const isFieldWorkOrReportsPage = permission === 'canAccessFieldReports';
-  const fieldOfficerSpecialAccess = isFieldOfficer() && isFieldWorkOrReportsPage;
-  
-  // Determine if user has permission - for normal users
-  const hasPermission = fieldOfficerSpecialAccess || isDevMode || (isAdminPage ? isAdmin() : permissions[permission]);
-  
-  // Log permission check for debugging
-  console.log(`Permission check for ${String(permission)}: ${hasPermission}`, {
-    userRole: userProfile?.role,
-    devRole,
-    permissionValue: permissions[permission],
-    isDevelopment,
-    isAdminPage,
-    isFieldOfficer: isFieldOfficer(),
-    fieldOfficerSpecialAccess
-  });
+  // Check both permission and role requirements
+  const hasAccess = hasPermission && hasRequiredRole();
   
   useEffect(() => {
-    // Skip all permission checks for dev users or special Field Officer access
-    if (isDevMode || fieldOfficerSpecialAccess) return;
+    // Skip permission checks in dev mode
+    if (isDevelopment && devRole) return;
 
     // Only redirect if the user doesn't have permission
-    if (!hasPermission) {
+    if (!hasAccess) {
       toast({
         title: "Access Restricted",
-        description: `You don't have permission to access this page.`,
+        description: `You don't have the required permission to access this page.`,
         variant: "destructive",
       });
       navigate(redirectTo);
     }
-  }, [hasPermission, navigate, redirectTo, toast, permission, isDevMode, fieldOfficerSpecialAccess]);
+  }, [hasAccess, navigate, redirectTo, toast, isDevelopment, devRole]);
   
-  // Only render children if user has permission or is dev mode or field officer with special access
+  // Only render children if user has permission and the required role
   return <>{children}</>;
 };
 

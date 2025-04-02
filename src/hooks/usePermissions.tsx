@@ -19,11 +19,28 @@ export type Permissions = {
 };
 
 export function usePermissions(userProfile: UserProfile | null): Permissions {
-  const { getRoleInfo, isDirector } = useRoles(userProfile);
-  const roleInfo = getRoleInfo();
+  const { isAdmin } = useRoles(userProfile);
   
   const permissions = useMemo(() => {
     const role = userProfile?.role?.toLowerCase() || 'user';
+    
+    // If user is admin, they have all permissions
+    if (isAdmin()) {
+      return {
+        canViewRequests: true,
+        canCreateRequests: true,
+        canViewOwnRequests: true,
+        canApproveRequests: true,
+        canRejectRequests: true,
+        canReviewRequests: true,
+        canAssignRequests: true,
+        canAccessAnalytics: true,
+        canAccessFieldReports: true,
+        canAccessSystemSettings: true,
+        canAccessAdminPanel: true,
+        canManageUsers: true
+      };
+    }
     
     // Default permissions for any user
     const defaultPermissions: Permissions = {
@@ -40,8 +57,9 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
       canManageUsers: false
     };
     
-    // Updated role-specific permissions to include HoD
+    // Role-specific permissions with improved organization
     switch (role) {
+      // Program Management Roles
       case 'head_of_department':
       case 'head_of_programs':
       case 'hop':
@@ -52,20 +70,39 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
           canAssignRequests: true,
           canAccessAnalytics: true,
           canAccessFieldReports: true,
-          canCreateRequests: false  // Prevent HoD from creating new requests
+          canCreateRequests: false  // Prevent program managers from creating requests
         };
-        
+      
+      // Field Operations Roles  
       case 'project_officer':
       case 'regional_project_officer':
-      case 'assistant_project_officer':
         return {
           ...defaultPermissions,
           canReviewRequests: true,
           canAssignRequests: true,
           canAccessFieldReports: true,
-          canAccessAnalytics: role === 'assistant_project_officer'
+          canAccessAnalytics: true
         };
         
+      case 'assistant_project_officer':
+        return {
+          ...defaultPermissions,
+          canReviewRequests: true,
+          canAssignRequests: false,  // Assistant officers cannot assign requests
+          canAccessFieldReports: true,
+          canAccessAnalytics: false
+        };
+      
+      case 'field_officer':
+        return {
+          ...defaultPermissions,
+          canReviewRequests: false,
+          canAssignRequests: false,
+          canAccessFieldReports: true,
+          canAccessAnalytics: false
+        };
+        
+      // Management Roles
       case 'director':
       case 'management':
         return {
@@ -73,10 +110,10 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
           canApproveRequests: true,
           canRejectRequests: true,
           canReviewRequests: true,
-          canAssignRequests: true,
+          canAssignRequests: false,  // Directors don't assign requests directly
           canAccessAnalytics: true,
           canAccessFieldReports: true,
-          canAccessSystemSettings: true,
+          canAccessSystemSettings: false,  // Restrict system settings to admin only
           canManageUsers: true
         };
         
@@ -86,10 +123,10 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
           canApproveRequests: true,
           canRejectRequests: true,
           canReviewRequests: true,
-          canAssignRequests: true,
+          canAssignRequests: false,
           canAccessAnalytics: true,
           canAccessFieldReports: true,
-          canAccessSystemSettings: true,
+          canAccessSystemSettings: false,  // Restrict system settings to admin only
           canManageUsers: true
         };
         
@@ -99,28 +136,17 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
           canApproveRequests: true,
           canRejectRequests: true,
           canAccessAnalytics: true,
-          canAccessFieldReports: true
-        };
-        
-      case 'admin':
-        return {
-          ...defaultPermissions,
-          canApproveRequests: true,
-          canRejectRequests: true,
-          canReviewRequests: true,
-          canAssignRequests: true,
-          canAccessAnalytics: true,
           canAccessFieldReports: true,
-          canAccessSystemSettings: true,
-          canAccessAdminPanel: true,
-          canManageUsers: true
+          canAccessSystemSettings: false,  // Restrict system settings to admin only
+          canManageUsers: false
         };
         
+      // Regular User Role
       case 'user':
       default:
         return defaultPermissions;
     }
-  }, [userProfile?.role]);
+  }, [userProfile?.role, isAdmin]);
   
   return permissions;
 }

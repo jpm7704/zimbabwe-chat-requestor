@@ -40,14 +40,21 @@ const UserProfile = () => {
   
   // Get user initials for avatar fallback
   const getUserInitials = () => {
-    if (!userProfile || !userProfile.name) return "U";
+    if (!userProfile || (!userProfile.first_name && !userProfile.last_name)) return "U";
     
-    const nameParts = userProfile.name.split(" ");
-    if (nameParts.length >= 2) {
-      return `${nameParts[0][0]}${nameParts[1][0]}`;
+    const firstInitial = userProfile.first_name ? userProfile.first_name[0] : '';
+    const lastInitial = userProfile.last_name ? userProfile.last_name[0] : '';
+    
+    if (firstInitial && lastInitial) {
+      return `${firstInitial}${lastInitial}`;
     }
     
-    return nameParts[0][0];
+    return firstInitial || lastInitial || "U";
+  };
+
+  const getFullName = () => {
+    if (!userProfile) return "User Profile";
+    return `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
   };
 
   return (
@@ -63,7 +70,7 @@ const UserProfile = () => {
           </div>
           
           <div className="flex-1 text-center md:text-left">
-            <h1 className="text-3xl font-bold">{userProfile?.name || "User Profile"}</h1>
+            <h1 className="text-3xl font-bold">{getFullName()}</h1>
             <p className="text-muted-foreground">{userProfile?.email}</p>
             <div className="flex flex-wrap gap-2 mt-2 justify-center md:justify-start">
               <Badge variant="secondary" className="capitalize">

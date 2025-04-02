@@ -1,7 +1,7 @@
-
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useRoles } from "@/hooks/useRoles";
 import {
   BarChart3,
   ClipboardCheck,
@@ -23,6 +23,7 @@ interface RoleMenuProps {
 const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
   const { userProfile } = useAuth();
   const permissions = usePermissions(userProfile);
+  const { isAdmin, isDirector } = useRoles(userProfile);
   
   const linkClasses = variant === "sidebar" 
     ? "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground"
@@ -38,6 +39,15 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       onItemClick();
     }
   };
+
+  // Only show admin-specific pages to actual admins
+  const showAdminPages = isAdmin();
+  
+  // Only show role management to admins (not directors or other management roles)
+  const showRoleManagement = isAdmin();
+  
+  // Only show system settings to admins
+  const showSystemSettings = isAdmin();
     
   return (
     <nav className="space-y-1">
@@ -121,6 +131,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
         </Link>
       )}
       
+      {/* Restrict user management to admins or directors */}
       {permissions.canManageUsers && (
         <Link 
           to="/admin/users" 
@@ -132,7 +143,8 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
         </Link>
       )}
       
-      {permissions.canManageUsers && (
+      {/* Restrict role management to admins only */}
+      {showRoleManagement && (
         <Link 
           to="/admin/roles" 
           className={`${linkClasses} ${window.location.pathname === '/admin/roles' ? activeLinkClasses : ''}`}
@@ -143,7 +155,8 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
         </Link>
       )}
       
-      {permissions.canAccessSystemSettings && (
+      {/* Restrict system settings to admins only */}
+      {showSystemSettings && (
         <Link 
           to="/admin/system" 
           className={`${linkClasses} ${window.location.pathname === '/admin/system' ? activeLinkClasses : ''}`}
@@ -154,6 +167,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
         </Link>
       )}
       
+      {/* Keep regular settings for all users */}
       <Link 
         to="/settings" 
         className={`${linkClasses} ${window.location.pathname === '/settings' ? activeLinkClasses : ''}`}

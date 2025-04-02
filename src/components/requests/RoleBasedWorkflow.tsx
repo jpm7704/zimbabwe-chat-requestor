@@ -9,6 +9,8 @@ import ProgrammeManagerView from "./role-views/ProgrammeManagerView";
 import ManagementView from "./role-views/ManagementView";
 import PatronView from "./role-views/PatronView";
 import CEOView from "./role-views/CEOView";
+import FallbackView from "./role-views/FallbackView";
+import { useRoles } from "@/hooks/useRoles";
 
 interface RoleBasedWorkflowProps {
   userProfile: UserProfile | null;
@@ -31,102 +33,84 @@ interface RoleBasedWorkflowProps {
 const RoleBasedWorkflow = ({ userProfile, permissions, statusCounts }: RoleBasedWorkflowProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { 
+    isFieldOfficer, 
+    isProjectOfficer, 
+    isHeadOfPrograms, 
+    isDirector, 
+    isCEO, 
+    isPatron,
+    isRegularUser
+  } = useRoles(userProfile);
   
-  // Handle role-specific page access and redirects
+  // Enforce role-specific access to pages
   useEffect(() => {
     if (!userProfile) return;
     
     const currentPath = location.pathname;
-    const userRole = userProfile.role?.toLowerCase() || '';
     
     // Redirect from inappropriate pages based on role
-    if (currentPath === '/field-work' && !['field_officer', 'project_officer', 'regional_project_officer', 'assistant_project_officer'].includes(userRole)) {
-      // Redirect non-field officers from field work page
-      navigate('/dashboard');
-      return;
+    if (currentPath === '/field-work') {
+      if (!isFieldOfficer() && !isProjectOfficer()) {
+        navigate('/dashboard');
+        return;
+      }
     }
     
     if (currentPath === '/reports' && !permissions.canAccessFieldReports) {
-      // Redirect users without report access
       navigate('/dashboard');
       return;
     }
     
-    if (currentPath === '/approvals' && !permissions.canApproveRequests) {
-      // Redirect users who can't approve requests
-      navigate('/dashboard');
-      return;
+    if (currentPath === '/approvals') {
+      if (!isDirector() && !isCEO() && !isPatron()) {
+        navigate('/dashboard');
+        return;
+      }
     }
     
     if (currentPath === '/analytics' && !permissions.canAccessAnalytics) {
-      // Redirect users without analytics access
       navigate('/dashboard');
       return;
     }
-  }, [userProfile, location.pathname, permissions, navigate]);
-
-  // Add an event listener to respond to role changes
-  useEffect(() => {
-    const handleRoleChange = () => {
-      // Check permissions on role change
-      if (!userProfile) return;
-      
-      const currentPath = location.pathname;
-      const userRole = userProfile.role?.toLowerCase() || '';
-      
-      // Re-check permissions based on the current path
-      if (currentPath === '/field-work' && !['field_officer', 'project_officer', 'regional_project_officer', 'assistant_project_officer'].includes(userRole)) {
-        navigate('/dashboard');
-      } else if (currentPath === '/reports' && !permissions.canAccessFieldReports) {
-        navigate('/dashboard');
-      } else if (currentPath === '/approvals' && !permissions.canApproveRequests) {
-        navigate('/dashboard');
-      } else if (currentPath === '/analytics' && !permissions.canAccessAnalytics) {
-        navigate('/dashboard');
-      }
-    };
-
-    // Listen for dev role changes
-    window.addEventListener('dev-role-changed', handleRoleChange);
-    
-    return () => {
-      window.removeEventListener('dev-role-changed', handleRoleChange);
-    };
-  }, [userProfile, location.pathname, permissions, navigate]);
+  }, [userProfile, location.pathname, permissions, navigate, 
+      isFieldOfficer, isProjectOfficer, isDirector, isCEO, isPatron]);
 
   if (!userProfile) {
     return null;
   }
 
-  // Render different views based on user role
-  switch (userProfile.role?.toLowerCase()) {
-    case 'field_officer':
-      return <FieldOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
-      
-    case 'project_officer':
-    case 'regional_project_officer':
-    case 'assistant_project_officer':
-      return <ProjectOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
-      
-    case 'programme_manager':
-    case 'head_of_programs':
-    case 'hop':
-      return <ProgrammeManagerView userProfile={userProfile} statusCounts={statusCounts} />;
-      
-    case 'director':
-    case 'management':
-      return <ManagementView userProfile={userProfile} statusCounts={statusCounts} />;
-      
-    case 'ceo':
-      return <CEOView userProfile={userProfile} statusCounts={statusCounts} />;
-      
-    case 'patron':
-      return <PatronView userProfile={userProfile} statusCounts={statusCounts} />;
-      
-    case 'user':
-    default:
-      return <RegularUserView userProfile={userProfile} />;
+  // Render different views based on user role with improved organization
+  if (isFieldOfficer()) {
+    return <FieldOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
   }
+  
+  if (isProjectOfficer()) {
+    return <ProjectOfficerView userProfile={userProfile} statusCounts={statusCounts} />;
+  }
+  
+  if (isHeadOfPrograms()) {
+    return <ProgrammeManagerView userProfile={userProfile} statusCounts={statusCounts} />;
+  }
+  
+  if (isDirector()) {
+    return <ManagementView userProfile={userProfile} statusCounts={statusCounts} />;
+  }
+  
+  if (isCEO()) {
+    return <CEOView userProfile={userProfile} statusCounts={statusCounts} />;
+  }
+  
+  if (isPatron()) {
+    return <PatronView userProfile={userProfile} statusCounts={statusCounts} />;
+  }
+  
+  if (isRegularUser()) {
+    return <RegularUserView userProfile={userProfile} />;
+  }
+  
+  // Fallback for unrecognized roles
+  return <FallbackView userProfile={userProfile} />;
 };
 
 export default RoleBasedWorkflow;

@@ -36,11 +36,6 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  const devRole = localStorage.getItem('dev_role');
-  const isDevMode = !!devRole;
-  
-  console.log('App rendering, devRole:', devRole, 'isDevMode:', isDevMode);
-  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -68,85 +63,89 @@ const App = () => {
             
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
             
-            {/* Role-specific routes */}
+            {/* Role-specific routes with improved access control */}
             <Route path="/field-work" element={
               <MainLayout>
-                {isDevMode ? <FieldWork /> : (
-                  <RequirePermission permission="canAccessFieldReports">
-                    <FieldWork />
-                  </RequirePermission>
-                )}
+                <RequirePermission 
+                  permission="canAccessFieldReports" 
+                  requiredRole={['field_officer', 'project_officer', 'regional_project_officer', 'assistant_project_officer']}
+                >
+                  <FieldWork />
+                </RequirePermission>
               </MainLayout>
             } />
             
             <Route path="/reports" element={
               <MainLayout>
-                {isDevMode ? <Reports /> : (
-                  <RequirePermission permission="canAccessFieldReports">
-                    <Reports />
-                  </RequirePermission>
-                )}
+                <RequirePermission 
+                  permission="canAccessFieldReports"
+                >
+                  <Reports />
+                </RequirePermission>
               </MainLayout>
             } />
             
             <Route path="/reports/:id" element={
               <MainLayout>
-                {isDevMode ? <ReportDetail /> : (
-                  <RequirePermission permission="canAccessFieldReports">
-                    <ReportDetail />
-                  </RequirePermission>
-                )}
+                <RequirePermission 
+                  permission="canAccessFieldReports"
+                >
+                  <ReportDetail />
+                </RequirePermission>
               </MainLayout>
             } />
             
             <Route path="/analytics" element={
               <MainLayout>
-                {isDevMode ? <Analytics /> : (
-                  <RequirePermission permission="canAccessAnalytics">
-                    <Analytics />
-                  </RequirePermission>
-                )}
+                <RequirePermission 
+                  permission="canAccessAnalytics"
+                >
+                  <Analytics />
+                </RequirePermission>
               </MainLayout>
             } />
             
             <Route path="/approvals" element={
               <MainLayout>
-                {isDevMode ? <ApprovalsPage /> : (
-                  <RequirePermission permission="canApproveRequests">
-                    <ApprovalsPage />
-                  </RequirePermission>
-                )}
+                <RequirePermission 
+                  permission="canApproveRequests" 
+                  requiredRole={['director', 'management', 'ceo', 'patron']}
+                >
+                  <ApprovalsPage />
+                </RequirePermission>
               </MainLayout>
             } />
             
-            {/* Admin routes */}
+            {/* Admin routes with stricter role requirements */}
             <Route path="/admin/users" element={
               <MainLayout>
-                {isDevMode ? <UserManagement /> : (
-                  <RequirePermission permission="canManageUsers">
-                    <UserManagement />
-                  </RequirePermission>
-                )}
+                <RequirePermission 
+                  permission="canManageUsers"
+                >
+                  <UserManagement />
+                </RequirePermission>
               </MainLayout>
             } />
             
             <Route path="/admin/roles" element={
               <MainLayout>
-                {isDevMode ? <RolesManagement /> : (
-                  <RequirePermission permission="canManageUsers">
-                    <RolesManagement />
-                  </RequirePermission>
-                )}
+                <RequirePermission 
+                  permission="canManageUsers"
+                  requiredRole="admin"
+                >
+                  <RolesManagement />
+                </RequirePermission>
               </MainLayout>
             } />
             
             <Route path="/admin/system" element={
               <MainLayout>
-                {isDevMode ? <SystemSettings /> : (
-                  <RequirePermission permission="canAccessSystemSettings">
-                    <SystemSettings />
-                  </RequirePermission>
-                )}
+                <RequirePermission 
+                  permission="canAccessSystemSettings"
+                  requiredRole="admin"
+                >
+                  <SystemSettings />
+                </RequirePermission>
               </MainLayout>
             } />
             
