@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -53,41 +54,44 @@ export function useFieldWork() {
 
       const { data, error: fetchError } = await query.order('visit_date', { ascending: false });
 
+      // Always set fieldVisits to an array (empty if no data)
       if (fetchError) {
-        throw fetchError;
-      }
-
-      // Handle case when data is null or empty
-      if (!data || data.length === 0) {
+        console.log("Fetch error:", fetchError);
+        // Only set error if it's not a "no rows returned" error
+        if (!fetchError.message.includes("no rows returned")) {
+          setError(fetchError);
+        }
         setFieldVisits([]);
       } else {
-        const transformedVisits: FieldWorkRequest[] = data.map(visit => ({
-          id: visit.id,
-          ticketNumber: visit.request?.ticket_number || 'N/A',
-          title: visit.request?.title || visit.purpose || 'Field Visit',
-          status: visit.status,
-          priority: visit.priority as 'low' | 'medium' | 'high',
-          visitDate: visit.visit_date,
-          location: visit.location,
-          assignee: visit.assigned_officer_name || undefined,
-          reportSubmitted: visit.report_submitted,
-          requestId: visit.request_id,
-          purpose: visit.purpose || ''
-        }));
+        // Handle case when data is null or empty
+        if (!data || data.length === 0) {
+          setFieldVisits([]);
+        } else {
+          const transformedVisits: FieldWorkRequest[] = data.map(visit => ({
+            id: visit.id,
+            ticketNumber: visit.request?.ticket_number || 'N/A',
+            title: visit.request?.title || visit.purpose || 'Field Visit',
+            status: visit.status,
+            priority: visit.priority as 'low' | 'medium' | 'high',
+            visitDate: visit.visit_date,
+            location: visit.location,
+            assignee: visit.assigned_officer_name || undefined,
+            reportSubmitted: visit.report_submitted,
+            requestId: visit.request_id,
+            purpose: visit.purpose || ''
+          }));
 
-        setFieldVisits(transformedVisits);
+          setFieldVisits(transformedVisits);
+        }
       }
     } catch (err) {
       console.error('Error fetching field visits:', err);
-      setError(err instanceof Error ? err : new Error('Failed to load field visits'));
-      
-      // Show error toast but don't show it for empty data states
-      if (!(err instanceof Error && err.message.includes('no rows returned'))) {
-        toast({
-          title: 'Error',
-          description: 'Failed to load field visits. Please try again.',
-          variant: 'destructive',
-        });
+      // Don't set error state or show toast for empty data states
+      if (!(err instanceof Error && err.message.includes("no rows returned"))) {
+        setError(err instanceof Error ? err : new Error('Failed to load field visits'));
+      } else {
+        // Just set empty array for no data
+        setFieldVisits([]);
       }
     } finally {
       setLoading(false);

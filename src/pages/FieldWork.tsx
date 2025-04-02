@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -197,7 +196,7 @@ const FieldWork = () => {
             </div>
           ) : error ? (
             <div className="text-center py-10 text-red-500">
-              {error.message || "Failed to load field visits"}
+              {error.message !== "Failed to load field visits" && error.message}
             </div>
           ) : filteredVisits.length > 0 ? (
             filteredVisits.map(renderVisitCard)
@@ -215,7 +214,7 @@ const FieldWork = () => {
             </div>
           ) : error ? (
             <div className="text-center py-10 text-red-500">
-              {error.message || "Failed to load field visits"}
+              {error.message !== "Failed to load field visits" && error.message}
             </div>
           ) : filteredVisits.length > 0 ? (
             filteredVisits.map(renderVisitCard)
