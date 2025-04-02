@@ -1,18 +1,19 @@
+
 # BGF Application: Unimplemented Features
 
 This document tracks the buttons and forms that appear in the UI but don't have full implementation yet.
 
 ## Forms
 
-- [x] User profile edit form
-- [x] Password reset form
-- [x] Field visit scheduling form
-- [x] Report editing form (only creation exists)
-- [x] Advanced search/filter form
-- [x] Notification preferences form
-- [x] User management form (for admin)
-- [x] System settings form (for admin)
-- [x] Role management form (for admin)
+- [ ] User profile edit form
+- [ ] Password reset form
+- [ ] Field visit scheduling form
+- [ ] Report editing form (only creation exists)
+- [ ] Advanced search/filter form
+- [ ] Notification preferences form
+- [ ] User management form (for admin)
+- [ ] System settings form (for admin)
+- [ ] Role management form (for admin)
 
 ## Buttons
 
