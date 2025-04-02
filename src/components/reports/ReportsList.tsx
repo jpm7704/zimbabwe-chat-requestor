@@ -22,7 +22,10 @@ const ReportsList = ({ reports, isLoading, error, onRefresh }: ReportsListProps)
     );
   }
 
-  if (error) {
+  if (error && error.message !== "Failed to load field visits" && 
+      !error.message.includes("no rows returned") && 
+      !error.message.includes("policy") && 
+      !error.message.includes("infinite recursion")) {
     return (
       <div className="flex flex-col items-center justify-center py-10">
         <div className="p-4 rounded-full bg-destructive/10 mb-4">
