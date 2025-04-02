@@ -1,9 +1,7 @@
-
 import { useMemo } from "react";
 import { UserProfile } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
 
-// Define and export the Permissions type
 export type Permissions = {
   canViewRequests: boolean;
   canCreateRequests: boolean;
@@ -41,13 +39,19 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
       canManageUsers: false
     };
     
-    // Role-specific permissions
+    // Updated role-specific permissions to include HoD
     switch (role) {
-      case 'field_officer':
+      case 'head_of_department':
+      case 'head_of_programs':
+      case 'hop':
+      case 'programme_manager':
         return {
           ...defaultPermissions,
           canReviewRequests: true,
-          canAccessFieldReports: true  // Ensure Field Officers have this permission
+          canAssignRequests: true,
+          canAccessAnalytics: true,
+          canAccessFieldReports: true,
+          canCreateRequests: false  // Prevent HoD from creating new requests
         };
         
       case 'project_officer':
@@ -59,17 +63,6 @@ export function usePermissions(userProfile: UserProfile | null): Permissions {
           canAssignRequests: true,
           canAccessFieldReports: true,
           canAccessAnalytics: role === 'assistant_project_officer'
-        };
-        
-      case 'programme_manager':
-      case 'head_of_programs':
-      case 'hop':
-        return {
-          ...defaultPermissions,
-          canReviewRequests: true,
-          canAssignRequests: true,
-          canAccessAnalytics: true,
-          canAccessFieldReports: true
         };
         
       case 'director':

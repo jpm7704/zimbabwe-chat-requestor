@@ -60,7 +60,10 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
         </p>
       </div>
       
-      {showNewRequestButton && permissions.canViewRequests && !permissions.canReviewRequests && (
+      {showNewRequestButton && 
+       permissions.canViewRequests && 
+       !permissions.canReviewRequests && 
+       !['head_of_department', 'head_of_programs', 'programme_manager', 'hop'].includes(userProfile?.role?.toLowerCase() || '') && (
         <Button asChild>
           <Link to="/submit?action=new" className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
