@@ -2,7 +2,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AppSidebar from "./AppSidebar";
-import Footer from "./Footer";
 import DevRoleSwitcher from "@/components/dev/DevRoleSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
@@ -46,7 +45,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           </main>
         </div>
       </SidebarProvider>
-      <Footer />
       <Toaster />
     </div>
   );
