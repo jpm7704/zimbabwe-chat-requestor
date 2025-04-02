@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus, ClipboardCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { usePermissions } from "@/hooks/usePermissions";
+import { useRoles } from "@/hooks/useRoles";
 
 interface RequestsHeaderProps {
   showNewRequestButton?: boolean;
@@ -11,7 +11,7 @@ interface RequestsHeaderProps {
 
 const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) => {
   const { userProfile, formatRole } = useAuth();
-  const permissions = usePermissions(userProfile);
+  const { isRegularUser, isFieldOfficer, isProjectOfficer, isAssistantProjectOfficer } = useRoles(userProfile);
   
   // Determine the role-specific title and description
   const getRoleSpecificHeader = () => {
@@ -59,6 +59,11 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
     return managementRoles.includes(userProfile.role.toLowerCase());
   };
   
+  // Helper function to check if user is field staff
+  const isFieldStaff = () => {
+    return isFieldOfficer() || isProjectOfficer() || isAssistantProjectOfficer();
+  };
+  
   return (
     <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
       <div>
@@ -76,10 +81,7 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
         </p>
       </div>
       
-      {showNewRequestButton && 
-       permissions.canViewRequests && 
-       !permissions.canReviewRequests && 
-       !hasManagementRole() && (
+      {showNewRequestButton && isRegularUser() && (
         <Button asChild>
           <Link to="/submit?action=new" className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
@@ -88,11 +90,11 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
         </Button>
       )}
       
-      {permissions.canReviewRequests && (
+      {isFieldStaff() && (
         <Button asChild variant="outline">
           <Link to="/field-work" className="flex items-center gap-2">
             <ClipboardCheck className="h-4 w-4" />
-            {userProfile?.role === 'field_officer' ? 'My Assignments' : 'View Assignments'}
+            {isFieldOfficer() ? 'My Assignments' : 'View Assignments'}
           </Link>
         </Button>
       )}

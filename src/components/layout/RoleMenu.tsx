@@ -49,6 +49,11 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
     }
   };
 
+  // Helper to check if user is field staff (who should see field work)
+  const isFieldStaff = () => {
+    return isFieldOfficer() || isProjectOfficer() || isAssistantProjectOfficer();
+  };
+
   return (
     <nav className="space-y-1">
       {/* Dashboard - shown to all users */}
@@ -85,7 +90,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       )}
       
       {/* Field Staff Links */}
-      {(isFieldOfficer() || isProjectOfficer() || isAssistantProjectOfficer()) && (
+      {isFieldStaff() && (
         <>
           <Link 
             to="/requests" 
