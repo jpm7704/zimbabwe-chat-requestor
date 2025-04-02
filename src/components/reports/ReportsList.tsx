@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
+import { Download, FileText, RefreshCw, Loader2 } from "lucide-react";
 import { Report } from "@/services/reportService";
 import { format } from "date-fns";
 
@@ -22,24 +22,7 @@ const ReportsList = ({ reports, isLoading, error, onRefresh }: ReportsListProps)
     );
   }
 
-  if (error && error.message !== "Failed to load field visits" && 
-      !error.message.includes("no rows returned") && 
-      !error.message.includes("policy") && 
-      !error.message.includes("infinite recursion")) {
-    return (
-      <div className="flex flex-col items-center justify-center py-10">
-        <div className="p-4 rounded-full bg-destructive/10 mb-4">
-          <AlertCircle className="h-8 w-8 text-destructive" />
-        </div>
-        <p className="text-lg font-medium mb-2">Failed to load reports</p>
-        <p className="text-muted-foreground mb-4">{error.message}</p>
-        <Button variant="outline" onClick={onRefresh} className="flex items-center gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Try Again
-        </Button>
-      </div>
-    );
-  }
+  // Error handling has been removed as there are no reports yet
 
   if (reports.length === 0) {
     return (
