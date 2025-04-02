@@ -81,7 +81,8 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
         </p>
       </div>
       
-      {showNewRequestButton && isRegularUser() && (
+      {/* Remove the showNewRequestButton prop condition to hide it completely for non-regular users */}
+      {isRegularUser() && (
         <Button asChild>
           <Link to="/submit?action=new" className="flex items-center gap-2">
             <Plus className="h-4 w-4" />

@@ -43,7 +43,8 @@ const RequestsPage = () => {
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">
-      <RequestsHeader showNewRequestButton={isRegularUser()} />
+      {/* Removed the showNewRequestButton prop */}
+      <RequestsHeader />
       
       {/* Always show UserStatsSummary for all roles */}
       <UserStatsSummary statusCounts={statusCounts} />
