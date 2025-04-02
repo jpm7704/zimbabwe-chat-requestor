@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAnalyticsData } from "@/hooks/useAnalyticsData";
@@ -151,4 +150,3 @@ const Analytics = () => {
 };
 
 export default Analytics;
-
