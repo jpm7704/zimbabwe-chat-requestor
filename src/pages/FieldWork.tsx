@@ -12,11 +12,16 @@ import { useToast } from "@/hooks/use-toast";
 
 const FieldWork = () => {
   const [activeTab, setActiveTab] = useState("upcoming");
-  const { visits, isLoading, updateVisitStatus } = useFieldWork({
-    status: activeTab === "upcoming" ? "scheduled,pending" : "completed"
-  });
+  const { fieldVisits, loading, error, updateFieldVisit } = useFieldWork();
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  
+  // Filter visits based on active tab
+  const filteredVisits = fieldVisits?.filter(visit => 
+    activeTab === "upcoming" 
+      ? (visit.status === "scheduled" || visit.status === "pending") 
+      : visit.status === "completed"
+  ) || [];
   
   const renderStatusIcon = (status: string) => {
     switch (status) {
@@ -35,13 +40,22 @@ const FieldWork = () => {
 
   const handleStatusChange = async (visitId: string, newStatus: string) => {
     try {
-      await updateVisitStatus(visitId, newStatus);
+      await updateFieldVisit(visitId, { status: newStatus });
+      toast({
+        title: "Status updated",
+        description: `Field visit status changed to ${newStatus}`,
+      });
     } catch (error) {
       console.error("Failed to update visit status:", error);
+      toast({
+        title: "Update failed",
+        description: "Could not update field visit status",
+        variant: "destructive"
+      });
     }
   };
 
-  const renderVisitCard = (visit: any) => (
+  const renderVisitCard = (visit) => (
     <Card key={visit.id} className="mb-4">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center justify-between">
@@ -59,7 +73,7 @@ const FieldWork = () => {
         <div className="flex flex-col space-y-2">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="h-4 w-4" />
-            <span>{new Date(visit.dueDate).toLocaleDateString()}</span>
+            <span>{new Date(visit.visitDate).toLocaleDateString()}</span>
           </div>
           
           {visit.location && (
@@ -73,7 +87,7 @@ const FieldWork = () => {
             <Badge variant={visit.priority === 'high' ? 'destructive' : visit.priority === 'medium' ? 'default' : 'outline'}>
               {visit.priority} priority
             </Badge>
-            {visit.report === 'Submitted' && (
+            {visit.reportSubmitted && (
               <Badge variant="outline" className="bg-green-50 text-green-700">
                 Report Submitted
               </Badge>
@@ -95,7 +109,7 @@ const FieldWork = () => {
               <div className="space-y-4 py-4">
                 <div className="space-y-1">
                   <p className="font-medium text-sm">Request</p>
-                  <p>{visit.ticketNumber} - {visit.title}</p>
+                  <p>{visit.ticketNumber || 'N/A'} - {visit.title}</p>
                 </div>
                 
                 <div className="space-y-1">
@@ -105,12 +119,12 @@ const FieldWork = () => {
                 
                 <div className="space-y-1">
                   <p className="font-medium text-sm">Due Date</p>
-                  <p>{new Date(visit.dueDate).toLocaleDateString()}</p>
+                  <p>{new Date(visit.visitDate).toLocaleDateString()}</p>
                 </div>
                 
                 <div className="space-y-1">
                   <p className="font-medium text-sm">Assigned To</p>
-                  <p>{visit.assignee}</p>
+                  <p>{visit.assignee || 'Not assigned'}</p>
                 </div>
                 
                 <div className="space-y-1">
@@ -148,7 +162,7 @@ const FieldWork = () => {
                 <div className="border-t pt-4 mt-4">
                   <Button asChild>
                     <a href={`/reports?visitId=${visit.id}`}>
-                      {visit.report === 'Submitted' ? 'View Report' : 'Create Report'}
+                      {visit.reportSubmitted ? 'View Report' : 'Create Report'}
                     </a>
                   </Button>
                 </div>
@@ -177,12 +191,12 @@ const FieldWork = () => {
         </TabsList>
         
         <TabsContent value="upcoming" className="space-y-4">
-          {isLoading ? (
+          {loading ? (
             <div className="flex items-center justify-center py-10">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : visits.length > 0 ? (
-            visits.map(renderVisitCard)
+          ) : filteredVisits.length > 0 ? (
+            filteredVisits.map(renderVisitCard)
           ) : (
             <div className="text-center py-10 text-muted-foreground">
               No upcoming field visits scheduled
@@ -191,12 +205,12 @@ const FieldWork = () => {
         </TabsContent>
         
         <TabsContent value="completed" className="space-y-4">
-          {isLoading ? (
+          {loading ? (
             <div className="flex items-center justify-center py-10">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : visits.length > 0 ? (
-            visits.map(renderVisitCard)
+          ) : filteredVisits.length > 0 ? (
+            filteredVisits.map(renderVisitCard)
           ) : (
             <div className="text-center py-10 text-muted-foreground">
               No completed field visits found
