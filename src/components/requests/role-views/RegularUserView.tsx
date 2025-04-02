@@ -62,7 +62,7 @@ const RegularUserView = ({ userProfile }: RegularUserViewProps) => {
           </p>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" asChild>
-              <Link to="/submit?action=new" className="flex items-center gap-2">
+              <Link to="/submit" className="flex items-center gap-2">
                 <Plus className="h-3 w-3" />
                 New Request
               </Link>

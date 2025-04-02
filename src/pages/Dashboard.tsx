@@ -41,7 +41,7 @@ const Dashboard = () => {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Button asChild size="sm">
-                    <Link to="/submit?action=new">
+                    <Link to="/submit">
                       <Plus className="h-4 w-4 mr-1" />
                       New Request
                     </Link>

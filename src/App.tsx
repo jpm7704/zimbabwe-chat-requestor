@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,7 +29,6 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./hooks/use-toast";
 
-// Role-based route guard component
 const RoleRoute = ({ 
   element, 
   allowedRoles = [],
@@ -51,18 +49,14 @@ const RoleRoute = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Get dev role from localStorage (for development mode role switching)
   const isDevelopment = import.meta.env.DEV;
   const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
   
   const checkRole = () => {
-    // Skip role checks in dev mode
     if (isDevelopment && devRole) return true;
     
-    // Admin has access to everything
     if (isAdmin()) return true;
     
-    // Check if user has any of the allowed roles
     return allowedRoles.some(role => {
       switch(role) {
         case "admin": return isAdmin();
@@ -85,7 +79,6 @@ const RoleRoute = ({
       return;
     }
     
-    // Skip role checks in dev mode
     if (isDevelopment && devRole) return;
     
     if (!checkRole()) {
@@ -118,21 +111,18 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Redirect root to dashboard */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/staff-verification" element={<StaffVerification />} />
             
-            {/* Common routes - accessible by all authenticated users */}
             <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
             <Route path="/profile" element={<MainLayout><UserProfile /></MainLayout>} />
             <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
             <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
             <Route path="/requests/:id" element={<MainLayout><RequestDetail /></MainLayout>} />
             
-            {/* Regular User-specific routes */}
             <Route path="/submit" element={
               <MainLayout>
                 <RoleRoute
@@ -153,14 +143,10 @@ const App = () => {
             
             <Route path="/chat" element={
               <MainLayout>
-                <RoleRoute
-                  element={<RequestSubmissionPage />}
-                  allowedRoles={["user"]}
-                />
+                <Navigate to="/submit" replace />
               </MainLayout>
             } />
             
-            {/* Field Staff routes */}
             <Route path="/field-work" element={
               <MainLayout>
                 <RoleRoute
@@ -170,7 +156,6 @@ const App = () => {
               </MainLayout>
             } />
             
-            {/* Report routes - accessible by field staff, management, and program managers */}
             <Route path="/reports" element={
               <MainLayout>
                 <RoleRoute
@@ -207,7 +192,6 @@ const App = () => {
               </MainLayout>
             } />
             
-            {/* Analytics routes - for management and program managers */}
             <Route path="/analytics" element={
               <MainLayout>
                 <RoleRoute
@@ -223,7 +207,6 @@ const App = () => {
               </MainLayout>
             } />
             
-            {/* Approvals routes - for directors, CEO, and patrons only */}
             <Route path="/approvals" element={
               <MainLayout>
                 <RoleRoute
@@ -233,7 +216,6 @@ const App = () => {
               </MainLayout>
             } />
             
-            {/* Admin routes */}
             <Route path="/admin/users" element={
               <MainLayout>
                 <RoleRoute
@@ -261,7 +243,6 @@ const App = () => {
               </MainLayout>
             } />
             
-            {/* Fallback route for not found pages */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
