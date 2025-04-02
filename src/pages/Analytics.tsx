@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAnalyticsData } from "@/hooks/useAnalyticsData";
 import { BarChart, PieChart, LineChart } from "recharts";
-import { Bar, Pie, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell as RechartsCell } from "recharts";
+import { Bar, Pie, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell as RechartsCell, Legend } from "recharts";
 import { Loader2 } from "lucide-react";
 
 const Analytics = () => {
