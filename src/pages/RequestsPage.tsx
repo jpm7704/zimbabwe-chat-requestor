@@ -1,9 +1,8 @@
 
 import { useRequestsData } from "@/hooks/useRequestsData";
 import { useAuth } from "@/hooks/useAuth";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useNavigate } from "react-router-dom";
 import { useRoles } from "@/hooks/useRoles";
+import { useNavigate } from "react-router-dom";
 import RequestsHeader from "@/components/requests/RequestsHeader";
 import RequestsSearchFilter from "@/components/requests/RequestsSearchFilter";
 import RequestsList from "@/components/requests/RequestsList";
@@ -14,7 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 const RequestsPage = () => {
   const { userProfile, isAuthenticated } = useAuth();
   const { isRegularUser } = useRoles(userProfile);
-  const permissions = usePermissions(userProfile);
   const navigate = useNavigate();
   const { toast } = useToast();
   const {
@@ -51,9 +49,8 @@ const RequestsPage = () => {
       <UserStatsSummary statusCounts={statusCounts} />
       
       <RoleBasedWorkflow 
-        userProfile={userProfile} 
-        permissions={permissions} 
-        statusCounts={statusCounts} 
+        userProfile={userProfile}
+        statusCounts={statusCounts}
       />
       
       <RequestsSearchFilter 
