@@ -13,12 +13,6 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
   const { userProfile, formatRole } = useAuth();
   const permissions = usePermissions(userProfile);
   
-  // Determine if the user is a Head of Department or similar role
-  const isHeadOrManager = userProfile?.role ? 
-    ['head_of_department', 'head_of_programs', 'programme_manager', 'hop'].includes(
-      userProfile.role.toLowerCase()
-    ) : false;
-  
   // Determine the role-specific title and description
   const getRoleSpecificHeader = () => {
     if (!userProfile) return { title: "My Requests", description: "Track and manage your BGF Zimbabwe support requests" };
@@ -66,11 +60,10 @@ const RequestsHeader = ({ showNewRequestButton = true }: RequestsHeaderProps) =>
         </p>
       </div>
       
-      {/* Only show the New Request button for regular users */}
       {showNewRequestButton && 
-       permissions.canCreateRequests && 
-       !isHeadOrManager && 
-       !permissions.canReviewRequests && (
+       permissions.canViewRequests && 
+       !permissions.canReviewRequests && 
+       !['head_of_department', 'head_of_programs', 'programme_manager', 'hop'].includes(userProfile?.role?.toLowerCase() || '') && (
         <Button asChild>
           <Link to="/submit?action=new" className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
