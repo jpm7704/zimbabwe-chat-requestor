@@ -111,7 +111,7 @@ export const createReport = async (reportData: Omit<Report, 'id' | 'date'>): Pro
       .eq('id', session.session.user.id)
       .single();
     
-    const authorName = profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 'Anonymous';
+    const authorName = profile ? profile.name || 'Anonymous' : 'Anonymous';
     
     const { data, error } = await supabase
       .from('reports')
@@ -121,7 +121,8 @@ export const createReport = async (reportData: Omit<Report, 'id' | 'date'>): Pro
         category: reportData.category,
         status: reportData.status,
         author_id: session.session.user.id,
-        author_name: authorName
+        author_name: authorName,
+        region: profile?.region
       })
       .select()
       .single();

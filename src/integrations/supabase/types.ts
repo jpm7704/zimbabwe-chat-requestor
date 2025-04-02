@@ -57,6 +57,65 @@ export type Database = {
           },
         ]
       }
+      field_visits: {
+        Row: {
+          assigned_officer_id: string | null
+          assigned_officer_name: string | null
+          created_at: string
+          id: string
+          location: string
+          notes: string | null
+          priority: string
+          purpose: string | null
+          region: string | null
+          report_id: string | null
+          report_submitted: boolean
+          request_id: string | null
+          status: string
+          visit_date: string
+        }
+        Insert: {
+          assigned_officer_id?: string | null
+          assigned_officer_name?: string | null
+          created_at?: string
+          id?: string
+          location: string
+          notes?: string | null
+          priority?: string
+          purpose?: string | null
+          region?: string | null
+          report_id?: string | null
+          report_submitted?: boolean
+          request_id?: string | null
+          status?: string
+          visit_date: string
+        }
+        Update: {
+          assigned_officer_id?: string | null
+          assigned_officer_name?: string | null
+          created_at?: string
+          id?: string
+          location?: string
+          notes?: string | null
+          priority?: string
+          purpose?: string | null
+          region?: string | null
+          report_id?: string | null
+          report_submitted?: boolean
+          request_id?: string | null
+          status?: string
+          visit_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_visits_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -125,6 +184,48 @@ export type Database = {
           target_roles?: string[]
           title?: string
           type?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          author_id: string | null
+          author_name: string | null
+          category: string | null
+          content: string | null
+          created_at: string
+          id: string
+          region: string | null
+          status: string
+          title: string
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          region?: string | null
+          status?: string
+          title: string
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          region?: string | null
+          status?: string
+          title?: string
+          type?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

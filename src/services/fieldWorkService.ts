@@ -15,6 +15,7 @@ export interface FieldVisit {
   report_submitted: boolean;
   notes: string | null;
   region: string | null;
+  assigned_officer_name: string | null;
 }
 
 export const createFieldVisit = async (visitData: Omit<FieldVisit, 'id' | 'created_at' | 'report_submitted'>) => {
@@ -22,7 +23,7 @@ export const createFieldVisit = async (visitData: Omit<FieldVisit, 'id' | 'creat
     const { data, error } = await supabase
       .from('field_visits')
       .insert(visitData)
-      .select('*')
+      .select()
       .single();
     
     if (error) throw error;

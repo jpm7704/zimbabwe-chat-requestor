@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { fetchReports, Report, ReportFilters } from '@/services/reportService';
+import { Report, ReportFilters } from '@/services/reportService';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -112,7 +112,7 @@ export function useReports(filters?: ReportFilters) {
           category: reportData.category,
           status: reportData.status,
           author_id: userProfile.id,
-          author_name: `${userProfile.first_name} ${userProfile.last_name}`,
+          author_name: userProfile.name,
           region: userProfile.region
         })
         .select();
