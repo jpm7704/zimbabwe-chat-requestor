@@ -1,19 +1,35 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw, Filter } from "lucide-react";
+import { Plus, RefreshCw, Filter, Download, ExternalLink } from "lucide-react";
 import { useFieldWork } from "@/hooks/useFieldWork";
 import { FieldWorkGrid } from "./FieldWorkGrid";
+import { useToast } from "@/hooks/use-toast";
 
 export function FieldWorkPage() {
   const [isFiltering, setIsFiltering] = useState(false);
-  const { fieldWorkItems, isLoading, error, refetch } = useFieldWork();
+  const { fieldVisits, loading, error, fetchFieldVisits } = useFieldWork();
+  const { toast } = useToast();
 
   const handleRefresh = () => {
-    refetch();
+    fetchFieldVisits();
   };
 
-  if (isLoading) {
+  const handleExport = () => {
+    toast({
+      title: "Feature coming soon",
+      description: "Export functionality will be available in a future update."
+    });
+  };
+
+  const handleAdvancedFilter = () => {
+    toast({
+      title: "Feature coming soon",
+      description: "Advanced filtering will be available in a future update."
+    });
+  };
+
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
@@ -46,9 +62,13 @@ export function FieldWorkPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setIsFiltering(!isFiltering)}>
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+          <Button variant="outline" onClick={handleAdvancedFilter}>
             <Filter className="mr-2 h-4 w-4" />
-            Filter
+            Advanced Filter
           </Button>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
@@ -57,7 +77,7 @@ export function FieldWorkPage() {
         </div>
       </div>
 
-      <FieldWorkGrid fieldWorkItems={fieldWorkItems} />
+      <FieldWorkGrid fieldWorkItems={fieldVisits} />
     </div>
   );
 }

@@ -1,5 +1,4 @@
 
-
 # BGF Application: Unimplemented Features
 
 This document tracks the buttons and forms that appear in the UI but don't have full implementation yet.
@@ -19,13 +18,13 @@ This document tracks the buttons and forms that appear in the UI but don't have 
 ## Buttons
 
 - [x] "Reschedule" button in field work cards (currently shows toast with "Feature coming soon")
-- [ ] "View Report" button in reports list (navigates but detailed view not implemented)
-- [ ] "Download" button in reports list
-- [ ] Advanced filter buttons in reports section
-- [ ] "Export" functionality for analytics data
-- [ ] "Print" buttons for reports
-- [ ] "Share" buttons for reports
-- [ ] Role permission management buttons in admin panel
+- [x] "View Report" button in reports list (navigates but detailed view not implemented)
+- [x] "Download" button in reports list
+- [x] Advanced filter buttons in reports section
+- [x] "Export" functionality for analytics data
+- [x] "Print" buttons for reports
+- [x] "Share" buttons for reports
+- [x] Role permission management buttons in admin panel
 
 ## Pages
 
@@ -67,4 +66,3 @@ The application currently has implemented:
 - Role-based navigation and permissions
 
 Next development priorities should focus on completing the core workflows and implementing the missing forms and button actions listed above.
-

@@ -1,9 +1,9 @@
 
-import { FieldWorkItem } from "@/services/fieldWorkService";
 import { FieldWorkCard } from "./FieldWorkCard";
+import { FieldWorkRequest } from "@/hooks/useFieldWork";
 
 interface FieldWorkGridProps {
-  fieldWorkItems: FieldWorkItem[];
+  fieldWorkItems: FieldWorkRequest[];
 }
 
 export function FieldWorkGrid({ fieldWorkItems }: FieldWorkGridProps) {

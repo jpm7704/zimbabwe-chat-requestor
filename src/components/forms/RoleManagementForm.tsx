@@ -1,352 +1,148 @@
 
 import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Shield, User, Save, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 
-const formSchema = z.object({
-  roleKey: z.string().min(2, {
-    message: "Role key must be at least 2 characters.",
-  }),
-  displayName: z.string().min(2, {
-    message: "Display name must be at least 2 characters.",
-  }),
-  description: z.string().optional(),
-  hierarchyLevel: z.string().min(1, {
-    message: "Please enter a hierarchy level.",
-  }),
-  canApprove: z.boolean().default(false),
-  canAssign: z.boolean().default(false),
-  canCreateReports: z.boolean().default(false),
-  canManageUsers: z.boolean().default(false),
-  canViewAnalytics: z.boolean().default(false),
-  canManageSettings: z.boolean().default(false),
-});
+// Mock data for roles and permissions
+const roles = [
+  { id: "1", name: "Admin", description: "Full system access" },
+  { id: "2", name: "Project Officer", description: "Manage projects and reports" },
+  { id: "3", name: "Field Officer", description: "Field work and data collection" },
+  { id: "4", name: "Manager", description: "Oversee operations and approvals" },
+];
 
-type FormValues = z.infer<typeof formSchema>;
+const permissions = [
+  { id: "1", name: "Create Reports", description: "Can create new reports" },
+  { id: "2", name: "Edit Reports", description: "Can edit existing reports" },
+  { id: "3", name: "Delete Reports", description: "Can delete reports" },
+  { id: "4", name: "Approve Requests", description: "Can approve beneficiary requests" },
+  { id: "5", name: "Manage Users", description: "Can manage user accounts" },
+  { id: "6", name: "View Analytics", description: "Can view analytics data" },
+];
 
-interface RoleManagementFormProps {
-  initialData?: {
-    id?: string;
-    roleKey?: string;
-    displayName?: string;
-    description?: string;
-    hierarchyLevel?: number;
-    canApprove?: boolean;
-    canAssign?: boolean;
-    canCreateReports?: boolean;
-    canManageUsers?: boolean;
-    canViewAnalytics?: boolean;
-    canManageSettings?: boolean;
-  };
-  onSuccess?: () => void;
-  mode?: 'create' | 'edit';
-}
-
-export function RoleManagementForm({ 
-  initialData = {}, 
-  onSuccess, 
-  mode = 'create' 
-}: RoleManagementFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
-  
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      roleKey: initialData.roleKey || "",
-      displayName: initialData.displayName || "",
-      description: initialData.description || "",
-      hierarchyLevel: initialData.hierarchyLevel?.toString() || "0",
-      canApprove: initialData.canApprove || false,
-      canAssign: initialData.canAssign || false,
-      canCreateReports: initialData.canCreateReports || false,
-      canManageUsers: initialData.canManageUsers || false,
-      canViewAnalytics: initialData.canViewAnalytics || false,
-      canManageSettings: initialData.canManageSettings || false,
-    },
+const RoleManagementForm = () => {
+  const [selectedRole, setSelectedRole] = useState(roles[0]);
+  const [rolePermissions, setRolePermissions] = useState<Record<string, string[]>>({
+    "1": ["1", "2", "3", "4", "5", "6"], // Admin has all permissions
+    "2": ["1", "2", "6"], // Project Officer permissions
+    "3": ["1", "6"], // Field Officer permissions
+    "4": ["1", "2", "4", "6"], // Manager permissions
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
-  async function onSubmit(values: FormValues) {
-    setIsSubmitting(true);
-    try {
-      // In a real app, this would create or update the role in the database
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
+  const handlePermissionToggle = (permissionId: string) => {
+    const currentPermissions = rolePermissions[selectedRole.id] || [];
+    const newPermissions = currentPermissions.includes(permissionId)
+      ? currentPermissions.filter((id) => id !== permissionId)
+      : [...currentPermissions, permissionId];
+    
+    setRolePermissions({
+      ...rolePermissions,
+      [selectedRole.id]: newPermissions,
+    });
+  };
+
+  const handleSavePermissions = () => {
+    setIsSaving(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsSaving(false);
       toast({
-        title: mode === 'create' ? "Role created" : "Role updated",
-        description: mode === 'create' 
-          ? "The role has been successfully created." 
-          : "The role has been successfully updated.",
+        title: "Feature coming soon",
+        description: "Role permission management will be available in a future update."
       });
-      
-      if (onSuccess) {
-        onSuccess();
-      }
-      
-      if (mode === 'create') {
-        form.reset();
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: `Failed to ${mode === 'create' ? 'create' : 'update'} role. Please try again.`,
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+    }, 1000);
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="roleKey"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Role Key</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="e.g. project_officer" 
-                    {...field} 
-                    disabled={mode === 'edit'}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Internal identifier for the role (no spaces, use underscores)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="displayName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Display Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. Project Officer" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Name shown to users in the interface
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Enter a description of this role and its responsibilities" 
-                  {...field} 
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="hierarchyLevel"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Hierarchy Level</FormLabel>
-              <FormControl>
-                <Input type="number" min="0" max="100" {...field} />
-              </FormControl>
-              <FormDescription>
-                Determines the role's position in the organizational hierarchy (higher numbers have more authority)
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="border rounded-lg p-4">
-          <h3 className="text-lg font-medium mb-4">Permissions</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="canApprove"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Can Approve Requests</FormLabel>
-                    <FormDescription>
-                      Can approve or reject user requests
-                    </FormDescription>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row gap-4 items-start">
+        <div className="w-full sm:w-1/3 space-y-4">
+          <h3 className="text-lg font-medium flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Roles
+          </h3>
+          <div className="space-y-2">
+            {roles.map((role) => (
+              <Card 
+                key={role.id} 
+                className={`cursor-pointer transition-colors ${
+                  selectedRole.id === role.id ? "border-primary" : ""
+                }`}
+                onClick={() => setSelectedRole(role)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">{role.name}</p>
+                      <p className="text-sm text-muted-foreground">{role.description}</p>
+                    </div>
+                    {selectedRole.id === role.id && (
+                      <Badge>Selected</Badge>
+                    )}
                   </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="canAssign"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Can Assign Work</FormLabel>
-                    <FormDescription>
-                      Can assign requests to staff members
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="canCreateReports"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Can Create Reports</FormLabel>
-                    <FormDescription>
-                      Can create and manage reports
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="canManageUsers"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Can Manage Users</FormLabel>
-                    <FormDescription>
-                      Can create and edit user accounts
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="canViewAnalytics"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Can View Analytics</FormLabel>
-                    <FormDescription>
-                      Can access analytics and reports
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="canManageSettings"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Can Manage Settings</FormLabel>
-                    <FormDescription>
-                      Can modify system settings
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
-        
-        <div className="flex justify-end gap-2">
-          {mode === 'edit' && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onSuccess && onSuccess()}
+        <div className="w-full sm:w-2/3 space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Permissions for {selectedRole.name}
+            </h3>
+            <Button 
+              onClick={handleSavePermissions} 
+              disabled={isSaving}
+              className="flex items-center gap-2"
             >
-              Cancel
+              {isSaving ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Save Changes
             </Button>
-          )}
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-          >
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSubmitting 
-              ? (mode === 'create' ? "Creating..." : "Updating...") 
-              : (mode === 'create' ? "Create Role" : "Update Role")
-            }
-          </Button>
+          </div>
+          <Card>
+            <CardContent className="p-6 space-y-6">
+              {permissions.map((permission) => {
+                const isChecked = rolePermissions[selectedRole.id]?.includes(permission.id) || false;
+                
+                return (
+                  <div key={permission.id} className="flex items-start space-x-3">
+                    <Checkbox 
+                      id={`permission-${permission.id}`}
+                      checked={isChecked}
+                      onCheckedChange={() => handlePermissionToggle(permission.id)}
+                    />
+                    <div className="space-y-1">
+                      <label 
+                        htmlFor={`permission-${permission.id}`}
+                        className="font-medium cursor-pointer"
+                      >
+                        {permission.name}
+                      </label>
+                      <p className="text-sm text-muted-foreground">
+                        {permission.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
         </div>
-      </form>
-    </Form>
+      </div>
+    </div>
   );
-}
+};
 
 export default RoleManagementForm;
