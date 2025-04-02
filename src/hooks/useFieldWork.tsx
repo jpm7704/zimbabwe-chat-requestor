@@ -37,7 +37,8 @@ export function useFieldWork() {
       setLoading(true);
       setError(null);
 
-      let query = supabase.from('field_visits').select(`
+      // Use any type to bypass TypeScript errors until Supabase types are updated
+      let query = (supabase as any).from('field_visits').select(`
         *,
         request:requests(ticket_number, title)
       `);
@@ -94,7 +95,8 @@ export function useFieldWork() {
         throw new Error('User must be logged in to create a field visit');
       }
       
-      const { data, error } = await supabase
+      // Use any type to bypass TypeScript errors until Supabase types are updated
+      const { data, error } = await (supabase as any)
         .from('field_visits')
         .insert({
           location: visitData.location,
@@ -103,7 +105,7 @@ export function useFieldWork() {
           status: visitData.status,
           priority: visitData.priority,
           assigned_officer_id: userProfile.id,
-          assigned_officer_name: userProfile.name,
+          assigned_officer_name: userProfile.first_name + ' ' + userProfile.last_name,
           region: userProfile.region,
           request_id: visitData.requestId
         })
@@ -145,7 +147,8 @@ export function useFieldWork() {
       if (updates.visitDate) updateData.visit_date = updates.visitDate;
       if (updates.purpose) updateData.purpose = updates.purpose;
       
-      const { error } = await supabase
+      // Use any type to bypass TypeScript errors until Supabase types are updated
+      const { error } = await (supabase as any)
         .from('field_visits')
         .update(updateData)
         .eq('id', visitId);
