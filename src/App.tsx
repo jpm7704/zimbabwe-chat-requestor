@@ -17,9 +17,13 @@ import NotFound from "./pages/NotFound";
 import FieldWork from "./pages/FieldWork";
 import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
+import ReportDetail from "./pages/ReportDetail";
 import Settings from "./pages/Settings";
 import ApprovalsPage from "./pages/ApprovalsPage";
-import UserManagement from "./pages/UserManagement"; // Add import for UserManagement page
+import UserManagement from "./pages/UserManagement";
+import RolesManagement from "./pages/RolesManagement";
+import SystemSettings from "./pages/SystemSettings";
+import UserProfile from "./pages/UserProfile";
 import RequirePermission from "./components/auth/RequirePermission";
 
 const queryClient = new QueryClient({
@@ -56,6 +60,7 @@ const App = () => {
             <Route path="/submit" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
             <Route path="/enquiry" element={<MainLayout><EnquiryPage /></MainLayout>} />
             <Route path="/chat" element={<MainLayout><RequestSubmissionPage /></MainLayout>} />
+            <Route path="/profile" element={<MainLayout><UserProfile /></MainLayout>} />
             
             {/* Requests page - accessible by all authenticated users */}
             <Route path="/requests" element={<MainLayout><RequestsPage /></MainLayout>} />
@@ -79,6 +84,16 @@ const App = () => {
                 {isDevMode ? <Reports /> : (
                   <RequirePermission permission="canAccessFieldReports">
                     <Reports />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            <Route path="/reports/:id" element={
+              <MainLayout>
+                {isDevMode ? <ReportDetail /> : (
+                  <RequirePermission permission="canAccessFieldReports">
+                    <ReportDetail />
                   </RequirePermission>
                 )}
               </MainLayout>
@@ -108,8 +123,28 @@ const App = () => {
             <Route path="/admin/users" element={
               <MainLayout>
                 {isDevMode ? <UserManagement /> : (
-                  <RequirePermission permission="canManageStaff">
+                  <RequirePermission permission="canManageUsers">
                     <UserManagement />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            <Route path="/admin/roles" element={
+              <MainLayout>
+                {isDevMode ? <RolesManagement /> : (
+                  <RequirePermission permission="canManageUsers">
+                    <RolesManagement />
+                  </RequirePermission>
+                )}
+              </MainLayout>
+            } />
+            
+            <Route path="/admin/system" element={
+              <MainLayout>
+                {isDevMode ? <SystemSettings /> : (
+                  <RequirePermission permission="canAccessSystemSettings">
+                    <SystemSettings />
                   </RequirePermission>
                 )}
               </MainLayout>

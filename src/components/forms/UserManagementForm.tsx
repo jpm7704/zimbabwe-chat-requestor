@@ -47,12 +47,14 @@ interface UserManagementFormProps {
     staffNumber?: string;
   };
   onSuccess?: () => void;
+  onSubmit?: (values: FormValues) => void;
   mode?: 'create' | 'edit';
 }
 
 export function UserManagementForm({ 
   initialData = {}, 
   onSuccess, 
+  onSubmit,
   mode = 'create' 
 }: UserManagementFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,11 +72,16 @@ export function UserManagementForm({
     },
   });
 
-  async function onSubmit(values: FormValues) {
+  async function handleSubmit(values: FormValues) {
     setIsSubmitting(true);
     try {
       // In a real app, this would create or update the user in the database
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      
+      // If onSubmit is provided, call it with the form values
+      if (onSubmit) {
+        onSubmit(values);
+      }
       
       toast({
         title: mode === 'create' ? "User created" : "User updated",
@@ -103,7 +110,7 @@ export function UserManagementForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
