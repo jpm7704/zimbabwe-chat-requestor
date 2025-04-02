@@ -4,7 +4,16 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useRequestForm } from "@/hooks/useRequestForm";
 import NewRequestForm from "@/components/request/NewRequestForm";
-import { MessageCircle, HelpCircle, AlertCircle } from "lucide-react";
+import { 
+  MessageCircle, 
+  HelpCircle, 
+  AlertCircle, 
+  HomeIcon,
+  UtensilsIcon, 
+  DropletIcon,
+  UsersIcon,
+  AlertTriangle
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -47,7 +56,8 @@ const EnquiryPage = () => {
       if (type) {
         requestFormProps.setRequestForm(prev => ({
           ...prev,
-          type
+          type,
+          isEnquiry: true
         }));
       }
     } else if (type) {
@@ -76,16 +86,73 @@ const EnquiryPage = () => {
         </div>
 
         {!showNewRequest ? (
-          <Alert variant="default" className="bg-primary/5 border-primary/20">
-            <MessageCircle className="h-5 w-5 text-primary" />
-            <AlertTitle className="text-primary-foreground">Select an enquiry type</AlertTitle>
-            <AlertDescription>
-              Please select an enquiry type from the home page or use the form below to submit a general enquiry.
-            </AlertDescription>
-            <Button className="mt-2" onClick={() => setShowNewRequest(true)}>
-              Start General Enquiry
-            </Button>
-          </Alert>
+          <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div 
+              onClick={() => requestFormProps.handleRequestTypeSelect("shelter_assistance")} 
+              className="border border-primary/30 hover:border-primary transition-all p-6 rounded-lg cursor-pointer hover:bg-primary/5"
+            >
+              <HomeIcon className="h-8 w-8 text-primary mb-3" />
+              <h3 className="text-lg font-serif mb-2">Shelter Assistance</h3>
+              <p className="text-sm text-muted-foreground">
+                Enquire about housing support and shelter improvement programs.
+              </p>
+            </div>
+            
+            <div 
+              onClick={() => requestFormProps.handleRequestTypeSelect("food_assistance")} 
+              className="border border-primary/30 hover:border-primary transition-all p-6 rounded-lg cursor-pointer hover:bg-primary/5"
+            >
+              <UtensilsIcon className="h-8 w-8 text-primary mb-3" />
+              <h3 className="text-lg font-serif mb-2">Food Assistance</h3>
+              <p className="text-sm text-muted-foreground">
+                Learn about food security initiatives and nutrition programs.
+              </p>
+            </div>
+            
+            <div 
+              onClick={() => requestFormProps.handleRequestTypeSelect("water_sanitation")} 
+              className="border border-primary/30 hover:border-primary transition-all p-6 rounded-lg cursor-pointer hover:bg-primary/5"
+            >
+              <DropletIcon className="h-8 w-8 text-primary mb-3" />
+              <h3 className="text-lg font-serif mb-2">Water & Sanitation</h3>
+              <p className="text-sm text-muted-foreground">
+                Enquire about clean water access and sanitation support.
+              </p>
+            </div>
+            
+            <div 
+              onClick={() => requestFormProps.handleRequestTypeSelect("community_development")} 
+              className="border border-primary/30 hover:border-primary transition-all p-6 rounded-lg cursor-pointer hover:bg-primary/5"
+            >
+              <UsersIcon className="h-8 w-8 text-primary mb-3" />
+              <h3 className="text-lg font-serif mb-2">Community Development</h3>
+              <p className="text-sm text-muted-foreground">
+                Information about community empowerment initiatives.
+              </p>
+            </div>
+            
+            <div 
+              onClick={() => requestFormProps.handleRequestTypeSelect("disaster_relief")} 
+              className="border border-primary/30 hover:border-primary transition-all p-6 rounded-lg cursor-pointer hover:bg-primary/5"
+            >
+              <AlertTriangle className="h-8 w-8 text-primary mb-3" />
+              <h3 className="text-lg font-serif mb-2">Emergency Relief</h3>
+              <p className="text-sm text-muted-foreground">
+                Information about disaster response and emergency aid.
+              </p>
+            </div>
+            
+            <div 
+              onClick={() => requestFormProps.handleRequestTypeSelect("general_enquiry")} 
+              className="border border-primary/30 hover:border-primary transition-all p-6 rounded-lg cursor-pointer hover:bg-primary/5"
+            >
+              <HelpCircle className="h-8 w-8 text-primary mb-3" />
+              <h3 className="text-lg font-serif mb-2">General Enquiry</h3>
+              <p className="text-sm text-muted-foreground">
+                Any other questions about our programs and services.
+              </p>
+            </div>
+          </div>
         ) : (
           <div className="border border-primary/20 p-8 rounded-lg bg-card/40 shadow-sm">
             <div className="mb-6 flex items-center gap-2 pb-3 border-b border-primary/10">

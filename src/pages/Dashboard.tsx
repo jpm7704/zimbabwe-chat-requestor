@@ -4,7 +4,7 @@ import { useRoles } from "@/hooks/useRoles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ClipboardCheck, HelpCircle, BarChart3, FileText, UserCheck } from "lucide-react";
+import { ClipboardCheck, HelpCircle, BarChart3, FileText, UserCheck, Plus } from "lucide-react";
 
 const Dashboard = () => {
   const { userProfile } = useAuth();
@@ -31,6 +31,31 @@ const Dashboard = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2">
+                  <ClipboardCheck className="h-5 w-5 text-primary" />
+                  Submit Request
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Apply for medical assistance, educational support, or other programs.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild size="sm">
+                    <Link to="/submit?action=new">
+                      <Plus className="h-4 w-4 mr-1" />
+                      New Request
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/requests">View My Requests</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2">
                   <HelpCircle className="h-5 w-5 text-primary" />
                   Submit an Enquiry
                 </CardTitle>
@@ -48,8 +73,8 @@ const Dashboard = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2">
-                  <ClipboardCheck className="h-5 w-5 text-primary" />
-                  My Requests
+                  <FileText className="h-5 w-5 text-primary" />
+                  My Applications
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -57,7 +82,7 @@ const Dashboard = () => {
                   View and track all your submitted requests and applications.
                 </p>
                 <Button asChild size="sm">
-                  <Link to="/requests">View Requests</Link>
+                  <Link to="/requests">View All Applications</Link>
                 </Button>
               </CardContent>
             </Card>

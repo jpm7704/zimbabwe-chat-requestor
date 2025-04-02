@@ -46,9 +46,8 @@ export const useRequestForm = (setMessages: React.Dispatch<React.SetStateAction<
       setRequestForm(prev => ({
         ...prev,
         type: typeParam,
-        isEnquiry: enquiryParam === 'true'
+        isEnquiry: enquiryParam === 'true' || isEnquiry
       }));
-      setIsEnquiry(enquiryParam === 'true');
     }
   }, [searchParams]);
 

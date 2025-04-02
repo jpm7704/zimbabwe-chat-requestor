@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useRequestForm } from "@/hooks/useRequestForm";
 import NewRequestForm from "@/components/request/NewRequestForm";
-import { FileText, Send, Stethoscope, GraduationCap, AlertCircle } from "lucide-react";
+import { FileText, Send, Stethoscope, GraduationCap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -18,6 +18,11 @@ const RequestSubmissionPage = () => {
   
   const requestFormProps = useRequestForm(setMessages);
   const { showNewRequest, setShowNewRequest } = requestFormProps;
+
+  // Explicitly set isEnquiry to false for this page
+  useEffect(() => {
+    requestFormProps.setIsEnquiry(false);
+  }, []);
 
   // Redirect non-regular users to their appropriate dashboard
   useEffect(() => {
@@ -37,7 +42,8 @@ const RequestSubmissionPage = () => {
         if (type) {
           requestFormProps.setRequestForm(prev => ({
             ...prev,
-            type
+            type,
+            isEnquiry: false
           }));
         }
       } else if (type) {
@@ -57,7 +63,7 @@ const RequestSubmissionPage = () => {
         <div>
           <h1 className="text-4xl font-serif font-bold mb-3 text-elegant">Support Request</h1>
           <p className="text-muted-foreground font-serif text-lg">
-            Empowering the vulnerable through sustainable development initiatives
+            Submit a formal request for assistance from BGF Zimbabwe
           </p>
         </div>
 
@@ -109,6 +115,7 @@ const RequestSubmissionPage = () => {
               handleRequestSubmit={requestFormProps.handleRequestSubmit}
               requestTypeInfo={requestFormProps.requestTypeInfo}
               restrictedTypes={["medical_assistance", "educational_support"]}
+              isEnquiry={false}
             />
           </div>
         )}
