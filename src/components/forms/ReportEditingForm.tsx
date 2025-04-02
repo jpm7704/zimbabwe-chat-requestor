@@ -48,36 +48,42 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export interface ReportEditingFormProps {
-  report: Report;
+  report?: Report;
+  initialData?: any; // Adding the initialData prop
   onSuccess?: () => void;
   onSubmit?: (data: FormValues) => void;
 }
 
-export function ReportEditingForm({ report, onSuccess, onSubmit }: ReportEditingFormProps) {
+export function ReportEditingForm({ report, initialData, onSuccess, onSubmit }: ReportEditingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  
+  // Use either report or initialData, with report taking precedence
+  const data = report || initialData || {};
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: report.title,
-      author: report.author,
-      category: report.category,
-      status: report.status as "Published" | "Draft" | "Under Review",
-      content: report.content || "",
+      title: data.title || "",
+      author: data.author || "",
+      category: data.category || "",
+      status: data.status as "Published" | "Draft" | "Under Review" || "Draft",
+      content: data.content || "",
     },
   });
 
-  // Update form values if report changes
+  // Update form values if report or initialData changes
   useEffect(() => {
-    form.reset({
-      title: report.title,
-      author: report.author,
-      category: report.category,
-      status: report.status as "Published" | "Draft" | "Under Review",
-      content: report.content || "",
-    });
-  }, [report, form]);
+    if (data) {
+      form.reset({
+        title: data.title || "",
+        author: data.author || "",
+        category: data.category || "",
+        status: data.status as "Published" | "Draft" | "Under Review" || "Draft",
+        content: data.content || "",
+      });
+    }
+  }, [data, form]);
 
   async function handleSubmit(values: FormValues) {
     setIsSubmitting(true);
