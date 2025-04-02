@@ -47,7 +47,9 @@ const RequestsPage = () => {
     <div className="container px-4 mx-auto max-w-5xl py-8">
       <RequestsHeader showNewRequestButton={isRegularUser()} />
       
-      {isRegularUser() && <UserStatsSummary statusCounts={statusCounts} />}
+      {/* Always show UserStatsSummary for all roles */}
+      <UserStatsSummary statusCounts={statusCounts} />
+      
       <RoleBasedWorkflow 
         userProfile={userProfile} 
         permissions={permissions} 
