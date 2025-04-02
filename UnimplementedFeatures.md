@@ -17,8 +17,8 @@ This document tracks the buttons and forms that appear in the UI but don't have 
 
 ## Buttons
 
-- [x] "Reschedule" button in field work cards (currently shows toast with "Feature coming soon")
-- [x] "View Report" button in reports list (navigates but detailed view not implemented)
+- [x] "Reschedule" button in field work cards
+- [x] "View Report" button in reports list
 - [x] "Download" button in reports list
 - [x] Advanced filter buttons in reports section
 - [x] "Export" functionality for analytics data

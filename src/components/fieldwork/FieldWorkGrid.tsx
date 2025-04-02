@@ -4,9 +4,10 @@ import { FieldWorkRequest } from "@/hooks/useFieldWork";
 
 interface FieldWorkGridProps {
   fieldWorkItems: FieldWorkRequest[];
+  onUpdate?: () => void;
 }
 
-export function FieldWorkGrid({ fieldWorkItems }: FieldWorkGridProps) {
+export function FieldWorkGrid({ fieldWorkItems, onUpdate }: FieldWorkGridProps) {
   if (fieldWorkItems.length === 0) {
     return (
       <div className="text-center py-12">
@@ -21,7 +22,7 @@ export function FieldWorkGrid({ fieldWorkItems }: FieldWorkGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {fieldWorkItems.map((item) => (
-        <FieldWorkCard key={item.id} fieldWork={item} />
+        <FieldWorkCard key={item.id} fieldWork={item} onUpdate={onUpdate} />
       ))}
     </div>
   );
