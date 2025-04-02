@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -72,7 +71,6 @@ const SystemSettings = () => {
             </CardHeader>
             <CardContent>
               <SystemSettingsForm 
-                type="general" 
                 onSubmit={handleSaveSettings} 
                 initialData={{
                   appName: "BGF Application",
@@ -94,7 +92,6 @@ const SystemSettings = () => {
             </CardHeader>
             <CardContent>
               <SystemSettingsForm 
-                type="email" 
                 onSubmit={handleSaveSettings} 
                 initialData={{
                   smtpServer: "smtp.example.com",
@@ -122,7 +119,6 @@ const SystemSettings = () => {
             </CardHeader>
             <CardContent>
               <SystemSettingsForm 
-                type="security" 
                 onSubmit={handleSaveSettings} 
                 initialData={{
                   sessionTimeout: "60",

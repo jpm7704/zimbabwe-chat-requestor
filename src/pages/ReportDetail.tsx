@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -133,21 +132,15 @@ The community faces significant challenges but demonstrates strong social cohesi
     return null;
   }
 
-  // Helper function to render Markdown content as HTML
   const renderMarkdown = (content: string) => {
-    // This is a very basic renderer - in a real app, use a proper Markdown library
-    // Convert headers
     let html = content
       .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mt-6 mb-3">$1</h1>')
       .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold mt-5 mb-2">$1</h2>')
       .replace(/^### (.*$)/gm, '<h3 class="text-lg font-bold mt-4 mb-2">$1</h3>')
-      // Convert lists
       .replace(/^\d+\. (.*)$/gm, '<li class="ml-6 list-decimal">$1</li>')
       .replace(/^- (.*)$/gm, '<li class="ml-6 list-disc">$1</li>')
-      // Convert paragraphs
       .replace(/^(?!<h|<li)(.+)$/gm, '<p class="mb-3">$1</p>');
     
-    // Wrap lists
     html = html.replace(/<li class="ml-6 list-decimal">.*?(?=<h|<p|<li class="ml-6 list-disc"|$)/gs, (match) => {
       return `<ol class="list-decimal mb-4">${match}</ol>`;
     });
@@ -198,7 +191,7 @@ The community faces significant challenges but demonstrates strong social cohesi
               <DialogHeader>
                 <DialogTitle>Edit Report</DialogTitle>
               </DialogHeader>
-              <ReportEditingForm onSuccess={handleEditReport} initialData={report} />
+              <ReportEditingForm onSubmit={handleEditReport} initialData={report} />
             </DialogContent>
           </Dialog>
           <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2">

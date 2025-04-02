@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -79,7 +78,7 @@ const UserManagement = () => {
             <DialogHeader>
               <DialogTitle>Add New User</DialogTitle>
             </DialogHeader>
-            <UserManagementForm onSuccess={handleAddUser} />
+            <UserManagementForm onSubmit={handleAddUser} />
           </DialogContent>
         </Dialog>
       </div>

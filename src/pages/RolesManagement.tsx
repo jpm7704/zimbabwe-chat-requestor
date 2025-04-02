@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, PlusCircle, Lock, Shield, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { RoleManagementForm } from "@/components/forms/RoleManagementForm";
+import RoleManagementForm from "@/components/forms/RoleManagementForm";
 
 // Mock role data - in a real implementation, this would come from Supabase
 const mockRoles = [

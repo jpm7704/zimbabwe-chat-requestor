@@ -71,7 +71,8 @@ export function FieldVisitSchedulingForm() {
         status: values.status,
         priority: values.priority as 'low' | 'medium' | 'high',
         title: values.purpose, // Use purpose as title
-        requestId: values.requestId ? values.requestId : null
+        requestId: values.requestId ? values.requestId : null,
+        reportId: null // Add the missing reportId property
       });
       
       form.reset({
