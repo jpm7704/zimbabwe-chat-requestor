@@ -24,7 +24,11 @@ const permissions = [
   { id: "6", name: "View Analytics", description: "Can view analytics data" },
 ];
 
-const RoleManagementForm = () => {
+interface RoleManagementFormProps {
+  onSuccess?: (roleData: any) => void;
+}
+
+const RoleManagementForm = ({ onSuccess }: RoleManagementFormProps) => {
   const [selectedRole, setSelectedRole] = useState(roles[0]);
   const [rolePermissions, setRolePermissions] = useState<Record<string, string[]>>({
     "1": ["1", "2", "3", "4", "5", "6"], // Admin has all permissions
@@ -53,10 +57,19 @@ const RoleManagementForm = () => {
     // Simulate API call
     setTimeout(() => {
       setIsSaving(false);
-      toast({
-        title: "Feature coming soon",
-        description: "Role permission management will be available in a future update."
-      });
+      
+      if (onSuccess) {
+        onSuccess({
+          roleId: selectedRole.id,
+          roleName: selectedRole.name,
+          permissions: rolePermissions[selectedRole.id]
+        });
+      } else {
+        toast({
+          title: "Feature coming soon",
+          description: "Role permission management will be available in a future update."
+        });
+      }
     }, 1000);
   };
 

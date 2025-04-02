@@ -39,30 +39,39 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function SystemSettingsForm() {
+export interface SystemSettingsFormProps {
+  initialData?: Partial<FormValues> & Record<string, any>;
+  onSubmit?: (data: FormValues & Record<string, any>) => void;
+}
+
+export function SystemSettingsForm({ initialData = {}, onSubmit }: SystemSettingsFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      organizationName: "BGF Foundation",
-      primaryRegion: "Central",
-      enableNotifications: true,
-      enableFieldVisits: true,
-      enableReports: true,
-      enableAnalytics: true,
-      maintenanceMode: false,
-      requireTwoFactorAuth: false,
-      sessionTimeout: "60",
+      organizationName: initialData.organizationName || "BGF Foundation",
+      primaryRegion: initialData.primaryRegion || "Central",
+      enableNotifications: initialData.enableNotifications !== undefined ? initialData.enableNotifications : true,
+      enableFieldVisits: initialData.enableFieldVisits !== undefined ? initialData.enableFieldVisits : true,
+      enableReports: initialData.enableReports !== undefined ? initialData.enableReports : true,
+      enableAnalytics: initialData.enableAnalytics !== undefined ? initialData.enableAnalytics : true,
+      maintenanceMode: initialData.maintenanceMode !== undefined ? initialData.maintenanceMode : false,
+      requireTwoFactorAuth: initialData.requireTwoFactorAuth !== undefined ? initialData.requireTwoFactorAuth : false,
+      sessionTimeout: initialData.sessionTimeout || "60",
     },
   });
 
-  async function onSubmit(values: FormValues) {
+  async function handleSubmit(values: FormValues) {
     setIsSubmitting(true);
     try {
       // In a real app, this would update the system settings in the database
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      
+      if (onSubmit) {
+        onSubmit({ ...values, ...initialData });
+      }
       
       toast({
         title: "Settings updated",
@@ -81,7 +90,7 @@ export function SystemSettingsForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 gap-6">
           <div className="border rounded-lg p-4">
             <h3 className="text-lg font-medium mb-4">General Settings</h3>

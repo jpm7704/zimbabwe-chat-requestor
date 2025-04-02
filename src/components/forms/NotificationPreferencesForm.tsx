@@ -1,209 +1,183 @@
 
 import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Bell, Inbox, Globe } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-const formSchema = z.object({
-  emailNotifications: z.boolean().default(true),
-  requestUpdates: z.boolean().default(true),
-  fieldVisitReminders: z.boolean().default(true),
-  reportPublications: z.boolean().default(true),
-  systemAnnouncements: z.boolean().default(true),
-  dailySummary: z.boolean().default(false),
-});
+interface NotificationPreference {
+  requestUpdates: boolean;
+  newMessages: boolean;
+  systemAnnouncements: boolean;
+  [key: string]: boolean;
+}
 
-type FormValues = z.infer<typeof formSchema>;
+interface NotificationPreferencesData {
+  email: NotificationPreference;
+  inApp: NotificationPreference;
+  [key: string]: NotificationPreference;
+}
 
-export function NotificationPreferencesForm() {
+interface NotificationPreferencesFormProps {
+  initialData?: NotificationPreferencesData;
+  onSubmit?: (data: NotificationPreferencesData) => void;
+}
+
+export const NotificationPreferencesForm = ({ initialData, onSubmit }: NotificationPreferencesFormProps) => {
+  const [preferences, setPreferences] = useState<NotificationPreferencesData>(
+    initialData || {
+      email: {
+        requestUpdates: true,
+        newMessages: true,
+        systemAnnouncements: false
+      },
+      inApp: {
+        requestUpdates: true,
+        newMessages: true,
+        systemAnnouncements: true
+      }
+    }
+  );
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      emailNotifications: true,
-      requestUpdates: true,
-      fieldVisitReminders: true,
-      reportPublications: true,
-      systemAnnouncements: true,
-      dailySummary: false,
-    },
-  });
-
-  async function onSubmit(values: FormValues) {
+  const handleToggle = (channel: string, setting: string, checked: boolean) => {
+    setPreferences(prev => ({
+      ...prev,
+      [channel]: {
+        ...prev[channel],
+        [setting]: checked
+      }
+    }));
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     setIsSubmitting(true);
-    try {
-      // In a real app, this would update the user's notification preferences in the database
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+    
+    // Simulate API request
+    setTimeout(() => {
+      if (onSubmit) {
+        onSubmit(preferences);
+      }
       
       toast({
         title: "Preferences updated",
-        description: "Your notification preferences have been saved.",
+        description: "Your notification preferences have been saved"
       });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update preferences. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
+      
       setIsSubmitting(false);
-    }
-  }
-
+    }, 1000);
+  };
+  
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="emailNotifications"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Email Notifications</FormLabel>
-                <FormDescription>
-                  Receive notifications via email
-                </FormDescription>
-              </div>
-              <FormControl>
+    <form onSubmit={handleSubmit}>
+      <div className="space-y-8">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Bell className="h-5 w-5" />
+              <h3 className="text-lg font-medium">Email Notifications</h3>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <Label htmlFor="email-request-updates" className="font-medium">Request Updates</Label>
+                  <p className="text-sm text-muted-foreground">Notify when your request status changes</p>
+                </div>
                 <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+                  id="email-request-updates"
+                  checked={preferences.email.requestUpdates}
+                  onCheckedChange={(checked) => handleToggle("email", "requestUpdates", checked)}
                 />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="requestUpdates"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Request Updates</FormLabel>
-                <FormDescription>
-                  Get notified when there are updates to your requests
-                </FormDescription>
               </div>
-              <FormControl>
+              
+              <div className="flex justify-between items-center">
+                <div>
+                  <Label htmlFor="email-new-messages" className="font-medium">New Messages</Label>
+                  <p className="text-sm text-muted-foreground">Email you when you receive new messages</p>
+                </div>
                 <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+                  id="email-new-messages"
+                  checked={preferences.email.newMessages}
+                  onCheckedChange={(checked) => handleToggle("email", "newMessages", checked)}
                 />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="fieldVisitReminders"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Field Visit Reminders</FormLabel>
-                <FormDescription>
-                  Receive reminders about upcoming field visits
-                </FormDescription>
               </div>
-              <FormControl>
+              
+              <div className="flex justify-between items-center">
+                <div>
+                  <Label htmlFor="email-system-announcements" className="font-medium">System Announcements</Label>
+                  <p className="text-sm text-muted-foreground">Receive important system announcements</p>
+                </div>
                 <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+                  id="email-system-announcements"
+                  checked={preferences.email.systemAnnouncements}
+                  onCheckedChange={(checked) => handleToggle("email", "systemAnnouncements", checked)}
                 />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="reportPublications"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Report Publications</FormLabel>
-                <FormDescription>
-                  Get notified when new reports are published
-                </FormDescription>
               </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+            </div>
+          </CardContent>
+        </Card>
         
-        <FormField
-          control={form.control}
-          name="systemAnnouncements"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">System Announcements</FormLabel>
-                <FormDescription>
-                  Receive important system announcements and updates
-                </FormDescription>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Inbox className="h-5 w-5" />
+              <h3 className="text-lg font-medium">In-App Notifications</h3>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <Label htmlFor="app-request-updates" className="font-medium">Request Updates</Label>
+                  <p className="text-sm text-muted-foreground">Show notifications for request status changes</p>
+                </div>
+                <Switch
+                  id="app-request-updates"
+                  checked={preferences.inApp.requestUpdates}
+                  onCheckedChange={(checked) => handleToggle("inApp", "requestUpdates", checked)}
+                />
               </div>
-              <FormControl>
+              
+              <div className="flex justify-between items-center">
+                <div>
+                  <Label htmlFor="app-new-messages" className="font-medium">New Messages</Label>
+                  <p className="text-sm text-muted-foreground">Show notifications for new messages</p>
+                </div>
                 <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+                  id="app-new-messages"
+                  checked={preferences.inApp.newMessages}
+                  onCheckedChange={(checked) => handleToggle("inApp", "newMessages", checked)}
                 />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="dailySummary"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Daily Summary</FormLabel>
-                <FormDescription>
-                  Receive a daily summary of all activities
-                </FormDescription>
               </div>
-              <FormControl>
+              
+              <div className="flex justify-between items-center">
+                <div>
+                  <Label htmlFor="app-system-announcements" className="font-medium">System Announcements</Label>
+                  <p className="text-sm text-muted-foreground">Show notifications for system announcements</p>
+                </div>
                 <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+                  id="app-system-announcements"
+                  checked={preferences.inApp.systemAnnouncements}
+                  onCheckedChange={(checked) => handleToggle("inApp", "systemAnnouncements", checked)}
                 />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isSubmitting ? "Saving..." : "Save Preferences"}
-        </Button>
-      </form>
-    </Form>
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save Preferences"}
+          </Button>
+        </div>
+      </div>
+    </form>
   );
-}
+};
 
 export default NotificationPreferencesForm;

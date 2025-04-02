@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formSchema = z.object({
@@ -33,31 +32,51 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function UserProfileForm() {
+export interface UserProfileFormProps {
+  initialData?: any;
+  onSubmit?: (data: FormValues) => void;
+}
+
+export function UserProfileForm({ initialData = {}, onSubmit }: UserProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { userProfile } = useAuth();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: userProfile?.first_name || "",
-      lastName: userProfile?.last_name || "",
-      email: userProfile?.email || "",
-      region: userProfile?.region || "",
+      firstName: initialData?.first_name || "",
+      lastName: initialData?.last_name || "",
+      email: initialData?.email || "",
+      region: initialData?.region || "",
     },
   });
 
-  async function onSubmit(values: FormValues) {
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      form.reset({
+        firstName: initialData?.first_name || "",
+        lastName: initialData?.last_name || "",
+        email: initialData?.email || "",
+        region: initialData?.region || "",
+      });
+    }
+  }, [initialData, form]);
+
+  async function handleSubmit(values: FormValues) {
     setIsSubmitting(true);
     try {
       // In a real app, this would update the user's profile in the database
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
       
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
-      });
+      if (onSubmit) {
+        onSubmit(values);
+      } else {
+        toast({
+          title: "Profile updated",
+          description: "Your profile has been successfully updated.",
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -79,7 +98,7 @@ export function UserProfileForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}

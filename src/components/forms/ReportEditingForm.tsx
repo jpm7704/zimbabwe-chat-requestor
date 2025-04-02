@@ -47,12 +47,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface ReportEditingFormProps {
+export interface ReportEditingFormProps {
   report: Report;
   onSuccess?: () => void;
+  onSubmit?: (data: FormValues) => void;
 }
 
-export function ReportEditingForm({ report, onSuccess }: ReportEditingFormProps) {
+export function ReportEditingForm({ report, onSuccess, onSubmit }: ReportEditingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
@@ -78,7 +79,7 @@ export function ReportEditingForm({ report, onSuccess }: ReportEditingFormProps)
     });
   }, [report, form]);
 
-  async function onSubmit(values: FormValues) {
+  async function handleSubmit(values: FormValues) {
     setIsSubmitting(true);
     try {
       // In a real app, this would update the report in the database
@@ -88,6 +89,10 @@ export function ReportEditingForm({ report, onSuccess }: ReportEditingFormProps)
         title: "Report updated",
         description: "Your report has been successfully updated.",
       });
+      
+      if (onSubmit) {
+        onSubmit(values);
+      }
       
       if (onSuccess) {
         onSuccess();
@@ -106,7 +111,7 @@ export function ReportEditingForm({ report, onSuccess }: ReportEditingFormProps)
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="title"

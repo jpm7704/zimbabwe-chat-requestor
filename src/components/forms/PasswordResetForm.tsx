@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -14,31 +15,38 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
-const formSchema = z.object({
-  currentPassword: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, {
+    message: "Current password is required.",
   }),
   newPassword: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
+    message: "New password must be at least 8 characters.",
   }),
   confirmPassword: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
+    message: "Password confirmation must be at least 8 characters.",
   }),
 }).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: "Passwords do not match.",
   path: ["confirmPassword"],
 });
 
-type FormValues = z.infer<typeof formSchema>;
+export type PasswordFormValues = z.infer<typeof passwordSchema>;
 
-export function PasswordResetForm() {
+interface PasswordResetFormProps {
+  onSubmit?: (data: PasswordFormValues) => void;
+}
+
+export function PasswordResetForm({ onSubmit }: PasswordResetFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
     defaultValues: {
       currentPassword: "",
       newPassword: "",
@@ -46,18 +54,27 @@ export function PasswordResetForm() {
     },
   });
 
-  async function onSubmit(values: FormValues) {
+  async function handleSubmit(values: PasswordFormValues) {
     setIsSubmitting(true);
     try {
-      // In a real app, this would call an API to update the user's password
+      // In a real app, this would update the password in the database
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
       
-      toast({
-        title: "Password updated",
-        description: "Your password has been successfully updated.",
-      });
+      if (onSubmit) {
+        onSubmit(values);
+      } else {
+        toast({
+          title: "Password changed",
+          description: "Your password has been successfully updated.",
+        });
+      }
       
-      form.reset();
+      // Reset form
+      form.reset({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -71,16 +88,33 @@ export function PasswordResetForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="currentPassword"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Current Password</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter your current password" type="password" {...field} />
-              </FormControl>
+              <div className="relative">
+                <FormControl>
+                  <Input 
+                    placeholder="Enter your current password" 
+                    type={showCurrentPassword ? "text" : "password"}
+                    {...field}
+                  />
+                </FormControl>
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -92,9 +126,29 @@ export function PasswordResetForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>New Password</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter your new password" type="password" {...field} />
-              </FormControl>
+              <div className="relative">
+                <FormControl>
+                  <Input 
+                    placeholder="Enter your new password" 
+                    type={showNewPassword ? "text" : "password"}
+                    {...field}
+                  />
+                </FormControl>
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                >
+                  {showNewPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+              <FormDescription>
+                Password must be at least 8 characters long.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -105,10 +159,27 @@ export function PasswordResetForm() {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
-              <FormControl>
-                <Input placeholder="Confirm your new password" type="password" {...field} />
-              </FormControl>
+              <FormLabel>Confirm New Password</FormLabel>
+              <div className="relative">
+                <FormControl>
+                  <Input 
+                    placeholder="Confirm your new password" 
+                    type={showConfirmPassword ? "text" : "password"}
+                    {...field}
+                  />
+                </FormControl>
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -119,7 +190,7 @@ export function PasswordResetForm() {
           disabled={isSubmitting}
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isSubmitting ? "Updating..." : "Update Password"}
+          {isSubmitting ? "Changing Password..." : "Change Password"}
         </Button>
       </form>
     </Form>
