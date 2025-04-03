@@ -35,10 +35,10 @@ export function useUserProfile(userId: string | null) {
         
         // Use a try/catch block to handle potential errors
         try {
-          // Use maybeSingle instead of single to avoid potential errors
+          // Query the user_profiles table but with column name checks
           const { data, error } = await supabase
             .from('user_profiles')
-            .select('id, first_name, last_name, email, role, avatar_url, region, staff_number')
+            .select('id, name, email, role, avatar_url, region, staff_number')
             .eq('id', userId)
             .maybeSingle();
           
@@ -48,10 +48,11 @@ export function useUserProfile(userId: string | null) {
           
           if (data) {
             // Map the database fields to our UserProfile type
+            // Using the name field from database as first_name for compatibility
             setUserProfile({
               id: data.id,
-              first_name: data.first_name || '',
-              last_name: data.last_name || '',
+              first_name: data.name || '',  // Use 'name' field as 'first_name'
+              last_name: '',  // Initialize as empty since it's not in the database yet
               email: data.email,
               role: data.role,
               avatar_url: data.avatar_url,
@@ -114,10 +115,9 @@ export function useUserProfile(userId: string | null) {
       // If the database has RLS issues, just update the local state
       // and show success message for better user experience
       try {
-        // Format the data for the database
+        // Format the data for the database - mapping first_name to name
         const formattedData = {
-          first_name: updatedProfile.first_name || userProfile.first_name,
-          last_name: updatedProfile.last_name || userProfile.last_name,
+          name: updatedProfile.first_name || userProfile.first_name,  // Map first_name to name field in DB
           email: updatedProfile.email || userProfile.email,
           region: updatedProfile.region || userProfile.region,
           avatar_url: updatedProfile.avatar_url || userProfile.avatar_url
