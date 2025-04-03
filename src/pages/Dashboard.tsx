@@ -8,10 +8,12 @@ import { ClipboardCheck, HelpCircle, BarChart3, FileText, UserCheck, Plus } from
 
 const Dashboard = () => {
   const { userProfile } = useAuth();
-  const { isRegularUser, isFieldOfficer, isDirector } = useRoles(userProfile);
+  const { isRegularUser, isFieldOfficer, isProjectOfficer, isAssistantProjectOfficer, isDirector } = useRoles(userProfile);
 
   // Helper function to determine if user is staff
   const isStaff = () => isFieldOfficer() || 
+                         isProjectOfficer() ||
+                         isAssistantProjectOfficer() ||
                          userProfile?.role?.toLowerCase() === 'programme_manager' || 
                          userProfile?.role?.toLowerCase() === 'head_of_programs';
   
@@ -125,6 +127,25 @@ const Dashboard = () => {
                 </Button>
               </CardContent>
             </Card>
+            
+            {(isProjectOfficer() || isAssistantProjectOfficer()) && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                    Reports
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    View and manage verification reports.
+                  </p>
+                  <Button asChild size="sm">
+                    <Link to="/reports">View Reports</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </>
         )}
         
