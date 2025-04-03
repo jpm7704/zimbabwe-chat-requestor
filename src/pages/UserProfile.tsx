@@ -13,15 +13,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Edit, Key, Bell } from "lucide-react";
 
 const UserProfile = () => {
-  const { userProfile } = useAuth();
+  const { userProfile, updateUserProfile, formatRole } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
   const { toast } = useToast();
   
-  const handleProfileUpdate = (data: any) => {
-    toast({
-      title: "Profile updated",
-      description: "Your profile has been successfully updated"
+  const handleProfileUpdate = async (data: any) => {
+    const result = await updateUserProfile({
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+      region: data.region
     });
+    
+    return result;
   };
   
   const handlePasswordChange = (data: any) => {
@@ -29,6 +33,8 @@ const UserProfile = () => {
       title: "Password changed",
       description: "Your password has been successfully updated"
     });
+    
+    return { success: true };
   };
   
   const handleNotificationPreferencesUpdate = (data: any) => {
@@ -36,6 +42,8 @@ const UserProfile = () => {
       title: "Notification preferences updated",
       description: "Your notification preferences have been updated"
     });
+    
+    return { success: true };
   };
   
   // Get user initials for avatar fallback
@@ -57,6 +65,13 @@ const UserProfile = () => {
     return `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
   };
 
+  const handleAvatarChange = () => {
+    toast({
+      title: "Feature coming soon",
+      description: "Avatar upload functionality will be available soon"
+    });
+  };
+
   return (
     <div className="container px-4 mx-auto py-8 max-w-5xl">
       <div className="mb-8">
@@ -66,7 +81,7 @@ const UserProfile = () => {
               <AvatarImage src={userProfile?.avatar_url || ""} />
               <AvatarFallback className="text-xl">{getUserInitials()}</AvatarFallback>
             </Avatar>
-            <Button variant="outline" size="sm">Change Avatar</Button>
+            <Button variant="outline" size="sm" onClick={handleAvatarChange}>Change Avatar</Button>
           </div>
           
           <div className="flex-1 text-center md:text-left">
@@ -74,7 +89,7 @@ const UserProfile = () => {
             <p className="text-muted-foreground">{userProfile?.email}</p>
             <div className="flex flex-wrap gap-2 mt-2 justify-center md:justify-start">
               <Badge variant="secondary" className="capitalize">
-                {userProfile?.role?.replace("_", " ") || "User"}
+                {formatRole(userProfile?.role || '') || "User"}
               </Badge>
               {userProfile?.region && (
                 <Badge variant="outline">

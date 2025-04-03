@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UserProfile } from "@/hooks/useUserProfile";
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -33,11 +34,11 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export interface UserProfileFormProps {
-  initialData?: any;
-  onSubmit?: (data: FormValues) => void;
+  initialData?: UserProfile;
+  onSubmit?: (data: FormValues) => Promise<{ error?: any, success?: boolean }>;
 }
 
-export function UserProfileForm({ initialData = {}, onSubmit }: UserProfileFormProps) {
+export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
@@ -66,11 +67,21 @@ export function UserProfileForm({ initialData = {}, onSubmit }: UserProfileFormP
   async function handleSubmit(values: FormValues) {
     setIsSubmitting(true);
     try {
-      // In a real app, this would update the user's profile in the database
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
       if (onSubmit) {
-        onSubmit(values);
+        const result = await onSubmit(values);
+        
+        if (result.error) {
+          toast({
+            title: "Error",
+            description: "Failed to update profile. Please try again.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Profile updated",
+            description: "Your profile has been successfully updated.",
+          });
+        }
       } else {
         toast({
           title: "Profile updated",

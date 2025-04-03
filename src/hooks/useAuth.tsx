@@ -6,7 +6,12 @@ export type { UserProfile };
 
 export function useAuth() {
   const { isAuthenticated, userId, loading, handleLogout } = useAuthState();
-  const { userProfile, profileLoading, formatRole } = useUserProfile(userId);
+  const { 
+    userProfile, 
+    profileLoading, 
+    formatRole, 
+    updateUserProfile 
+  } = useUserProfile(userId);
 
   // Combine loading states from both hooks
   const combinedLoading = loading || profileLoading;
@@ -16,6 +21,7 @@ export function useAuth() {
     userProfile,
     loading: combinedLoading,
     handleLogout,
-    formatRole
+    formatRole,
+    updateUserProfile
   };
 }

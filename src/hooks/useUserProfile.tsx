@@ -17,6 +17,7 @@ export function useUserProfile(userId: string | null) {
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<Error | null>(null);
 
+  // Fetch the user profile from the database
   useEffect(() => {
     const fetchProfile = async () => {
       if (!userId) {
@@ -87,6 +88,41 @@ export function useUserProfile(userId: string | null) {
     };
   }, [userId]);
 
+  // Update the user profile
+  const updateUserProfile = async (updatedProfile: Partial<UserProfile>) => {
+    if (!userProfile?.id) return { error: new Error("No user profile found") };
+    
+    try {
+      setProfileLoading(true);
+      
+      // Format the data for the database
+      const formattedData = {
+        name: `${updatedProfile.first_name || userProfile.first_name || ''} ${updatedProfile.last_name || userProfile.last_name || ''}`.trim(),
+        email: updatedProfile.email || userProfile.email,
+        region: updatedProfile.region || userProfile.region
+      };
+      
+      const { error } = await supabase
+        .from('user_profiles')
+        .update(formattedData)
+        .eq('id', userProfile.id);
+      
+      if (error) {
+        console.error("Error updating profile:", error);
+        return { error };
+      }
+      
+      // Update the local state
+      setUserProfile(prev => prev ? { ...prev, ...updatedProfile } : null);
+      return { success: true };
+    } catch (error: any) {
+      console.error("Failed to update profile:", error);
+      return { error };
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
   // Helper function to get a mock profile
   const getMockProfile = (userId: string | null): UserProfile => {
     // Check if we have a role in localStorage
@@ -115,6 +151,7 @@ export function useUserProfile(userId: string | null) {
     userProfile,
     profileLoading,
     profileError,
-    formatRole
+    formatRole,
+    updateUserProfile
   };
 }
