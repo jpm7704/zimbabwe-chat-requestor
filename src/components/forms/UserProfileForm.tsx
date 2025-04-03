@@ -29,6 +29,7 @@ const formSchema = z.object({
     message: "Please enter a valid email address.",
   }),
   region: z.string().optional(),
+  staffNumber: z.number().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -49,6 +50,7 @@ export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps)
       lastName: initialData?.last_name || "",
       email: initialData?.email || "",
       region: initialData?.region || "",
+      staffNumber: initialData?.staff_number || undefined,
     },
   });
 
@@ -60,6 +62,7 @@ export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps)
         lastName: initialData?.last_name || "",
         email: initialData?.email || "",
         region: initialData?.region || "",
+        staffNumber: initialData?.staff_number || undefined,
       });
     }
   }, [initialData, form]);
@@ -173,6 +176,26 @@ export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps)
                   ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="staffNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Staff Number</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Enter your staff number" 
+                  type="number" 
+                  {...field}
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

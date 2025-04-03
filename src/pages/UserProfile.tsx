@@ -12,7 +12,7 @@ import { Edit, Key, Bell } from "lucide-react";
 import { AvatarUpload } from "@/components/profile/AvatarUpload";
 
 const UserProfile = () => {
-  const { userProfile, updateUserProfile, formatRole, updateAvatar } = useAuth();
+  const { userProfile, updateUserProfile, formatRole, updateAvatar, userId } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
   const { toast } = useToast();
   
@@ -30,7 +30,8 @@ const UserProfile = () => {
       first_name: data.firstName,
       last_name: data.lastName,
       email: data.email,
-      region: data.region
+      region: data.region,
+      staff_number: data.staffNumber
     });
     
     return result;
@@ -70,32 +71,45 @@ const UserProfile = () => {
 
   const getFullName = () => {
     if (!userProfile) return "User Profile";
-    return `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim();
+    return `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || "User Profile";
   };
+
+  if (!userProfile || !userId) {
+    return (
+      <div className="container px-4 mx-auto py-8 max-w-5xl">
+        <div className="flex justify-center items-center h-64">
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container px-4 mx-auto py-8 max-w-5xl">
       <div className="mb-8">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-6">
-          {userProfile && (
-            <AvatarUpload 
-              avatarUrl={userProfile.avatar_url} 
-              userInitials={getUserInitials()}
-              userId={userProfile.id}
-              onAvatarUpdate={updateAvatar}
-            />
-          )}
+          <AvatarUpload 
+            avatarUrl={userProfile.avatar_url} 
+            userInitials={getUserInitials()}
+            userId={userId}
+            onAvatarUpdate={updateAvatar}
+          />
           
           <div className="flex-1 text-center md:text-left">
             <h1 className="text-3xl font-bold">{getFullName()}</h1>
-            <p className="text-muted-foreground">{userProfile?.email}</p>
+            <p className="text-muted-foreground">{userProfile.email}</p>
             <div className="flex flex-wrap gap-2 mt-2 justify-center md:justify-start">
               <Badge variant="secondary" className="capitalize">
-                {formatRole(userProfile?.role || '') || "User"}
+                {formatRole(userProfile.role || '') || "User"}
               </Badge>
-              {userProfile?.region && (
+              {userProfile.region && (
                 <Badge variant="outline">
                   {userProfile.region}
+                </Badge>
+              )}
+              {userProfile.staff_number && (
+                <Badge variant="outline">
+                  Staff #: {userProfile.staff_number}
                 </Badge>
               )}
             </div>
@@ -126,12 +140,10 @@ const UserProfile = () => {
               <CardDescription>Update your account information</CardDescription>
             </CardHeader>
             <CardContent>
-              {userProfile && (
-                <UserProfileForm 
-                  onSubmit={handleProfileUpdate} 
-                  initialData={userProfile} 
-                />
-              )}
+              <UserProfileForm 
+                onSubmit={handleProfileUpdate} 
+                initialData={userProfile} 
+              />
             </CardContent>
           </Card>
         </TabsContent>

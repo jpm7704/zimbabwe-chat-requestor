@@ -24,6 +24,7 @@ export function useAuth() {
     handleLogout,
     formatRole,
     updateUserProfile,
-    updateAvatar
+    updateAvatar,
+    userId
   };
 }

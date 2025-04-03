@@ -11,6 +11,7 @@ export type UserProfile = {
   role?: string;
   avatar_url?: string;
   region?: string;
+  staff_number?: number;
 };
 
 export function useUserProfile(userId: string | null) {
@@ -37,7 +38,7 @@ export function useUserProfile(userId: string | null) {
           // Use maybeSingle instead of single to avoid potential errors
           const { data, error } = await supabase
             .from('user_profiles')
-            .select('id, name, email, role, avatar_url, region')
+            .select('id, first_name, last_name, email, role, avatar_url, region, staff_number')
             .eq('id', userId)
             .maybeSingle();
           
@@ -49,12 +50,13 @@ export function useUserProfile(userId: string | null) {
             // Map the database fields to our UserProfile type
             setUserProfile({
               id: data.id,
-              first_name: data.name?.split(' ')[0] || '',
-              last_name: data.name?.split(' ').slice(1).join(' ') || '',
+              first_name: data.first_name || '',
+              last_name: data.last_name || '',
               email: data.email,
               role: data.role,
               avatar_url: data.avatar_url,
-              region: data.region
+              region: data.region,
+              staff_number: data.staff_number
             });
           } else {
             // No data found, use mock
@@ -114,7 +116,8 @@ export function useUserProfile(userId: string | null) {
       try {
         // Format the data for the database
         const formattedData = {
-          name: `${updatedProfile.first_name || userProfile.first_name || ''} ${updatedProfile.last_name || userProfile.last_name || ''}`.trim(),
+          first_name: updatedProfile.first_name || userProfile.first_name,
+          last_name: updatedProfile.last_name || userProfile.last_name,
           email: updatedProfile.email || userProfile.email,
           region: updatedProfile.region || userProfile.region,
           avatar_url: updatedProfile.avatar_url || userProfile.avatar_url
@@ -196,7 +199,8 @@ export function useUserProfile(userId: string | null) {
       email: "test@example.com",
       role: savedRole || "director", // Default role
       avatar_url: "",
-      region: "Central"
+      region: "Central",
+      staff_number: 12345
     };
   };
 
