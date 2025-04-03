@@ -66,22 +66,20 @@ export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps)
 
   async function handleSubmit(values: FormValues) {
     setIsSubmitting(true);
+    
     try {
       if (onSubmit) {
         const result = await onSubmit(values);
         
         if (result.error) {
+          console.error("Form submission error:", result.error);
           toast({
             title: "Error",
             description: "Failed to update profile. Please try again.",
             variant: "destructive",
           });
-        } else {
-          toast({
-            title: "Profile updated",
-            description: "Your profile has been successfully updated.",
-          });
         }
+        // Success toast is now handled in useUserProfile for better coordination
       } else {
         toast({
           title: "Profile updated",
@@ -161,7 +159,7 @@ export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps)
           render={({ field }) => (
             <FormItem>
               <FormLabel>Region</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || ""}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select your region" />
