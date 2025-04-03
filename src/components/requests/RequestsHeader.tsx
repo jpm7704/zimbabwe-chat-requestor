@@ -1,15 +1,13 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, ClipboardCheck } from "lucide-react";
+import { ClipboardCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
 
 const RequestsHeader = () => {
   const { userProfile, formatRole } = useAuth();
-  const { isRegularUser, isFieldOfficer, isProjectOfficer, isAssistantProjectOfficer } = useRoles(userProfile);
+  const { isFieldOfficer, isProjectOfficer, isAssistantProjectOfficer } = useRoles(userProfile);
   
-  // Determine the role-specific title and description
   const getRoleSpecificHeader = () => {
     if (!userProfile) return { title: "My Requests", description: "Track and manage your BGF Zimbabwe support requests" };
     
@@ -41,7 +39,6 @@ const RequestsHeader = () => {
   
   const { title, description } = getRoleSpecificHeader();
   
-  // Helper function to check if the user has a management role
   const hasManagementRole = () => {
     if (!userProfile || !userProfile.role) return false;
     
@@ -55,7 +52,6 @@ const RequestsHeader = () => {
     return managementRoles.includes(userProfile.role.toLowerCase());
   };
   
-  // Helper function to check if user is field staff
   const isFieldStaff = () => {
     return isFieldOfficer() || isProjectOfficer() || isAssistantProjectOfficer();
   };
@@ -76,16 +72,6 @@ const RequestsHeader = () => {
           )}
         </p>
       </div>
-      
-      {/* Restore New Request button for regular users */}
-      {isRegularUser() && (
-        <Button asChild>
-          <Link to="/submit?action=new" className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            New Request
-          </Link>
-        </Button>
-      )}
       
       {isFieldStaff() && (
         <Button asChild variant="outline">
