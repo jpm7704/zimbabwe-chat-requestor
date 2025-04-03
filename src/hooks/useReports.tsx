@@ -8,17 +8,16 @@ import { useToast } from '@/hooks/use-toast';
 export function useReports(filters?: ReportFilters) {
   const [reports, setReports] = useState<Report[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
   const { userProfile } = useAuth();
   const { toast } = useToast();
 
   const loadReports = async () => {
     try {
       setIsLoading(true);
-      setError(null);
-
+      
       if (!userProfile) {
         setReports([]);
+        setIsLoading(false);
         return;
       }
       
@@ -61,11 +60,11 @@ export function useReports(filters?: ReportFilters) {
       
       const { data, error: fetchError } = await query;
       
+      // Silently handle errors - just show empty state instead
       if (fetchError) {
-        throw fetchError;
-      }
-
-      if (data) {
+        console.log("Error fetching reports:", fetchError);
+        setReports([]);
+      } else if (data) {
         const transformedReports: Report[] = data.map(report => ({
           id: report.id,
           title: report.title,
@@ -82,12 +81,8 @@ export function useReports(filters?: ReportFilters) {
       }
     } catch (err) {
       console.error("Error loading reports:", err);
-      setError(err instanceof Error ? err : new Error('An unknown error occurred'));
-      toast({
-        title: "Error loading reports",
-        description: err instanceof Error ? err.message : "Failed to load reports",
-        variant: "destructive"
-      });
+      // Silently handle errors - just show empty state
+      setReports([]);
     } finally {
       setIsLoading(false);
     }
@@ -183,7 +178,6 @@ export function useReports(filters?: ReportFilters) {
   return {
     reports,
     isLoading,
-    error,
     refetchReports: loadReports,
     createReport,
     updateReport

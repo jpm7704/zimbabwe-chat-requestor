@@ -17,7 +17,7 @@ const Reports = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   
-  const { reports, isLoading, error, refetchReports } = useReports({
+  const { reports, isLoading, refetchReports } = useReports({
     status: activeTab !== "all" ? activeTab : undefined,
     searchTerm: searchTerm,
     category: categoryFilter !== "all" ? categoryFilter : undefined
@@ -91,7 +91,6 @@ const Reports = () => {
           <ReportsList 
             reports={reports} 
             isLoading={isLoading} 
-            error={error}
             onRefresh={refetchReports}
           />
         </TabsContent>

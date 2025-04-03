@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Report } from "@/services/reportService";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Printer, Share, Filter } from "lucide-react";
+import { FileText, Download, Printer, Share, Filter, FileBarChart } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
@@ -12,11 +12,10 @@ import { Link } from "react-router-dom";
 interface ReportsListProps {
   reports: Report[];
   isLoading: boolean;
-  error: Error | null;
   onRefresh: () => void;
 }
 
-const ReportsList: React.FC<ReportsListProps> = ({ reports, isLoading, error, onRefresh }) => {
+const ReportsList: React.FC<ReportsListProps> = ({ reports, isLoading, onRefresh }) => {
   const { toast } = useToast();
 
   const handleDownload = (reportId: string) => {
@@ -55,23 +54,26 @@ const ReportsList: React.FC<ReportsListProps> = ({ reports, isLoading, error, on
     );
   }
 
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <h3 className="text-lg font-medium text-red-600 mb-2">Error loading reports</h3>
-        <p className="text-muted-foreground mb-4">{error.message}</p>
-        <Button variant="outline" onClick={onRefresh}>Retry</Button>
-      </div>
-    );
-  }
-
   if (reports.length === 0) {
     return (
-      <div className="text-center py-12 border rounded-lg">
+      <div className="text-center py-16 border rounded-lg bg-muted/20">
+        <FileBarChart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-lg font-medium mb-2">No reports found</h3>
-        <p className="text-muted-foreground mb-6">
-          No reports match your current filters or search criteria.
+        <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+          There are no reports matching your current filters. Try changing your search terms or filters, or create a new report.
         </p>
+        <Button variant="outline" onClick={onRefresh} className="mr-2">Refresh</Button>
+        <Button asChild>
+          <Link to="#" onClick={(e) => {
+            e.preventDefault();
+            document.querySelector('[aria-label="New Report"]')?.dispatchEvent(
+              new MouseEvent('click', { bubbles: true })
+            );
+          }}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Create New Report
+          </Link>
+        </Button>
       </div>
     );
   }
