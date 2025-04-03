@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Report } from "@/services/reportService";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Printer, Share, Filter, FileBarChart } from "lucide-react";
+import { FileText, Download, Printer, Share, Filter, FileBarChart, PlusCircle } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
