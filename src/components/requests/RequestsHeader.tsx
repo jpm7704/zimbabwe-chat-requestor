@@ -77,6 +77,16 @@ const RequestsHeader = () => {
         </p>
       </div>
       
+      {/* Restore New Request button for regular users */}
+      {isRegularUser() && (
+        <Button asChild>
+          <Link to="/submit?action=new" className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            New Request
+          </Link>
+        </Button>
+      )}
+      
       {isFieldStaff() && (
         <Button asChild variant="outline">
           <Link to="/field-work" className="flex items-center gap-2">
@@ -90,4 +100,3 @@ const RequestsHeader = () => {
 };
 
 export default RequestsHeader;
-
