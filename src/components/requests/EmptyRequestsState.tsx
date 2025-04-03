@@ -3,6 +3,7 @@ import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useRoles } from "@/hooks/useRoles";
 
 interface EmptyRequestsStateProps {
   searchTerm?: string;
@@ -10,25 +11,8 @@ interface EmptyRequestsStateProps {
 
 const EmptyRequestsState = ({ searchTerm }: EmptyRequestsStateProps) => {
   const { userProfile } = useAuth();
+  const { isRegularUser } = useRoles(userProfile);
   
-  // Determine if this is a management role
-  const isManagementRole = () => {
-    if (!userProfile || !userProfile.role) return false;
-    
-    const managementRoles = [
-      'head_of_department', 
-      'head_of_programs', 
-      'hop', 
-      'programme_manager',
-      'director',
-      'management',
-      'ceo',
-      'patron'
-    ];
-    
-    return managementRoles.includes(userProfile.role.toLowerCase());
-  };
-
   return (
     <div className="text-center py-12">
       <div className="mx-auto w-24 h-24 rounded-full bg-muted/50 flex items-center justify-center mb-4">
@@ -40,18 +24,18 @@ const EmptyRequestsState = ({ searchTerm }: EmptyRequestsStateProps) => {
         <p className="text-muted-foreground mb-6">
           Try a different search term
         </p>
-      ) : isManagementRole() ? (
+      ) : isRegularUser() ? (
         <p className="text-muted-foreground mb-6">
-          There are no requests to review at this time
+          You haven't submitted any requests yet
         </p>
       ) : (
         <p className="text-muted-foreground mb-6">
-          You haven't submitted any requests yet
+          There are no requests to review at this time
         </p>
       )}
       
       {/* Only show Create New Request button for regular users */}
-      {!isManagementRole() && (
+      {isRegularUser() && (
         <Button asChild>
           <Link to="/chat">Create New Request</Link>
         </Button>
