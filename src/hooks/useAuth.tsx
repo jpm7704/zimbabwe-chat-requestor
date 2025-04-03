@@ -10,7 +10,8 @@ export function useAuth() {
     userProfile, 
     profileLoading, 
     formatRole, 
-    updateUserProfile 
+    updateUserProfile,
+    updateAvatar 
   } = useUserProfile(userId);
 
   // Combine loading states from both hooks
@@ -22,6 +23,7 @@ export function useAuth() {
     loading: combinedLoading,
     handleLogout,
     formatRole,
-    updateUserProfile
+    updateUserProfile,
+    updateAvatar
   };
 }

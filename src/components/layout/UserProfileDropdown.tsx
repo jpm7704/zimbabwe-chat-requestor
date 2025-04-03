@@ -5,6 +5,7 @@ import { Settings, User, LogOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth, UserProfile } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface UserProfileDropdownProps {
   userProfile: UserProfile | null;
@@ -31,11 +32,28 @@ const UserProfileDropdown = ({ userProfile }: UserProfileDropdownProps) => {
     }
   };
 
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (!userProfile || (!userProfile.first_name && !userProfile.last_name)) return "U";
+    
+    const firstInitial = userProfile.first_name ? userProfile.first_name[0] : '';
+    const lastInitial = userProfile.last_name ? userProfile.last_name[0] : '';
+    
+    if (firstInitial && lastInitial) {
+      return `${firstInitial}${lastInitial}`;
+    }
+    
+    return firstInitial || lastInitial || "U";
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2">
-          <User size={16} />
+          <Avatar className="h-6 w-6 mr-1">
+            <AvatarImage src={userProfile?.avatar_url || ""} />
+            <AvatarFallback className="text-xs">{getUserInitials()}</AvatarFallback>
+          </Avatar>
           <span className="max-w-[100px] truncate">
             {userProfile?.first_name || 'User'}
           </span>
@@ -54,6 +72,12 @@ const UserProfileDropdown = ({ userProfile }: UserProfileDropdownProps) => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/profile" className="cursor-pointer">
+            <User className="mr-2 h-4 w-4" />
+            <span>My Profile</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/settings" className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />

@@ -116,7 +116,8 @@ export function useUserProfile(userId: string | null) {
         const formattedData = {
           name: `${updatedProfile.first_name || userProfile.first_name || ''} ${updatedProfile.last_name || userProfile.last_name || ''}`.trim(),
           email: updatedProfile.email || userProfile.email,
-          region: updatedProfile.region || userProfile.region
+          region: updatedProfile.region || userProfile.region,
+          avatar_url: updatedProfile.avatar_url || userProfile.avatar_url
         };
         
         const { error } = await supabase
@@ -178,6 +179,11 @@ export function useUserProfile(userId: string | null) {
     }
   };
 
+  // Update avatar specifically
+  const updateAvatar = async (avatarUrl: string) => {
+    return await updateUserProfile({ avatar_url: avatarUrl });
+  };
+
   // Helper function to get a mock profile
   const getMockProfile = (userId: string | null): UserProfile => {
     // Check if we have a role in localStorage
@@ -207,6 +213,7 @@ export function useUserProfile(userId: string | null) {
     profileLoading,
     profileError,
     formatRole,
-    updateUserProfile
+    updateUserProfile,
+    updateAvatar
   };
 }
