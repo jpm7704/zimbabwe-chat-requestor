@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,13 +19,25 @@ interface RequestsSearchFilterProps {
   onFilter: (filter: string) => void;
   onSort: (sortField: string, direction: "asc" | "desc") => void;
   activeFilter: string;
+  searchTerm?: string;
 }
 
-const RequestsSearchFilter = ({ onSearch, onFilter, onSort, activeFilter }: RequestsSearchFilterProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
+const RequestsSearchFilter = ({ 
+  onSearch, 
+  onFilter, 
+  onSort, 
+  activeFilter,
+  searchTerm = ""
+}: RequestsSearchFilterProps) => {
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+  
+  // Update local search term when prop changes
+  useEffect(() => {
+    setLocalSearchTerm(searchTerm);
+  }, [searchTerm]);
 
   const handleSearch = () => {
-    onSearch(searchTerm);
+    onSearch(localSearchTerm);
   };
 
   return (
@@ -37,8 +49,8 @@ const RequestsSearchFilter = ({ onSearch, onFilter, onSort, activeFilter }: Requ
             type="text"
             placeholder="Search by ticket number or description"
             className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={localSearchTerm}
+            onChange={(e) => setLocalSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
         </div>

@@ -9,6 +9,7 @@ import RequestsList from "@/components/requests/RequestsList";
 import RoleBasedWorkflow from "@/components/requests/RoleBasedWorkflow";
 import UserStatsSummary from "@/components/requests/UserStatsSummary";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 const RequestsPage = () => {
   const { userProfile, isAuthenticated } = useAuth();
@@ -27,6 +28,11 @@ const RequestsPage = () => {
     refreshRequests
   } = useRequestsData();
   
+  // Refresh data when component mounts
+  useEffect(() => {
+    refreshRequests();
+  }, []);
+  
   // Get counts for different request statuses
   const getStatusCounts = () => {
     const counts = {
@@ -43,7 +49,6 @@ const RequestsPage = () => {
 
   return (
     <div className="container px-4 mx-auto max-w-5xl py-8">
-      {/* Removed the showNewRequestButton prop */}
       <RequestsHeader />
       
       {/* Always show UserStatsSummary for all roles */}
@@ -59,6 +64,7 @@ const RequestsPage = () => {
         onFilter={handleFilter}
         onSort={handleSort}
         activeFilter={activeFilter}
+        searchTerm={searchTerm}
       />
 
       <RequestsList 

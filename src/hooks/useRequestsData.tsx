@@ -109,7 +109,18 @@ export const useRequestsData = () => {
       }));
 
       setRequests(transformedRequests);
-      applyFiltersAndSort(transformedRequests, activeFilter, sortConfig.field, sortConfig.direction);
+      
+      // Apply initial filter based on current activeFilter
+      const initialFilteredRequests = applyFilter(transformedRequests, activeFilter);
+      
+      // Apply search if there's a search term
+      const searchedRequests = searchTerm 
+        ? applySearch(initialFilteredRequests, searchTerm)
+        : initialFilteredRequests;
+        
+      // Apply sort
+      applySort(searchedRequests, sortConfig.field, sortConfig.direction);
+      
     } catch (error: any) {
       console.error("Error fetching requests:", error);
       
@@ -128,36 +139,50 @@ export const useRequestsData = () => {
     }
   };
 
-  const applyFiltersAndSort = (
-    requestsToFilter: Request[],
-    filter: string,
+  const applyFilter = (requestsToFilter: Request[], filter: string) => {
+    if (filter === "all") {
+      return [...requestsToFilter];
+    }
+    
+    if (filter === "active") {
+      return requestsToFilter.filter(request => 
+        ["submitted", "assigned", "under_review", "manager_review"].includes(request.status)
+      );
+    }
+    
+    if (filter === "completed") {
+      return requestsToFilter.filter(request => 
+        ["completed", "forwarded"].includes(request.status)
+      );
+    }
+    
+    if (filter === "rejected") {
+      return requestsToFilter.filter(request => 
+        request.status === "rejected"
+      );
+    }
+    
+    // If filter is a specific status
+    return requestsToFilter.filter(request => request.status === filter as RequestStatus);
+  };
+  
+  const applySearch = (requestsToFilter: Request[], term: string) => {
+    if (!term.trim()) return requestsToFilter;
+    
+    const normalizedTerm = term.toLowerCase().trim();
+    return requestsToFilter.filter(request => 
+      request.ticketNumber.toLowerCase().includes(normalizedTerm) ||
+      request.title.toLowerCase().includes(normalizedTerm) ||
+      request.description.toLowerCase().includes(normalizedTerm)
+    );
+  };
+  
+  const applySort = (
+    requestsToSort: Request[],
     sortField: keyof Request,
     sortDirection: "asc" | "desc"
   ) => {
-    // First apply filters
-    let result = [...requestsToFilter];
-    
-    if (filter !== "all") {
-      if (filter === "active") {
-        result = result.filter(request => 
-          ["submitted", "assigned", "under_review", "manager_review"].includes(request.status)
-        );
-      } else if (filter === "completed") {
-        result = result.filter(request => 
-          ["completed", "forwarded"].includes(request.status)
-        );
-      } else if (filter === "rejected") {
-        result = result.filter(request => 
-          request.status === "rejected"
-        );
-      } else {
-        // If filter is a specific status
-        result = result.filter(request => request.status === filter as RequestStatus);
-      }
-    }
-    
-    // Then sort the filtered results
-    result.sort((a, b) => {
+    const sorted = [...requestsToSort].sort((a, b) => {
       if (a[sortField] < b[sortField]) {
         return sortDirection === "asc" ? -1 : 1;
       }
@@ -167,38 +192,28 @@ export const useRequestsData = () => {
       return 0;
     });
     
-    setFilteredRequests(result);
+    setFilteredRequests(sorted);
   };
 
-  const handleSearch = async (term: string) => {
-    setSearchTerm(term);
+  const applyFiltersAndSort = (
+    requestsToFilter: Request[],
+    filter: string,
+    sortField: keyof Request,
+    sortDirection: "asc" | "desc"
+  ) => {
+    // Apply filters
+    const filteredByStatus = applyFilter(requestsToFilter, filter);
     
-    if (!term.trim()) {
-      applyFiltersAndSort(requests, activeFilter, sortConfig.field, sortConfig.direction);
-      return;
-    }
+    // Apply search
+    const filteredBySearch = applySearch(filteredByStatus, searchTerm);
+    
+    // Apply sort
+    applySort(filteredBySearch, sortField, sortDirection);
+  };
 
-    try {
-      setLoading(true);
-      
-      // Filter existing requests based on search term
-      const results = requests.filter(request => 
-        request.ticketNumber.toLowerCase().includes(term.toLowerCase()) ||
-        request.title.toLowerCase().includes(term.toLowerCase()) ||
-        request.description.toLowerCase().includes(term.toLowerCase())
-      );
-      
-      applyFiltersAndSort(results, activeFilter, sortConfig.field, sortConfig.direction);
-    } catch (error) {
-      console.error("Error searching requests:", error);
-      toast({
-        title: "Error",
-        description: "Failed to search requests. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+    applyFiltersAndSort(requests, activeFilter, sortConfig.field, sortConfig.direction);
   };
 
   const handleFilter = (filter: string) => {
@@ -213,12 +228,19 @@ export const useRequestsData = () => {
     };
     setSortConfig(newSortConfig);
     applyFiltersAndSort(
-      filteredRequests, 
+      requests, 
       activeFilter, 
       newSortConfig.field, 
       newSortConfig.direction
     );
   };
+
+  // Re-apply filters when search term changes
+  useEffect(() => {
+    if (requests.length > 0) {
+      applyFiltersAndSort(requests, activeFilter, sortConfig.field, sortConfig.direction);
+    }
+  }, [searchTerm, activeFilter]);
 
   return {
     requests,

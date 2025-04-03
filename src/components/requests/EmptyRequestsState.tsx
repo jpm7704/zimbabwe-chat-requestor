@@ -33,13 +33,6 @@ const EmptyRequestsState = ({ searchTerm }: EmptyRequestsStateProps) => {
           There are no requests to review at this time
         </p>
       )}
-      
-      {/* Only show Create New Request button for regular users */}
-      {isRegularUser() && (
-        <Button asChild>
-          <Link to="/chat">Create New Request</Link>
-        </Button>
-      )}
     </div>
   );
 };
