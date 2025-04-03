@@ -18,6 +18,15 @@ const UserProfile = () => {
   const { toast } = useToast();
   
   const handleProfileUpdate = async (data: any) => {
+    if (!userProfile) {
+      toast({
+        title: "Error",
+        description: "Could not update profile: User profile not found",
+        variant: "destructive",
+      });
+      return { error: new Error("User profile not found") };
+    }
+    
     const result = await updateUserProfile({
       first_name: data.firstName,
       last_name: data.lastName,
@@ -124,10 +133,12 @@ const UserProfile = () => {
               <CardDescription>Update your account information</CardDescription>
             </CardHeader>
             <CardContent>
-              <UserProfileForm 
-                onSubmit={handleProfileUpdate} 
-                initialData={userProfile || {}} 
-              />
+              {userProfile && (
+                <UserProfileForm 
+                  onSubmit={handleProfileUpdate} 
+                  initialData={userProfile} 
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>

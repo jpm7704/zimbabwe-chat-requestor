@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export type UserProfile = {
   id: string;
@@ -16,6 +17,7 @@ export function useUserProfile(userId: string | null) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<Error | null>(null);
+  const { toast } = useToast();
 
   // Fetch the user profile from the database
   useEffect(() => {
@@ -30,11 +32,12 @@ export function useUserProfile(userId: string | null) {
         setProfileLoading(true);
         setProfileError(null);
         
+        // Use maybeSingle instead of single to avoid potential errors
         const { data, error } = await supabase
           .from('user_profiles')
           .select('id, name, email, role, avatar_url, region')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
         
         if (error) {
           console.error("Error fetching user profile:", error);
@@ -51,6 +54,9 @@ export function useUserProfile(userId: string | null) {
             avatar_url: data.avatar_url,
             region: data.region
           });
+        } else {
+          // No data found, use mock
+          setUserProfile(getMockProfile(userId));
         }
       } catch (error: any) {
         setProfileError(error);
@@ -109,14 +115,37 @@ export function useUserProfile(userId: string | null) {
       
       if (error) {
         console.error("Error updating profile:", error);
+        
+        // Show toast error message
+        toast({
+          title: "Error updating profile",
+          description: error.message || "Failed to update profile. Please try again.",
+          variant: "destructive",
+        });
+        
         return { error };
       }
       
       // Update the local state
       setUserProfile(prev => prev ? { ...prev, ...updatedProfile } : null);
+      
+      // Show success toast
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been successfully updated.",
+      });
+      
       return { success: true };
     } catch (error: any) {
       console.error("Failed to update profile:", error);
+      
+      // Show toast error message
+      toast({
+        title: "Error updating profile",
+        description: error.message || "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+      
       return { error };
     } finally {
       setProfileLoading(false);
