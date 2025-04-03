@@ -1,10 +1,9 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Report } from "@/services/reportService";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Printer, Share, Filter, FileBarChart, PlusCircle } from "lucide-react";
+import { FileText, Download, Printer, Share, Filter, FileBarChart } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
@@ -60,20 +59,9 @@ const ReportsList: React.FC<ReportsListProps> = ({ reports, isLoading, onRefresh
         <FileBarChart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-lg font-medium mb-2">No reports found</h3>
         <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-          There are no reports matching your current filters. Try changing your search terms or filters, or create a new report.
+          There are no reports matching your current filters. Try changing your search terms or filters.
         </p>
-        <Button variant="outline" onClick={onRefresh} className="mr-2">Refresh</Button>
-        <Button asChild>
-          <Link to="#" onClick={(e) => {
-            e.preventDefault();
-            document.querySelector('[aria-label="New Report"]')?.dispatchEvent(
-              new MouseEvent('click', { bubbles: true })
-            );
-          }}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Create New Report
-          </Link>
-        </Button>
+        <Button variant="outline" onClick={onRefresh}>Refresh</Button>
       </div>
     );
   }
