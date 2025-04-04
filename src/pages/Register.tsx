@@ -138,12 +138,7 @@ const Register = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="user" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="user">Regular User</TabsTrigger>
-                <TabsTrigger value="staff">Staff Member</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <UserTypeSelector activeTab={activeTab} setActiveTab={setActiveTab} />
             
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
