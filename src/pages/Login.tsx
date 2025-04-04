@@ -6,31 +6,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, ArrowLeft, Mail } from "lucide-react";
+import { ArrowRight, ArrowLeft, Mail, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const { isAuthenticated } = useAuth();
   
   const [formData, setFormData] = useState({
-    email: "test@example.com",
-    password: "password"
+    email: "",
+    password: ""
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Redirect if already authenticated
   useEffect(() => {
-    // Auto redirect to dashboard after a short delay
-    const timer = setTimeout(() => {
-      toast({
-        title: "Development Mode",
-        description: "Automatically logged in for development."
-      });
-      navigate('/requests');
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [navigate, toast]);
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -39,19 +37,42 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     
-    // Simulate login
-    setTimeout(() => {
-      toast({
-        title: "Login successful",
-        description: "Welcome back to BGF Zimbabwe support portal."
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password
       });
-      
-      navigate("/requests");
-    }, 500);
+
+      if (error) {
+        setError(error.message);
+        toast({
+          title: "Login failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Login successful",
+          description: "Welcome back to BGF Zimbabwe support portal."
+        });
+        
+        navigate("/dashboard");
+      }
+    } catch (err: any) {
+      setError(err.message || "An error occurred during login");
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -71,13 +92,18 @@ const Login = () => {
             </Button>
           </div>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Development Mode</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Sign in to your account</CardTitle>
             <CardDescription className="text-center">
-              Authentication is disabled. You'll be auto-redirected...
+              Enter your email and password to access your account
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-md">
+                  {error}
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -87,12 +113,15 @@ const Login = () => {
                   placeholder="name@example.com"
                   value={formData.email}
                   onChange={handleChange}
-                  disabled={true}
+                  required
                 />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
+                  <Link to="/reset-password" className="text-xs text-primary hover:underline">
+                    Forgot password?
+                  </Link>
                 </div>
                 <Input
                   id="password"
@@ -101,22 +130,31 @@ const Login = () => {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
-                  disabled={true}
+                  required
                 />
               </div>
               <Button
                 type="submit"
                 className="w-full"
-                disabled={true}
+                disabled={loading}
               >
-                {loading ? "Signing in..." : "Sign in"}
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
               </Button>
             </form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <div className="text-center text-sm text-muted-foreground">
-              <p>Development mode active - Authentication is disabled</p>
-              <p>Use the Role Switcher in the bottom right to change roles</p>
+            <div className="text-center text-sm">
+              <span className="text-muted-foreground">Don't have an account? </span>
+              <Link to="/register" className="text-primary font-medium hover:underline">
+                Sign up
+              </Link>
             </div>
           </CardFooter>
         </Card>
