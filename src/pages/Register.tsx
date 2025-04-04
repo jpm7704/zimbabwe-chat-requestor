@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import UserTypeSelector from "@/components/auth/UserTypeSelector";
 import StaffRoleSelector from "@/components/auth/StaffRoleSelector";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const Register = () => {
   const [activeTab, setActiveTab] = useState<string>("user");
   const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
   const [checkingFirstTimeSetup, setCheckingFirstTimeSetup] = useState(true);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -93,6 +95,26 @@ const Register = () => {
       return;
     }
 
+    if (!agreedToTerms) {
+      setError("You must agree to the terms and conditions");
+      toast({
+        title: "Terms agreement required",
+        description: "You must agree to the terms and conditions to create an account.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (activeTab === "staff" && !formData.staffRole) {
+      setError("Please select a staff role");
+      toast({
+        title: "Role selection required",
+        description: "Please select your staff role to continue.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     setError(null);
     
@@ -107,6 +129,8 @@ const Register = () => {
         staffNumber = formData.staffNumber ? parseInt(formData.staffNumber) : null;
         region = formData.region || null;
       }
+      
+      console.log("Registering with role:", userRole);
       
       // Register the user with Supabase
       const { data, error } = await supabase.auth.signUp({
@@ -173,7 +197,7 @@ const Register = () => {
           <CardContent>
             <UserTypeSelector activeTab={activeTab} setActiveTab={setActiveTab} />
             
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               {error && (
                 <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-md">
                   {error}
@@ -244,24 +268,28 @@ const Register = () => {
               </div>
 
               {activeTab === "staff" && (
-                <>
-                  <StaffRoleSelector
-                    isFirstTimeSetup={isFirstTimeSetup}
-                    formData={formData}
-                    setFormData={setFormData}
-                  />
-                  
-                  <div className="p-3 bg-blue-50 text-blue-800 rounded-md text-sm">
-                    Staff accounts require verification after registration.
-                    An admin will need to approve your account.
-                  </div>
-                </>
+                <StaffRoleSelector
+                  isFirstTimeSetup={isFirstTimeSetup}
+                  formData={formData}
+                  setFormData={setFormData}
+                />
               )}
+
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="terms" 
+                  checked={agreedToTerms}
+                  onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                />
+                <Label htmlFor="terms" className="text-sm">
+                  I agree to the terms and conditions
+                </Label>
+              </div>
 
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loading}
+                disabled={loading || (activeTab === "staff" && !formData.staffRole)}
               >
                 {loading ? (
                   <>

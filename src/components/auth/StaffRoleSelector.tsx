@@ -22,7 +22,7 @@ interface StaffRoleSelectorProps {
     staffRole: string;
     staffNumber: string;
     region: string;
-    adminCode: string;
+    adminCode?: string;
   };
   setFormData: React.Dispatch<React.SetStateAction<{
     firstName: string;
@@ -102,13 +102,7 @@ const StaffRoleSelector = ({
           <Input
             id="staffNumber"
             name="staffNumber"
-            type="number"
-            min="1"
-            max={formData.staffRole === 'director' ? "5" : 
-                 formData.staffRole === 'head_of_programs' ? "1" : 
-                 formData.staffRole === 'assistant_project_officer' ? "5" : 
-                 formData.staffRole === 'ceo' ? "1" :
-                 formData.staffRole === 'patron' ? "1" : "4"}
+            type="text"
             placeholder={formData.staffRole === 'director' ? "1-5" : 
                         formData.staffRole === 'head_of_programs' ? "1" : 
                         formData.staffRole === 'assistant_project_officer' ? "1-5" : 
