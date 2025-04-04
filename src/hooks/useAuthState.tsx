@@ -15,10 +15,17 @@ export function useAuthState() {
   useEffect(() => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, currentSession) => {
+      (event, currentSession) => {
         setSession(currentSession);
         setIsAuthenticated(!!currentSession);
         setUserId(currentSession?.user?.id || null);
+        
+        // Store the complete session in localStorage for persistence
+        if (currentSession) {
+          // We don't need to manually store the session as Supabase handles this
+          // Just update our local state
+          console.log("Auth state changed:", event, "User:", currentSession?.user?.id);
+        }
       }
     );
 
@@ -30,6 +37,10 @@ export function useAuthState() {
         setSession(currentSession);
         setIsAuthenticated(!!currentSession);
         setUserId(currentSession?.user?.id || null);
+        
+        if (currentSession) {
+          console.log("Retrieved existing session for user:", currentSession?.user?.id);
+        }
       } catch (error) {
         console.error("Error checking auth session:", error);
       } finally {

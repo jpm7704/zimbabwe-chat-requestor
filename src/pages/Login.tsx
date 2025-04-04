@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -42,7 +41,8 @@ const Login = () => {
     setError(null);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("Attempting to sign in with:", formData.email);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password
       });
@@ -55,6 +55,8 @@ const Login = () => {
           variant: "destructive"
         });
       } else {
+        console.log("Sign in successful, role:", data.user?.user_metadata?.role);
+        
         toast({
           title: "Login successful",
           description: "Welcome back to BGF Zimbabwe support portal."

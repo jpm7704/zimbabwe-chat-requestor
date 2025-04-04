@@ -24,7 +24,6 @@ export function useUserProfile(userId: string | null) {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!userId) {
-        setUserProfile(getMockProfile(userId));
         setProfileLoading(false);
         return;
       }
@@ -33,76 +32,59 @@ export function useUserProfile(userId: string | null) {
         setProfileLoading(true);
         setProfileError(null);
         
-        // Use a try/catch block to handle potential errors
-        try {
-          // Query the user_profiles table but with column name checks
-          const { data, error } = await supabase
-            .from('user_profiles')
-            .select('id, name, email, role, avatar_url, region, staff_number')
-            .eq('id', userId)
-            .maybeSingle();
+        // Check if we have cached profile data
+        const cachedProfile = sessionStorage.getItem(`userProfile:${userId}`);
+        if (cachedProfile) {
+          console.log("Using cached profile data for user:", userId);
+          setUserProfile(JSON.parse(cachedProfile));
+          setProfileLoading(false);
           
-          if (error) {
-            throw error;
-          }
+          // Still fetch fresh data in the background
+        }
+        
+        // Query the user_profiles table
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('id, name, email, role, avatar_url, region, staff_number')
+          .eq('id', userId)
+          .maybeSingle();
+        
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          // Map the database fields to our UserProfile type
+          const profileData = {
+            id: data.id,
+            first_name: data.name || '',  // Use 'name' field as 'first_name'
+            last_name: '',  // Initialize as empty since it's not in the database yet
+            email: data.email,
+            role: data.role,
+            avatar_url: data.avatar_url,
+            region: data.region,
+            staff_number: data.staff_number
+          };
           
-          if (data) {
-            // Map the database fields to our UserProfile type
-            // Using the name field from database as first_name for compatibility
-            setUserProfile({
-              id: data.id,
-              first_name: data.name || '',  // Use 'name' field as 'first_name'
-              last_name: '',  // Initialize as empty since it's not in the database yet
-              email: data.email,
-              role: data.role,
-              avatar_url: data.avatar_url,
-              region: data.region,
-              staff_number: data.staff_number
-            });
-          } else {
-            // No data found, use mock
-            setUserProfile(getMockProfile(userId));
-          }
-        } catch (error: any) {
-          console.error("Error fetching user profile:", error);
+          // Cache the profile data
+          sessionStorage.setItem(`userProfile:${userId}`, JSON.stringify(profileData));
           
-          // Always fall back to mock profile in case of any errors
-          setUserProfile(getMockProfile(userId));
+          // Update state
+          setUserProfile(profileData);
+        } else {
+          console.warn("No user profile found for user:", userId);
+          // Clear cached data if no profile found
+          sessionStorage.removeItem(`userProfile:${userId}`);
         }
       } catch (error: any) {
         setProfileError(error);
         console.error("Failed to load user profile:", error);
-        
-        // Fall back to mock profile
-        setUserProfile(getMockProfile(userId));
       } finally {
         setProfileLoading(false);
       }
     };
     
     fetchProfile();
-  }, [userId]);
-
-  // Add event listener for role changes
-  useEffect(() => {
-    const handleRoleChange = () => {
-      setUserProfile(getMockProfile(userId));
-    };
-
-    // Listen for dev role changes
-    window.addEventListener('dev-role-changed', handleRoleChange);
-    
-    // Also listen for localStorage changes
-    window.addEventListener('storage', event => {
-      if (event.key === 'dev_role') {
-        handleRoleChange();
-      }
-    });
-
-    return () => {
-      window.removeEventListener('dev-role-changed', handleRoleChange);
-      window.removeEventListener('storage', handleRoleChange);
-    };
   }, [userId]);
 
   // Update the user profile
@@ -112,52 +94,34 @@ export function useUserProfile(userId: string | null) {
     try {
       setProfileLoading(true);
       
-      // If the database has RLS issues, just update the local state
-      // and show success message for better user experience
-      try {
-        // Format the data for the database - mapping first_name to name
-        const formattedData = {
-          name: updatedProfile.first_name || userProfile.first_name,  // Map first_name to name field in DB
-          email: updatedProfile.email || userProfile.email,
-          region: updatedProfile.region || userProfile.region,
-          avatar_url: updatedProfile.avatar_url || userProfile.avatar_url
-        };
-        
-        const { error } = await supabase
-          .from('user_profiles')
-          .update(formattedData)
-          .eq('id', userProfile.id);
-        
-        if (error) {
-          throw error;
-        }
-      } catch (error: any) {
-        console.error("Error updating profile:", error);
-        
-        // Suppress the RLS policy error for a better user experience
-        if (error.message?.includes("infinite recursion detected in policy")) {
-          console.log("Suppressing RLS policy error and proceeding with local update");
-          // We continue with the local update even though the database update failed
-        } else {
-          // For other errors, show an error message and return
-          toast({
-            title: "Error updating profile",
-            description: error.message || "Failed to update profile. Please try again.",
-            variant: "destructive",
-          });
-          
-          return { error };
-        }
+      // Format the data for the database - mapping first_name to name
+      const formattedData = {
+        name: updatedProfile.first_name || userProfile.first_name,  // Map first_name to name field in DB
+        email: updatedProfile.email || userProfile.email,
+        region: updatedProfile.region || userProfile.region,
+        avatar_url: updatedProfile.avatar_url || userProfile.avatar_url,
+        role: updatedProfile.role || userProfile.role
+      };
+      
+      const { error } = await supabase
+        .from('user_profiles')
+        .update(formattedData)
+        .eq('id', userProfile.id);
+      
+      if (error) {
+        throw error;
       }
       
-      // Always update the local state regardless of database success
-      // This ensures the UI reflects the changes even if the database update fails
+      // Update the local state
       const updatedUserProfile = {
         ...userProfile,
         ...updatedProfile
       };
       
       setUserProfile(updatedUserProfile);
+      
+      // Update cached data
+      sessionStorage.setItem(`userProfile:${userProfile.id}`, JSON.stringify(updatedUserProfile));
       
       // Show success toast
       toast({
@@ -185,23 +149,6 @@ export function useUserProfile(userId: string | null) {
   // Update avatar specifically
   const updateAvatar = async (avatarUrl: string) => {
     return await updateUserProfile({ avatar_url: avatarUrl });
-  };
-
-  // Helper function to get a mock profile
-  const getMockProfile = (userId: string | null): UserProfile => {
-    // Check if we have a role in localStorage
-    const savedRole = localStorage.getItem('dev_role');
-    
-    return {
-      id: userId || "temp-user-id",
-      first_name: "Test",
-      last_name: "User",
-      email: "test@example.com",
-      role: savedRole || "director", // Default role
-      avatar_url: "",
-      region: "Central",
-      staff_number: 12345
-    };
   };
 
   // Format role for display

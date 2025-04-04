@@ -1,7 +1,7 @@
 
 import { useAuthState } from "./useAuthState";
 import { useUserProfile, UserProfile } from "./useUserProfile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export type { UserProfile };
 
@@ -21,12 +21,33 @@ export function useAuth() {
   // Combine loading states from both hooks
   const loading = authLoading || profileLoading;
 
-  // Helper function to get the route for the selected role
+  // Effect to synchronize selected role with profile
+  useEffect(() => {
+    // When the user profile is loaded, update selected role if not yet set
+    if (!selectedRole && userProfile?.role) {
+      setSelectedRole(userProfile.role);
+      console.log("Setting selected role from profile:", userProfile.role);
+    }
+  }, [userProfile, selectedRole]);
+
+  // Helper function to get the route for the user's role
   const getRoleHomePage = () => {
-    // Use the profile role
-    if (!userProfile || !userProfile.role) return '/dashboard';
+    // First check session metadata for role
+    const metadataRole = session?.user?.user_metadata?.role;
     
-    return getRouteForRole(userProfile.role.toLowerCase());
+    // Then check profile role
+    const profileRole = userProfile?.role;
+    
+    // Use the most authoritative source (profile takes precedence)
+    const role = profileRole || metadataRole;
+    
+    if (!role) {
+      console.warn("No role found, defaulting to dashboard");
+      return '/dashboard';
+    }
+    
+    console.log("Getting home page for role:", role);
+    return getRouteForRole(role.toLowerCase());
   };
   
   // Extract the role-based routing logic to a separate function
