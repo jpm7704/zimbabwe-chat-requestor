@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +7,7 @@ import { SystemSettingsForm } from "@/components/forms/SystemSettingsForm";
 import { Badge } from "@/components/ui/badge";
 import { Check, CloudOff, Database, Mail, RefreshCw, Save, Server, Shield } from "lucide-react";
 import ClearDatabaseButton from "@/components/admin/ClearDatabaseButton";
+import { Trash2 } from 'lucide-react';
 
 const SystemSettings = () => {
   const [activeTab, setActiveTab] = useState("general");
