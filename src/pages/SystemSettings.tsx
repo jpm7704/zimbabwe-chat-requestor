@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SystemSettingsForm } from "@/components/forms/SystemSettingsForm";
 import { Badge } from "@/components/ui/badge";
 import { Check, CloudOff, Database, Mail, RefreshCw, Save, Server, Shield } from "lucide-react";
+import ClearDatabaseButton from "@/components/admin/ClearDatabaseButton";
 
 const SystemSettings = () => {
   const [activeTab, setActiveTab] = useState("general");
@@ -179,6 +181,21 @@ const SystemSettings = () => {
                       <Button variant="destructive" className="mt-2">
                         Enable Maintenance Mode
                       </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-destructive">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center gap-4">
+                    <Trash2 className="h-12 w-12 text-destructive" />
+                    <h3 className="font-medium text-lg">Clear All Application Data</h3>
+                    <p className="text-sm text-muted-foreground text-center">
+                      Permanently delete all application data including users, requests, and other records
+                    </p>
+                    <div className="flex gap-4 mt-2">
+                      <ClearDatabaseButton />
                     </div>
                   </div>
                 </CardContent>
