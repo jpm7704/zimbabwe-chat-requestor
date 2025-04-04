@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface RoleSelectorProps {
   selectedRole: string | null;
@@ -9,8 +9,8 @@ interface RoleSelectorProps {
 }
 
 const RoleSelector = ({ selectedRole, onRoleChange }: RoleSelectorProps) => {
+  // Staff roles - excluding "Regular User" as requested
   const roles = [
-    { id: "user", label: "Regular User" },
     { id: "field_officer", label: "Field Officer" },
     { id: "project_officer", label: "Project Officer" },
     { id: "assistant_project_officer", label: "Assistant Project Officer" },
@@ -24,18 +24,21 @@ const RoleSelector = ({ selectedRole, onRoleChange }: RoleSelectorProps) => {
   return (
     <div className="space-y-3">
       <Label>Select your role:</Label>
-      <RadioGroup 
-        value={selectedRole || "user"} 
+      <Select 
+        value={selectedRole || ""} 
         onValueChange={onRoleChange}
-        className="grid grid-cols-1 md:grid-cols-2 gap-2"
       >
-        {roles.map((role) => (
-          <div key={role.id} className="flex items-center space-x-2">
-            <RadioGroupItem value={role.id} id={role.id} />
-            <Label htmlFor={role.id} className="cursor-pointer">{role.label}</Label>
-          </div>
-        ))}
-      </RadioGroup>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select your staff role" />
+        </SelectTrigger>
+        <SelectContent className="bg-popover">
+          {roles.map((role) => (
+            <SelectItem key={role.id} value={role.id}>
+              {role.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };
