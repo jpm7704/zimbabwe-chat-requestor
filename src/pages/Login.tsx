@@ -6,15 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, ArrowLeft, Mail, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Mail, Loader2, UserCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import RoleSelector from "@/components/auth/RoleSelector";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, selectedRole, setSelectedRole } = useAuth();
   
   const [formData, setFormData] = useState({
     email: "",
@@ -22,6 +24,7 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("user");
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -35,6 +38,10 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleRoleChange = (role: string) => {
+    setSelectedRole(role);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,12 +105,20 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <Tabs defaultValue="user" value={activeTab} onValueChange={setActiveTab} className="mb-6">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="user">Regular User</TabsTrigger>
+                <TabsTrigger value="staff">Staff Member</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-md">
                   {error}
                 </div>
               )}
+              
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -116,6 +131,7 @@ const Login = () => {
                   required
                 />
               </div>
+              
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
@@ -133,10 +149,19 @@ const Login = () => {
                   required
                 />
               </div>
+
+              {/* Show role selector only for staff logins */}
+              {activeTab === "staff" && (
+                <RoleSelector 
+                  selectedRole={selectedRole} 
+                  onRoleChange={handleRoleChange}
+                />
+              )}
+
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loading}
+                disabled={loading || (activeTab === "staff" && !selectedRole)}
               >
                 {loading ? (
                   <>
@@ -144,7 +169,16 @@ const Login = () => {
                     Signing in...
                   </>
                 ) : (
-                  "Sign in"
+                  <>
+                    {activeTab === "staff" ? (
+                      <>
+                        <UserCheck className="mr-2 h-4 w-4" />
+                        Sign in as Staff
+                      </>
+                    ) : (
+                      "Sign in"
+                    )}
+                  </>
                 )}
               </Button>
             </form>

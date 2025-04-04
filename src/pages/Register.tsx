@@ -9,11 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import RoleSelector from "@/components/auth/RoleSelector";
 
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, selectedRole, setSelectedRole } = useAuth();
   
   const [formData, setFormData] = useState({
     firstName: "",
@@ -24,6 +26,7 @@ const Register = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("user");
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -37,6 +40,10 @@ const Register = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+  
+  const handleRoleChange = (role: string) => {
+    setSelectedRole(role);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,6 +74,9 @@ const Register = () => {
     setError(null);
     
     try {
+      // Determine user role
+      const userRole = activeTab === "staff" && selectedRole ? selectedRole : "user";
+      
       // Register the user with Supabase
       const { error } = await supabase.auth.signUp({
         email: formData.email,
@@ -76,6 +86,7 @@ const Register = () => {
             first_name: formData.firstName,
             last_name: formData.lastName,
             name: `${formData.firstName} ${formData.lastName}`, // Also store as name for compatibility
+            role: userRole, // Store the selected role
           }
         }
       });
@@ -131,6 +142,13 @@ const Register = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <Tabs defaultValue="user" value={activeTab} onValueChange={setActiveTab} className="mb-6">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="user">Regular User</TabsTrigger>
+                <TabsTrigger value="staff">Staff Member</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-md">
@@ -201,10 +219,18 @@ const Register = () => {
                 />
               </div>
 
+              {/* Show role selector only for staff registrations */}
+              {activeTab === "staff" && (
+                <RoleSelector 
+                  selectedRole={selectedRole}
+                  onRoleChange={handleRoleChange}
+                />
+              )}
+
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loading}
+                disabled={loading || (activeTab === "staff" && !selectedRole)}
               >
                 {loading ? (
                   <>
@@ -212,7 +238,7 @@ const Register = () => {
                     Creating account...
                   </>
                 ) : (
-                  "Create account"
+                  activeTab === "staff" ? "Create Staff Account" : "Create User Account"
                 )}
               </Button>
             </form>

@@ -1,11 +1,12 @@
 
 import { useAuthState } from "./useAuthState";
 import { useUserProfile, UserProfile } from "./useUserProfile";
+import { useState } from "react";
 
 export type { UserProfile };
 
 export function useAuth() {
-  const { isAuthenticated, userId, loading, handleLogout } = useAuthState();
+  const { isAuthenticated, userId, loading, handleLogout, session } = useAuthState();
   const { 
     userProfile, 
     profileLoading, 
@@ -13,6 +14,9 @@ export function useAuth() {
     updateUserProfile,
     updateAvatar 
   } = useUserProfile(userId);
+  
+  // For role selection during login
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
   // Combine loading states from both hooks
   const combinedLoading = loading || profileLoading;
@@ -25,6 +29,9 @@ export function useAuth() {
     formatRole,
     updateUserProfile,
     updateAvatar,
-    userId
+    userId,
+    session,
+    selectedRole,
+    setSelectedRole
   };
 }
