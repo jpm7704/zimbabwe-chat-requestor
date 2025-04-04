@@ -10,7 +10,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, loading, getRoleHomePage } = useAuth();
+  const { isAuthenticated, loading, userProfile, getRoleHomePage } = useAuth();
   const navigate = useNavigate();
   
   // Enable real-time notifications
@@ -24,8 +24,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   
   // In development mode, ALL roles should bypass permission checks
   const isDevMode = isDevelopment && devRole;
-  
+
   useEffect(() => {
+    // Redirect unauthenticated users to login
     if (!loading && !isAuthenticated) {
       navigate('/login');
     }

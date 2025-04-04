@@ -1,12 +1,11 @@
-
 import { useAuthState } from "./useAuthState";
 import { useUserProfile, UserProfile } from "./useUserProfile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export type { UserProfile };
 
 export function useAuth() {
-  const { isAuthenticated, userId, loading, handleLogout, session } = useAuthState();
+  const { isAuthenticated, userId, loading: authLoading, handleLogout, session } = useAuthState();
   const { 
     userProfile, 
     profileLoading, 
@@ -19,26 +18,43 @@ export function useAuth() {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
   // Combine loading states from both hooks
-  const combinedLoading = loading || profileLoading;
+  const loading = authLoading || profileLoading;
 
   // Helper function to get the route for the selected role
   const getRoleHomePage = () => {
+    // In dev mode, use the selected role from localStorage if available
+    const isDevelopment = import.meta.env.DEV;
+    const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
+    
+    if (devRole) {
+      const role = devRole.toLowerCase();
+      return getRouteForRole(role);
+    }
+    
+    // Otherwise use the profile role
     if (!userProfile || !userProfile.role) return '/dashboard';
     
-    const role = userProfile.role.toLowerCase();
-    
+    return getRouteForRole(userProfile.role.toLowerCase());
+  };
+  
+  // Extract the role-based routing logic to a separate function
+  const getRouteForRole = (role: string) => {
     switch (role) {
       case 'field_officer':
         return '/field-work';
       case 'project_officer':
       case 'assistant_project_officer':
+      case 'regional_project_officer':
         return '/requests';
       case 'head_of_programs':
       case 'programme_manager':
       case 'hop':
         return '/analytics';
       case 'director':
+      case 'management':
+        return '/approvals';
       case 'ceo':
+        return '/approvals';
       case 'patron':
         return '/approvals';
       case 'admin':
@@ -51,7 +67,7 @@ export function useAuth() {
   return {
     isAuthenticated,
     userProfile,
-    loading: combinedLoading,
+    loading,
     handleLogout,
     formatRole,
     updateUserProfile,

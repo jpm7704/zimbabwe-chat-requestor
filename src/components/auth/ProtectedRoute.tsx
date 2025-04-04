@@ -20,40 +20,36 @@ const ProtectedRoute = ({
   const { toast } = useToast();
   
   useEffect(() => {
-    // Only redirect after loading is complete and user is not authenticated
-    if (!loading) {
-      if (!isAuthenticated) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to access this page.",
-          variant: "destructive",
-        });
-        navigate(redirectTo);
-        return;
-      }
+    if (loading) return;
+    
+    // Handle unauthenticated users
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to access this page.",
+        variant: "destructive",
+      });
+      navigate(redirectTo);
+      return;
+    }
+    
+    // Role-based access control
+    if (requiredRole && userProfile) {
+      const userRole = userProfile.role?.toLowerCase() || 'user';
       
-      // Check role requirements if specified
-      if (requiredRole && userProfile) {
-        const userRole = userProfile.role?.toLowerCase() || 'user';
-        const isDevelopment = import.meta.env.DEV;
-        const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
-        
-        // Skip role checks in dev mode with dev role set
-        if (isDevelopment && devRole) return;
-        
-        // Check against array of roles
-        if (Array.isArray(requiredRole)) {
-          if (!requiredRole.some(role => role.toLowerCase() === userRole)) {
-            toast({
-              title: "Access Restricted",
-              description: "You don't have permission to access this page.",
-              variant: "destructive",
-            });
-            navigate('/dashboard');
-          }
-        } 
-        // Check against single role
-        else if (requiredRole.toLowerCase() !== userRole) {
+      // Check if in development mode with role override
+      const isDevelopment = import.meta.env.DEV;
+      const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
+      
+      // Skip role checks in dev mode with dev role set
+      if (isDevelopment && devRole) return;
+      
+      // Handle admin role - admins can access everything
+      if (userRole === 'admin') return;
+      
+      // Check against array of roles
+      if (Array.isArray(requiredRole)) {
+        if (!requiredRole.some(role => role.toLowerCase() === userRole)) {
           toast({
             title: "Access Restricted",
             description: "You don't have permission to access this page.",
@@ -61,6 +57,15 @@ const ProtectedRoute = ({
           });
           navigate('/dashboard');
         }
+      } 
+      // Check against single role
+      else if (requiredRole.toLowerCase() !== userRole) {
+        toast({
+          title: "Access Restricted",
+          description: "You don't have permission to access this page.",
+          variant: "destructive",
+        });
+        navigate('/dashboard');
       }
     }
   }, [isAuthenticated, loading, navigate, redirectTo, toast, requiredRole, userProfile]);

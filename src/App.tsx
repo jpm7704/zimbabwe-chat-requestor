@@ -3,6 +3,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import MainLayout from "@/components/layout/MainLayout";
 import Loader from "@/components/ui/loader";
 import { Toaster } from "@/components/ui/toaster";
 import Login from "@/pages/Login";
@@ -36,7 +37,9 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <AppLayout />
+                <MainLayout>
+                  <AppLayout />
+                </MainLayout>
               </ProtectedRoute>
             }
           >
@@ -47,7 +50,7 @@ function App() {
             <Route path="settings" element={<Settings />} />
             <Route path="profile" element={<UserProfile />} />
             
-            {/* Role-specific routes with role checks */}
+            {/* Routes for all staff levels */}
             <Route path="requests" element={<Requests />} />
             <Route path="requests/:id" element={<RequestDetail />} />
             
@@ -55,7 +58,7 @@ function App() {
             <Route 
               path="field-work" 
               element={
-                <ProtectedRoute requiredRole={['field_officer', 'project_officer', 'assistant_project_officer', 'admin']}>
+                <ProtectedRoute requiredRole={['field_officer', 'project_officer', 'assistant_project_officer', 'admin', 'director', 'ceo', 'patron', 'head_of_programs', 'programme_manager']}>
                   <FieldWork />
                 </ProtectedRoute>
               } 
@@ -75,7 +78,7 @@ function App() {
             <Route 
               path="analytics" 
               element={
-                <ProtectedRoute requiredRole={['head_of_programs', 'director', 'ceo', 'patron', 'admin']}>
+                <ProtectedRoute requiredRole={['head_of_programs', 'programme_manager', 'director', 'ceo', 'patron', 'admin']}>
                   <Analytics />
                 </ProtectedRoute>
               } 
