@@ -71,6 +71,7 @@ export function useUserProfile(userId: string | null) {
           
           // Update state
           setUserProfile(profileData);
+          console.log("Fetched user profile:", profileData);
         } else {
           console.warn("No user profile found for user:", userId);
           // Clear cached data if no profile found

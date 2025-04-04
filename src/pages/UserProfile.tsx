@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -10,11 +10,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Edit, Key, Bell } from "lucide-react";
 import { AvatarUpload } from "@/components/profile/AvatarUpload";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const UserProfile = () => {
-  const { userProfile, updateUserProfile, formatRole, updateAvatar, userId } = useAuth();
+  const { userProfile, updateUserProfile, formatRole, updateAvatar, userId, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
   const { toast } = useToast();
+  
+  // Debug information
+  useEffect(() => {
+    console.log("UserProfile page - userId:", userId);
+    console.log("UserProfile page - userProfile:", userProfile);
+    console.log("UserProfile page - loading:", loading);
+  }, [userId, userProfile, loading]);
   
   const handleProfileUpdate = async (data: any) => {
     if (!userProfile) {
@@ -74,11 +82,33 @@ const UserProfile = () => {
     return `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || "User Profile";
   };
 
+  if (loading) {
+    return (
+      <div className="container px-4 mx-auto py-8 max-w-5xl">
+        <div className="animate-pulse space-y-8">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-6">
+            <Skeleton className="h-24 w-24 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-4 w-48" />
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-20" />
+              </div>
+            </div>
+          </div>
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    );
+  }
+
   if (!userProfile || !userId) {
     return (
       <div className="container px-4 mx-auto py-8 max-w-5xl">
         <div className="flex justify-center items-center h-64">
-          <p>Loading profile...</p>
+          <p>No profile data available. Please sign in again.</p>
         </div>
       </div>
     );

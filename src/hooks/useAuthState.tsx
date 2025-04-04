@@ -9,6 +9,7 @@ export function useAuthState() {
   const [loading, setLoading] = useState<boolean>(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
   // Check for session on initial load and set up auth listener
@@ -19,6 +20,7 @@ export function useAuthState() {
         setSession(currentSession);
         setIsAuthenticated(!!currentSession);
         setUserId(currentSession?.user?.id || null);
+        setUser(currentSession?.user || null);
         
         // Store the complete session in localStorage for persistence
         if (currentSession) {
@@ -37,6 +39,7 @@ export function useAuthState() {
         setSession(currentSession);
         setIsAuthenticated(!!currentSession);
         setUserId(currentSession?.user?.id || null);
+        setUser(currentSession?.user || null);
         
         if (currentSession) {
           console.log("Retrieved existing session for user:", currentSession?.user?.id);
@@ -71,6 +74,7 @@ export function useAuthState() {
     userId,
     loading,
     session,
+    user,
     handleLogout,
   };
 }

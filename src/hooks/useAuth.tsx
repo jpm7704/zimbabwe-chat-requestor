@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 export type { UserProfile };
 
 export function useAuth() {
-  const { isAuthenticated, userId, loading: authLoading, handleLogout, session } = useAuthState();
+  const { isAuthenticated, userId, loading: authLoading, handleLogout, session, user } = useAuthState();
   const { 
     userProfile, 
     profileLoading, 
@@ -87,6 +87,7 @@ export function useAuth() {
     updateAvatar,
     userId,
     session,
+    user,
     selectedRole,
     setSelectedRole,
     getRoleHomePage
