@@ -16,7 +16,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const { isAuthenticated, selectedRole, setSelectedRole } = useAuth();
+  const { isAuthenticated, selectedRole, setSelectedRole, getRoleHomePage } = useAuth();
   
   const [formData, setFormData] = useState({
     email: "",
@@ -29,9 +29,9 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      navigate(getRoleHomePage());
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, getRoleHomePage]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -50,6 +50,18 @@ const Login = () => {
     setError(null);
     
     try {
+      // For staff login, verify if a role is selected
+      if (activeTab === "staff" && !selectedRole) {
+        setError("Please select your staff role");
+        toast({
+          title: "Role required",
+          description: "Please select your staff role to continue",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password
@@ -68,7 +80,14 @@ const Login = () => {
           description: "Welcome back to BGF Zimbabwe support portal."
         });
         
-        navigate("/dashboard");
+        // If staff login, store the selected role in local storage
+        // This is for demonstration/development purposes
+        if (activeTab === "staff" && selectedRole && import.meta.env.DEV) {
+          localStorage.setItem('dev_role', selectedRole);
+        }
+        
+        // Use role-specific redirect
+        navigate(getRoleHomePage());
       }
     } catch (err: any) {
       setError(err.message || "An error occurred during login");

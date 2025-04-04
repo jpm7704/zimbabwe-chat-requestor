@@ -10,7 +10,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, getRoleHomePage } = useAuth();
   const navigate = useNavigate();
   
   // Enable real-time notifications

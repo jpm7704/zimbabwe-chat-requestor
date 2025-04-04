@@ -21,6 +21,33 @@ export function useAuth() {
   // Combine loading states from both hooks
   const combinedLoading = loading || profileLoading;
 
+  // Helper function to get the route for the selected role
+  const getRoleHomePage = () => {
+    if (!userProfile || !userProfile.role) return '/dashboard';
+    
+    const role = userProfile.role.toLowerCase();
+    
+    switch (role) {
+      case 'field_officer':
+        return '/field-work';
+      case 'project_officer':
+      case 'assistant_project_officer':
+        return '/requests';
+      case 'head_of_programs':
+      case 'programme_manager':
+      case 'hop':
+        return '/analytics';
+      case 'director':
+      case 'ceo':
+      case 'patron':
+        return '/approvals';
+      case 'admin':
+        return '/admin/dashboard';
+      default:
+        return '/dashboard';
+    }
+  };
+
   return {
     isAuthenticated,
     userProfile,
@@ -32,6 +59,7 @@ export function useAuth() {
     userId,
     session,
     selectedRole,
-    setSelectedRole
+    setSelectedRole,
+    getRoleHomePage
   };
 }
