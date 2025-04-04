@@ -12,8 +12,16 @@ export function useRealtimeNotifications() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { userProfile } = useAuth();
-  const queryClient = useQueryClient();
   const [notificationCount, setNotificationCount] = useState(0);
+  
+  // Safely access the query client
+  let queryClient;
+  try {
+    queryClient = useQueryClient();
+  } catch (error) {
+    console.error("QueryClient not available:", error);
+    // We'll continue without the queryClient
+  }
 
   // Subscribe to realtime updates
   useEffect(() => {
@@ -43,7 +51,9 @@ export function useRealtimeNotifications() {
     // Check if the notification is targeting the user's role
     if (notification.target_roles?.includes(userProfile.role)) {
       // Invalidate queries to force refetch of notifications
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      if (queryClient) {
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      }
       
       // Increment notification count
       setNotificationCount(prev => prev + 1);
