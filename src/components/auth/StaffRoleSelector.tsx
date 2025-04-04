@@ -30,7 +30,7 @@ interface StaffRoleSelectorProps {
     email: string;
     password: string;
     confirmPassword: string;
-    adminCode: string;
+    adminCode?: string;
     staffRole: string;
     staffNumber: string;
     region: string;

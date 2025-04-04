@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import UserTypeSelector from "@/components/auth/UserTypeSelector";
+import StaffRoleSelector from "@/components/auth/StaffRoleSelector";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -20,11 +22,17 @@ const Register = () => {
     lastName: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    staffRole: "",
+    staffNumber: "",
+    region: "",
+    adminCode: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("user");
+  const [isFirstTimeSetup, setIsFirstTimeSetup] = useState(false);
+  const [checkingFirstTimeSetup, setCheckingFirstTimeSetup] = useState(true);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -32,6 +40,27 @@ const Register = () => {
       navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
+
+  // Check if this is the first time setup (no users in the system)
+  useEffect(() => {
+    const checkFirstTimeSetup = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('user_profiles')
+          .select('*', { count: 'exact', head: true });
+        
+        if (!error) {
+          setIsFirstTimeSetup(count === 0);
+        }
+      } catch (err) {
+        console.error("Error checking for first-time setup:", err);
+      } finally {
+        setCheckingFirstTimeSetup(false);
+      }
+    };
+    
+    checkFirstTimeSetup();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -68,11 +97,19 @@ const Register = () => {
     setError(null);
     
     try {
-      // Determine user role based on tab
-      const userRole = activeTab === "staff" ? "field_officer" : "user";
+      // Determine user role based on tab and selection
+      let userRole = "user";
+      let staffNumber = null;
+      let region = null;
+      
+      if (activeTab === "staff") {
+        userRole = formData.staffRole || "field_officer";
+        staffNumber = formData.staffNumber ? parseInt(formData.staffNumber) : null;
+        region = formData.region || null;
+      }
       
       // Register the user with Supabase
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -81,26 +118,24 @@ const Register = () => {
             last_name: formData.lastName,
             name: `${formData.firstName} ${formData.lastName}`, // Also store as name for compatibility
             role: userRole, // Store the selected role
+            staff_number: staffNumber,
+            region: region
           }
         }
       });
 
       if (error) {
-        setError(error.message);
-        toast({
-          title: "Registration failed",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Registration successful",
-          description: "Please check your email to confirm your account.",
-          variant: "default"
-        });
-        
-        navigate("/login");
+        throw error;
       }
+      
+      toast({
+        title: "Registration successful",
+        description: "Please check your email to confirm your account.",
+        variant: "default"
+      });
+      
+      navigate("/login");
+      
     } catch (err: any) {
       setError(err.message || "An error occurred during registration");
       toast({
@@ -209,10 +244,18 @@ const Register = () => {
               </div>
 
               {activeTab === "staff" && (
-                <div className="p-3 bg-blue-50 text-blue-800 rounded-md text-sm">
-                  Staff accounts require verification after registration.
-                  An admin will need to approve your account.
-                </div>
+                <>
+                  <StaffRoleSelector
+                    isFirstTimeSetup={isFirstTimeSetup}
+                    formData={formData}
+                    setFormData={setFormData}
+                  />
+                  
+                  <div className="p-3 bg-blue-50 text-blue-800 rounded-md text-sm">
+                    Staff accounts require verification after registration.
+                    An admin will need to approve your account.
+                  </div>
+                </>
               )}
 
               <Button

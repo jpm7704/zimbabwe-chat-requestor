@@ -52,7 +52,7 @@ export function useAuth() {
   
   // Extract the role-based routing logic to a separate function
   const getRouteForRole = (role: string) => {
-    switch (role) {
+    switch (role.toLowerCase()) {
       case 'field_officer':
         return '/field-work';
       case 'project_officer':
