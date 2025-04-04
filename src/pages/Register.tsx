@@ -10,12 +10,12 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import RoleSelector from "@/components/auth/RoleSelector";
+import UserTypeSelector from "@/components/auth/UserTypeSelector";
 
 const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAuthenticated, selectedRole, setSelectedRole } = useAuth();
+  const { isAuthenticated } = useAuth();
   
   const [formData, setFormData] = useState({
     firstName: "",
@@ -40,10 +40,6 @@ const Register = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-  };
-  
-  const handleRoleChange = (role: string) => {
-    setSelectedRole(role);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,8 +70,8 @@ const Register = () => {
     setError(null);
     
     try {
-      // Determine user role
-      const userRole = activeTab === "staff" && selectedRole ? selectedRole : "user";
+      // Determine user role based on tab
+      const userRole = activeTab === "staff" ? "field_officer" : "user";
       
       // Register the user with Supabase
       const { error } = await supabase.auth.signUp({
@@ -219,18 +215,17 @@ const Register = () => {
                 />
               </div>
 
-              {/* Show role selector only for staff registrations */}
               {activeTab === "staff" && (
-                <RoleSelector 
-                  selectedRole={selectedRole}
-                  onRoleChange={handleRoleChange}
-                />
+                <div className="p-3 bg-blue-50 text-blue-800 rounded-md text-sm">
+                  Staff accounts require verification after registration.
+                  An admin will need to approve your account.
+                </div>
               )}
 
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loading || (activeTab === "staff" && !selectedRole)}
+                disabled={loading}
               >
                 {loading ? (
                   <>
