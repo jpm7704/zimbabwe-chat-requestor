@@ -37,13 +37,6 @@ const ProtectedRoute = ({
     if (requiredRole && userProfile) {
       const userRole = userProfile.role?.toLowerCase() || 'user';
       
-      // Check if in development mode with role override
-      const isDevelopment = import.meta.env.DEV;
-      const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
-      
-      // Skip role checks in dev mode with dev role set
-      if (isDevelopment && devRole) return;
-      
       // Handle admin role - admins can access everything
       if (userRole === 'admin') return;
       

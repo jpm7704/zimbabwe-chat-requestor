@@ -1,8 +1,7 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import AppSidebar from "./AppSidebar";
-import DevRoleSwitcher from "@/components/dev/DevRoleSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -15,17 +14,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   
   // Enable real-time notifications
   useRealtimeNotifications();
-  
-  // Check if we're in development mode
-  const isDevelopment = import.meta.env.DEV;
-  
-  // Get dev role from localStorage (for development mode role switching)
-  const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
-  
-  // In development mode, ALL roles should bypass permission checks
-  const isDevMode = isDevelopment && devRole;
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Redirect unauthenticated users to login
     if (!loading && !isAuthenticated) {
       navigate('/login');
@@ -34,7 +24,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {isDevMode && <DevRoleSwitcher />}
       <SidebarProvider>
         <div className="flex grow w-full">
           <AppSidebar />

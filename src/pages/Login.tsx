@@ -1,22 +1,19 @@
 
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, ArrowLeft, Mail, Loader2, UserCheck } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import RoleSelector from "@/components/auth/RoleSelector";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
-  const { isAuthenticated, selectedRole, setSelectedRole, getRoleHomePage } = useAuth();
+  const { isAuthenticated, getRoleHomePage } = useAuth();
   
   const [formData, setFormData] = useState({
     email: "",
@@ -24,7 +21,6 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("user");
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -40,28 +36,12 @@ const Login = () => {
     });
   };
 
-  const handleRoleChange = (role: string) => {
-    setSelectedRole(role);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     
     try {
-      // For staff login, verify if a role is selected
-      if (activeTab === "staff" && !selectedRole) {
-        setError("Please select your staff role");
-        toast({
-          title: "Role required",
-          description: "Please select your staff role to continue",
-          variant: "destructive"
-        });
-        setLoading(false);
-        return;
-      }
-
       const { error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password
@@ -79,12 +59,6 @@ const Login = () => {
           title: "Login successful",
           description: "Welcome back to BGF Zimbabwe support portal."
         });
-        
-        // If staff login, store the selected role in local storage
-        // This is for demonstration/development purposes
-        if (activeTab === "staff" && selectedRole && import.meta.env.DEV) {
-          localStorage.setItem('dev_role', selectedRole);
-        }
         
         // Use role-specific redirect
         navigate(getRoleHomePage());
@@ -124,13 +98,6 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="user" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="user">Regular User</TabsTrigger>
-                <TabsTrigger value="staff">Staff Member</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-md">
@@ -169,18 +136,10 @@ const Login = () => {
                 />
               </div>
 
-              {/* Show role selector only for staff logins */}
-              {activeTab === "staff" && (
-                <RoleSelector 
-                  selectedRole={selectedRole} 
-                  onRoleChange={handleRoleChange}
-                />
-              )}
-
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loading || (activeTab === "staff" && !selectedRole)}
+                disabled={loading}
               >
                 {loading ? (
                   <>
@@ -188,16 +147,7 @@ const Login = () => {
                     Signing in...
                   </>
                 ) : (
-                  <>
-                    {activeTab === "staff" ? (
-                      <>
-                        <UserCheck className="mr-2 h-4 w-4" />
-                        Sign in as Staff
-                      </>
-                    ) : (
-                      "Sign in"
-                    )}
-                  </>
+                  "Sign in"
                 )}
               </Button>
             </form>

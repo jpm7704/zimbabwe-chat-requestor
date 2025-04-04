@@ -1,6 +1,7 @@
+
 import { useAuthState } from "./useAuthState";
 import { useUserProfile, UserProfile } from "./useUserProfile";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export type { UserProfile };
 
@@ -22,16 +23,7 @@ export function useAuth() {
 
   // Helper function to get the route for the selected role
   const getRoleHomePage = () => {
-    // In dev mode, use the selected role from localStorage if available
-    const isDevelopment = import.meta.env.DEV;
-    const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
-    
-    if (devRole) {
-      const role = devRole.toLowerCase();
-      return getRouteForRole(role);
-    }
-    
-    // Otherwise use the profile role
+    // Use the profile role
     if (!userProfile || !userProfile.role) return '/dashboard';
     
     return getRouteForRole(userProfile.role.toLowerCase());

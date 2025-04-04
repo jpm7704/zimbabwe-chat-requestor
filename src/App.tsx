@@ -20,7 +20,6 @@ const FieldWork = lazy(() => import("@/pages/FieldWork"));
 const Reports = lazy(() => import("@/pages/Reports"));
 const Approvals = lazy(() => import("@/pages/ApprovalsPage"));
 const Analytics = lazy(() => import("@/pages/Analytics"));
-const EnquiryPage = lazy(() => import("@/pages/EnquiryPage"));
 const UserProfile = lazy(() => import("@/pages/UserProfile"));
 
 function App() {
@@ -90,16 +89,6 @@ function App() {
               element={
                 <ProtectedRoute requiredRole={['director', 'ceo', 'patron', 'admin']}>
                   <Approvals />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Regular user routes */}
-            <Route 
-              path="enquiry" 
-              element={
-                <ProtectedRoute requiredRole={['user']}>
-                  <EnquiryPage />
                 </ProtectedRoute>
               } 
             />

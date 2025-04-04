@@ -6,13 +6,11 @@ import {
   BarChart3,
   ClipboardCheck,
   FileText,
-  HelpCircle,
   Home,
   Settings,
   Shield,
   UserCheck,
-  UserCog,
-  Users
+  UserCog
 } from "lucide-react";
 
 interface RoleMenuProps {
@@ -34,10 +32,6 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
     isPatron
   } = useRoles(userProfile);
   
-  // Get dev role from localStorage (for development mode role switching)
-  const isDevelopment = import.meta.env.DEV;
-  const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
-  
   const linkClasses = variant === "sidebar" 
     ? "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground"
     : "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground";
@@ -57,24 +51,9 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
   const isFieldStaff = () => {
     return isFieldOfficer() || isProjectOfficer() || isAssistantProjectOfficer();
   };
-  
-  // Check if in development mode with a role override
-  const hasDevRole = () => {
-    return isDevelopment && devRole;
-  };
-  
-  // For debug/dev mode, show an indicator of which menu items are being displayed
-  const getDevRoleDisplay = () => {
-    if (hasDevRole()) {
-      return <div className="px-3 py-2 text-xs text-purple-500">Dev Mode: {devRole}</div>;
-    }
-    return null;
-  };
 
   return (
     <nav className="space-y-1">
-      {getDevRoleDisplay()}
-      
       {/* Dashboard - shown to all users */}
       <Link 
         to="/dashboard" 
@@ -95,20 +74,8 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
         <span>Requests</span>
       </Link>
       
-      {/* Regular User-specific links */}
-      {(isRegularUser() || hasDevRole()) && (
-        <Link 
-          to="/enquiry" 
-          className={`${linkClasses} ${window.location.pathname === '/enquiry' ? activeLinkClasses : ''}`}
-          onClick={handleLinkClick}
-        >
-          <HelpCircle className="h-4 w-4" />
-          <span>Enquiry</span>
-        </Link>
-      )}
-      
       {/* Field Staff Links */}
-      {(isFieldStaff() || isHeadOfPrograms() || isDirector() || isCEO() || isPatron() || isAdmin() || hasDevRole()) && (
+      {(isFieldStaff() || isHeadOfPrograms() || isDirector() || isCEO() || isPatron() || isAdmin()) && (
         <Link 
           to="/field-work" 
           className={`${linkClasses} ${window.location.pathname === '/field-work' ? activeLinkClasses : ''}`}
@@ -120,7 +87,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       )}
       
       {/* Reports - accessible to most staff roles */}
-      {(isFieldStaff() || isHeadOfPrograms() || isDirector() || isCEO() || isPatron() || isAdmin() || hasDevRole()) && (
+      {(isFieldStaff() || isHeadOfPrograms() || isDirector() || isCEO() || isPatron() || isAdmin()) && (
         <Link 
           to="/reports" 
           className={`${linkClasses} ${window.location.pathname === '/reports' ? activeLinkClasses : ''}`}
@@ -132,7 +99,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       )}
       
       {/* Analytics */}
-      {(isHeadOfPrograms() || isDirector() || isCEO() || isPatron() || isAdmin() || hasDevRole()) && (
+      {(isHeadOfPrograms() || isDirector() || isCEO() || isPatron() || isAdmin()) && (
         <Link 
           to="/analytics" 
           className={`${linkClasses} ${window.location.pathname === '/analytics' ? activeLinkClasses : ''}`}
@@ -144,7 +111,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       )}
       
       {/* Approvals */}
-      {(isDirector() || isCEO() || isPatron() || isAdmin() || hasDevRole()) && (
+      {(isDirector() || isCEO() || isPatron() || isAdmin()) && (
         <Link 
           to="/approvals" 
           className={`${linkClasses} ${window.location.pathname === '/approvals' ? activeLinkClasses : ''}`}
@@ -156,19 +123,19 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       )}
       
       {/* User Management */}
-      {(isDirector() || isCEO() || isAdmin() || hasDevRole()) && (
+      {(isDirector() || isCEO() || isAdmin()) && (
         <Link 
           to="/admin/users" 
           className={`${linkClasses} ${window.location.pathname === '/admin/users' ? activeLinkClasses : ''}`}
           onClick={handleLinkClick}
         >
-          <Users className="h-4 w-4" />
+          <UserCheck className="h-4 w-4" />
           <span>User Management</span>
         </Link>
       )}
       
       {/* Admin-only Links */}
-      {(isAdmin() || hasDevRole()) && (
+      {isAdmin() && (
         <>
           <Link 
             to="/admin/dashboard" 

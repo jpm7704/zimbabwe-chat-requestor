@@ -44,13 +44,6 @@ const RoleBasedWorkflow = ({ userProfile, statusCounts }: RoleBasedWorkflowProps
     
     const currentPath = location.pathname;
     
-    // Get dev role from localStorage (for development mode role switching)
-    const isDevelopment = import.meta.env.DEV;
-    const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
-    
-    // Skip role checks in dev mode
-    if (isDevelopment && devRole) return;
-    
     // Admin has access to all pages
     if (isAdmin()) return;
     
@@ -79,13 +72,6 @@ const RoleBasedWorkflow = ({ userProfile, statusCounts }: RoleBasedWorkflowProps
     
     if (currentPath === '/analytics') {
       if (!isHeadOfPrograms() && !isDirector() && !isCEO() && !isPatron()) {
-        navigate('/dashboard');
-        return;
-      }
-    }
-    
-    if (currentPath === '/enquiry' || currentPath === '/submit' || currentPath === '/chat') {
-      if (!isRegularUser()) {
         navigate('/dashboard');
         return;
       }

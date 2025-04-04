@@ -31,15 +31,8 @@ const RequirePermission = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Get dev role from localStorage (for development mode role switching)
-  const isDevelopment = import.meta.env.DEV;
-  const devRole = isDevelopment ? localStorage.getItem('dev_role') : null;
-  
   // Determine if user has the required role
   const hasRequiredRole = () => {
-    // In dev mode with dev role set, bypass checks
-    if (isDevelopment && devRole) return true;
-    
     // Admin always has access
     if (isAdmin()) return true;
     
@@ -88,9 +81,6 @@ const RequirePermission = ({
   };
   
   useEffect(() => {
-    // Skip permission checks in dev mode
-    if (isDevelopment && devRole) return;
-
     // Only redirect if the user doesn't have the required role
     if (!hasRequiredRole()) {
       toast({
@@ -100,7 +90,7 @@ const RequirePermission = ({
       });
       navigate(redirectTo);
     }
-  }, [navigate, redirectTo, toast, isDevelopment, devRole]);
+  }, [navigate, redirectTo, toast]);
   
   // Only render children if user has the required role
   return <>{children}</>;
