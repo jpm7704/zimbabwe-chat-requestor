@@ -37,14 +37,13 @@ export async function getNotifications(): Promise<Notification[]> {
 
     return data.map(notification => ({
       id: notification.id,
+      user_id: notification.user_id,
       type: notification.type as NotificationType,
       title: notification.title,
-      message: notification.message,
-      createdAt: notification.created_at,
+      content: notification.content,
+      created_at: notification.created_at,
       read: notification.read,
-      link: notification.link,
-      targetRoles: notification.target_roles,
-      relatedId: notification.related_id
+      link: notification.link
     }));
   } catch (error) {
     console.error('Error in getNotifications:', error);
@@ -159,9 +158,8 @@ export async function markAllNotificationsRead(): Promise<boolean> {
 export async function createNotification(
   type: NotificationType,
   title: string,
-  message: string,
-  targetRoles: string[],
-  relatedId?: string,
+  content: string,
+  user_id: string,
   link?: string
 ): Promise<boolean> {
   try {
@@ -170,9 +168,8 @@ export async function createNotification(
       .insert({
         type,
         title,
-        message,
-        target_roles: targetRoles,
-        related_id: relatedId,
+        content,
+        user_id,
         link,
         read: false
       });
@@ -194,7 +191,8 @@ export async function createNotification(
  */
 export async function createDocumentUploadNotification(
   requestId: string,
-  documentName: string
+  documentName: string,
+  userId: string
 ): Promise<void> {
   try {
     // Get request details
@@ -210,8 +208,7 @@ export async function createDocumentUploadNotification(
       'document_upload',
       'New Document Uploaded',
       `A new document "${documentName}" was uploaded for request ${request.ticket_number}: ${request.title}`,
-      ['field_officer', 'programme_manager', 'management'],
-      requestId,
+      userId,
       `/requests/${requestId}`
     );
   } catch (error) {

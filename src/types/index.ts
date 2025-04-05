@@ -88,10 +88,17 @@ export interface Document {
 export interface Note {
   id: string;
   request_id: string;
+  topic: string;
   sender_id: string;
   content: string;
-  timestamp: string;
+  extension: string;
   is_system_message?: boolean | null;
+  payload?: any;
+  event?: string | null;
+  timestamp?: string;
+  private?: boolean;
+  updated_at: string;
+  inserted_at: string;
 
   // Computed properties
   author?: UserProfile;
@@ -190,13 +197,14 @@ export type NotificationType = 'document_upload' | 'status_change' | 'assignment
 
 export interface Notification {
   id: string;
+  user_id: string;
   type: string;
   title: string;
-  message: string;
-  created_at: string;
-  read: boolean;
+  content: string; // This is 'content' in the database, not 'message'
   link?: string | null;
-  target_roles: string[];
-  related_id?: string | null;
-  user_id?: string;
+  read: boolean;
+  created_at: string;
+
+  // Computed properties (not in the database)
+  formattedDate?: string;
 }

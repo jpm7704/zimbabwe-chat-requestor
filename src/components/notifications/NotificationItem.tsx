@@ -19,8 +19,8 @@ const NotificationItem = ({ notification, onRead }: NotificationItemProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
   // Format date for display and tooltip
-  const formattedDate = format(new Date(notification.createdAt), 'PPp');
-  const timeAgo = formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true });
+  const formattedDate = format(new Date(notification.created_at), 'PPp');
+  const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true });
 
   // Get the appropriate icon based on notification type
   const renderIcon = () => {
@@ -41,7 +41,7 @@ const NotificationItem = ({ notification, onRead }: NotificationItemProps) => {
       await markAsRead();
       onRead();
     }
-    
+
     // If the notification has a link, navigate there
     if (notification.link) {
       navigate(notification.link);
@@ -63,7 +63,7 @@ const NotificationItem = ({ notification, onRead }: NotificationItemProps) => {
         <div className="p-2 rounded-full bg-primary/10">
           {renderIcon()}
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <p className={cn(
@@ -76,16 +76,16 @@ const NotificationItem = ({ notification, onRead }: NotificationItemProps) => {
               <div className="h-2 w-2 rounded-full bg-primary"></div>
             )}
           </div>
-          <p className="text-sm text-muted-foreground line-clamp-2">{notification.message}</p>
+          <p className="text-sm text-muted-foreground line-clamp-2">{notification.content}</p>
           <p className="text-xs text-muted-foreground mt-1" title={formattedDate}>{timeAgo}</p>
         </div>
       </div>
-      
+
       {isHovered && !notification.read && (
-        <Button 
-          className="absolute top-2 right-2" 
-          size="sm" 
-          variant="ghost" 
+        <Button
+          className="absolute top-2 right-2"
+          size="sm"
+          variant="ghost"
           onClick={(e) => {
             e.stopPropagation();
             markAsRead().then(onRead);

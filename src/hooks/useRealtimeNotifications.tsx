@@ -13,7 +13,7 @@ export function useRealtimeNotifications() {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const [notificationCount, setNotificationCount] = useState(0);
-  
+
   // Safely access the query client
   let queryClient;
   try {
@@ -33,7 +33,7 @@ export function useRealtimeNotifications() {
         event: 'INSERT',
         schema: 'public',
         table: 'notifications',
-        filter: `target_roles=cs.{${userProfile.role}}`,
+        filter: `user_id=eq.${userProfile.id}`,
       }, handleNewNotification)
       .subscribe();
 
@@ -45,25 +45,25 @@ export function useRealtimeNotifications() {
   // Handle incoming notifications
   const handleNewNotification = async (payload: any) => {
     const notification = payload.new;
-    
+
     if (!userProfile || !notification) return;
 
-    // Check if the notification is targeting the user's role
-    if (notification.target_roles?.includes(userProfile.role)) {
+    // Check if the notification is for this user
+    if (notification.user_id === userProfile.id) {
       // Invalidate queries to force refetch of notifications
       if (queryClient) {
         queryClient.invalidateQueries({ queryKey: ['notifications'] });
       }
-      
+
       // Increment notification count
       setNotificationCount(prev => prev + 1);
 
       // Show toast notification
       toast({
         title: notification.title,
-        description: notification.message,
+        description: notification.content,
         action: notification.link ? (
-          <ToastAction 
+          <ToastAction
             altText="View"
             onClick={() => {
               // Mark as read
