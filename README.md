@@ -1,22 +1,28 @@
-# Welcome to your Lovable project
+# Zimbabwe Chat Requestor
 
-## Project info
+## Project Overview
 
-**URL**: https://lovable.dev/projects/40be0ffd-7865-4eea-95e1-619e754acd98
+A support request management system with role-based workflow for approvals, field work tracking, and document management using Supabase.
+
+## Features
+
+- **User Authentication**: Secure login and registration with Supabase Auth
+- **Role-Based Access Control**: Different permissions for users, field officers, program managers, and administrators
+- **Request Management**: Create, track, and manage support requests
+- **Document Management**: Upload, view, and manage documents related to requests
+- **Field Work Tracking**: Schedule and monitor field visits
+- **Reporting**: Generate and view reports on field activities
+- **Real-time Notifications**: Get updates on request status changes and assignments
+- **Analytics Dashboard**: Visualize key metrics and performance indicators
+- **Responsive Design**: Works on desktop and mobile devices
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/40be0ffd-7865-4eea-95e1-619e754acd98) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+If you want to work locally using your own IDE, you can clone this repo and push changes.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -50,20 +56,43 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
+## Technologies Used
 
-This project is built with .
+This project is built with modern web technologies:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Frontend Framework**: React with TypeScript
+- **Build Tool**: Vite
+- **UI Components**: shadcn/ui
+- **Styling**: Tailwind CSS
+- **Database & Auth**: Supabase
+- **State Management**: React Query
+- **Routing**: React Router
+- **Form Handling**: React Hook Form
+- **Date Handling**: date-fns
+- **Charts**: Recharts
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/40be0ffd-7865-4eea-95e1-619e754acd98) and click on Share -> Publish.
+This project can be deployed using various hosting platforms:
 
-## I want to use a custom domain - is that possible?
+### Netlify
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+1. Create a Netlify account if you don't have one
+2. Connect your GitHub repository
+3. Configure the build settings:
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+4. Deploy the site
+
+### Vercel
+
+1. Create a Vercel account if you don't have one
+2. Import your GitHub repository
+3. Configure the project settings
+4. Deploy the site
+
+### GitHub Pages
+
+1. Update the `vite.config.ts` file to include your base path
+2. Run `npm run build`
+3. Deploy the `dist` folder to GitHub Pages
