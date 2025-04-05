@@ -2,10 +2,24 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://phhpwlrbsdvwtbevywjs.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoaHB3bHJic2R2d3RiZXZ5d2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEwMzUwNTEsImV4cCI6MjA1NjYxMTA1MX0.IgIwLnQfbYivJ2Sg48og_7zP45c0Fmka_KAvX0SStrc";
+// Use environment variables for Supabase configuration
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://bguhoroceezcneqfrdkp.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJndWhvcm9jZWV6Y25lcWZyZGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExMDQyMDgsImV4cCI6MjA1NjY4MDIwOH0.7F0GFeg382m5_n_8mko5W4Tny-hJ150LTilNWgOeGUU";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// Create the Supabase client with additional options for production
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    headers: {
+      'x-application-name': import.meta.env.VITE_APP_NAME || 'Zimbabwe Chat Requestor',
+      'x-application-version': import.meta.env.VITE_APP_VERSION || '1.0.0'
+    }
+  }
+});

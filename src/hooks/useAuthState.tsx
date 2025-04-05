@@ -14,20 +14,25 @@ export function useAuthState() {
 
   // Check for session on initial load and set up auth listener
   useEffect(() => {
+    console.log("Setting up auth state listener and checking for session");
+
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log("Auth state changed:", event, "User:", currentSession?.user?.id);
-        
+        console.log("Current session exists:", !!currentSession);
+
         setSession(currentSession);
         setIsAuthenticated(!!currentSession);
         setUserId(currentSession?.user?.id || null);
         setUser(currentSession?.user || null);
-        
+
         // For debugging
         if (currentSession?.user) {
           console.log("User metadata:", currentSession.user.user_metadata);
           console.log("User role from metadata:", currentSession.user.user_metadata?.role);
+        } else {
+          console.log("No user in current session");
         }
       }
     );
@@ -36,18 +41,30 @@ export function useAuthState() {
     const initSession = async () => {
       setLoading(true);
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        
+        console.log("Checking for existing session...");
+        const { data, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error("Error getting session:", error);
+          setLoading(false);
+          return;
+        }
+
+        const currentSession = data.session;
+        console.log("Session exists:", !!currentSession);
+
         setSession(currentSession);
         setIsAuthenticated(!!currentSession);
         setUserId(currentSession?.user?.id || null);
         setUser(currentSession?.user || null);
-        
+
         if (currentSession) {
           console.log("Retrieved existing session for user:", currentSession?.user?.id);
           // For debugging
           console.log("User metadata:", currentSession.user.user_metadata);
           console.log("User role from metadata:", currentSession.user.user_metadata?.role);
+        } else {
+          console.log("No existing session found");
         }
       } catch (error) {
         console.error("Error checking auth session:", error);
@@ -60,6 +77,7 @@ export function useAuthState() {
 
     // Cleanup subscription on unmount
     return () => {
+      console.log("Cleaning up auth subscription");
       subscription.unsubscribe();
     };
   }, []);
