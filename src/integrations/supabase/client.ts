@@ -2,42 +2,10 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Use environment variables for Supabase configuration
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://bguhoroceezcneqfrdkp.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJndWhvcm9jZWV6Y25lcWZyZGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExMDQyMDgsImV4cCI6MjA1NjY4MDIwOH0.7F0GFeg382m5_n_8mko5W4Tny-hJ150LTilNWgOeGUU";
+const SUPABASE_URL = "https://bguhoroceezcneqfrdkp.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJndWhvcm9jZWV6Y25lcWZyZGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExMDQyMDgsImV4cCI6MjA1NjY4MDIwOH0.7F0GFeg382m5_n_8mko5W4Tny-hJ150LTilNWgOeGUU";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-// Create the Supabase client with additional options for production
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  },
-  global: {
-    headers: {
-      'x-application-name': import.meta.env.VITE_APP_NAME || 'Zimbabwe Chat Requestor',
-      'x-application-version': import.meta.env.VITE_APP_VERSION || '1.0.0'
-    }
-  },
-  db: {
-    schema: 'public'
-  },
-  // Add debug mode in development
-  debug: import.meta.env.DEV
-});
-
-// Helper function to handle Supabase errors consistently
-export const handleSupabaseError = (error: any, context: string = 'Supabase operation') => {
-  console.error(`${context} failed:`, error);
-
-  // Return a standardized error object
-  return {
-    message: error.message || 'An unexpected error occurred',
-    code: error.code || 'unknown',
-    details: error.details || null,
-    context
-  };
-};
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);

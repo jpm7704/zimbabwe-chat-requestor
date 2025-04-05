@@ -17,7 +17,7 @@ export type Database = {
           request_id: string | null
           size: number
           type: string
-          uploaded_at: string
+          uploaded_at: string | null
           url: string
         }
         Insert: {
@@ -27,7 +27,7 @@ export type Database = {
           request_id?: string | null
           size: number
           type: string
-          uploaded_at?: string
+          uploaded_at?: string | null
           url: string
         }
         Update: {
@@ -37,7 +37,7 @@ export type Database = {
           request_id?: string | null
           size?: number
           type?: string
-          uploaded_at?: string
+          uploaded_at?: string | null
           url?: string
         }
         Relationships: [
@@ -57,61 +57,198 @@ export type Database = {
           },
         ]
       }
+      audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string | null
+          table_name: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       field_visits: {
         Row: {
           assigned_officer_id: string | null
           assigned_officer_name: string | null
-          created_at: string
+          created_at: string | null
           id: string
-          location: string
-          notes: string | null
+          location: string | null
           priority: string
           purpose: string | null
           region: string | null
           report_id: string | null
-          report_submitted: boolean
+          report_submitted: boolean | null
           request_id: string | null
           status: string
-          visit_date: string
+          updated_at: string | null
+          visit_date: string | null
         }
         Insert: {
           assigned_officer_id?: string | null
           assigned_officer_name?: string | null
-          created_at?: string
+          created_at?: string | null
           id?: string
-          location: string
-          notes?: string | null
+          location?: string | null
           priority?: string
           purpose?: string | null
           region?: string | null
           report_id?: string | null
-          report_submitted?: boolean
+          report_submitted?: boolean | null
           request_id?: string | null
           status?: string
-          visit_date: string
+          updated_at?: string | null
+          visit_date?: string | null
         }
         Update: {
           assigned_officer_id?: string | null
           assigned_officer_name?: string | null
-          created_at?: string
+          created_at?: string | null
           id?: string
-          location?: string
-          notes?: string | null
+          location?: string | null
           priority?: string
           purpose?: string | null
           region?: string | null
           report_id?: string | null
-          report_submitted?: boolean
+          report_submitted?: boolean | null
           request_id?: string | null
           status?: string
-          visit_date?: string
+          updated_at?: string | null
+          visit_date?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "field_visits_assigned_officer_id_fkey"
+            columns: ["assigned_officer_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "field_visits_request_id_fkey"
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      issues: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          project_id: string | null
+          reported_date: string
+          resolved_date: string | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          project_id?: string | null
+          reported_date?: string
+          resolved_date?: string | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          project_id?: string | null
+          reported_date?: string
+          resolved_date?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issues_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kpis: {
+        Row: {
+          created_at: string
+          current_value: number
+          description: string | null
+          id: string
+          name: string
+          project_id: string | null
+          target_value: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: number
+          description?: string | null
+          id?: string
+          name: string
+          project_id?: string | null
+          target_value: number
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: number
+          description?: string | null
+          id?: string
+          name?: string
+          project_id?: string | null
+          target_value?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kpis_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -123,7 +260,7 @@ export type Database = {
           is_system_message: boolean | null
           request_id: string
           sender_id: string
-          timestamp: string
+          timestamp: string | null
         }
         Insert: {
           content: string
@@ -131,7 +268,7 @@ export type Database = {
           is_system_message?: boolean | null
           request_id: string
           sender_id: string
-          timestamp?: string
+          timestamp?: string | null
         }
         Update: {
           content?: string
@@ -139,7 +276,7 @@ export type Database = {
           is_system_message?: boolean | null
           request_id?: string
           sender_id?: string
-          timestamp?: string
+          timestamp?: string | null
         }
         Relationships: [
           {
@@ -153,126 +290,520 @@ export type Database = {
       }
       notifications: {
         Row: {
-          created_at: string
+          content: string
+          created_at: string | null
           id: string
           link: string | null
-          message: string
-          read: boolean
-          related_id: string | null
-          target_roles: string[]
+          read: boolean | null
           title: string
           type: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          link?: string | null
+          read?: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          link?: string | null
+          read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          program_id: string | null
+          responsible_party_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
-          link?: string | null
-          message: string
-          read?: boolean
-          related_id?: string | null
-          target_roles: string[]
-          title: string
-          type: string
+          program_id?: string | null
+          responsible_party_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
-          link?: string | null
-          message?: string
-          read?: boolean
-          related_id?: string | null
-          target_roles?: string[]
-          title?: string
-          type?: string
+          program_id?: string | null
+          responsible_party_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_assignments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_assignments_responsible_party_id_fkey"
+            columns: ["responsible_party_id"]
+            isOneToOne: false
+            referencedRelation: "responsible_parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      programs: {
+        Row: {
+          actual_end_date: string | null
+          budget: number
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          spent: number
+          start_date: string
+          status: Database["public"]["Enums"]["status_type"]
+          target_end_date: string
+          thematic_area: Database["public"]["Enums"]["thematic_area"]
+          updated_at: string
+        }
+        Insert: {
+          actual_end_date?: string | null
+          budget?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          spent?: number
+          start_date: string
+          status?: Database["public"]["Enums"]["status_type"]
+          target_end_date: string
+          thematic_area: Database["public"]["Enums"]["thematic_area"]
+          updated_at?: string
+        }
+        Update: {
+          actual_end_date?: string | null
+          budget?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          spent?: number
+          start_date?: string
+          status?: Database["public"]["Enums"]["status_type"]
+          target_end_date?: string
+          thematic_area?: Database["public"]["Enums"]["thematic_area"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      project_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string | null
+          responsible_party_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id?: string | null
+          responsible_party_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string | null
+          responsible_party_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_assignments_responsible_party_id_fkey"
+            columns: ["responsible_party_id"]
+            isOneToOne: false
+            referencedRelation: "responsible_parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          activities: string | null
+          budget: number
+          completed_date: string | null
+          created_at: string
+          description: string | null
+          due_date: string
+          id: string
+          milestones: string | null
+          name: string
+          objectives: string | null
+          program_id: string | null
+          progress: number
+          region: string | null
+          resources: string | null
+          risks: string | null
+          spent: number
+          start_date: string
+          status: Database["public"]["Enums"]["status_type"]
+          updated_at: string
+        }
+        Insert: {
+          activities?: string | null
+          budget?: number
+          completed_date?: string | null
+          created_at?: string
+          description?: string | null
+          due_date: string
+          id?: string
+          milestones?: string | null
+          name: string
+          objectives?: string | null
+          program_id?: string | null
+          progress?: number
+          region?: string | null
+          resources?: string | null
+          risks?: string | null
+          spent?: number
+          start_date: string
+          status?: Database["public"]["Enums"]["status_type"]
+          updated_at?: string
+        }
+        Update: {
+          activities?: string | null
+          budget?: number
+          completed_date?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string
+          id?: string
+          milestones?: string | null
+          name?: string
+          objectives?: string | null
+          program_id?: string | null
+          progress?: number
+          region?: string | null
+          resources?: string | null
+          risks?: string | null
+          spent?: number
+          start_date?: string
+          status?: Database["public"]["Enums"]["status_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      regions: {
+        Row: {
+          active: boolean | null
+          code: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          code?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      report_templates: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          template_fields: Json
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          template_fields: Json
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          template_fields?: Json
+          updated_at?: string | null
         }
         Relationships: []
       }
       reports: {
         Row: {
           author_id: string | null
-          author_name: string | null
-          category: string | null
-          content: string | null
-          created_at: string
+          content: string
+          created_at: string | null
+          field_visit_id: string | null
           id: string
-          region: string | null
+          request_id: string | null
           status: string
           title: string
-          type: string | null
-          updated_at: string
+          type: string
+          updated_at: string | null
         }
         Insert: {
           author_id?: string | null
-          author_name?: string | null
-          category?: string | null
-          content?: string | null
-          created_at?: string
+          content: string
+          created_at?: string | null
+          field_visit_id?: string | null
           id?: string
-          region?: string | null
+          request_id?: string | null
           status?: string
           title: string
-          type?: string | null
-          updated_at?: string
+          type: string
+          updated_at?: string | null
         }
         Update: {
           author_id?: string | null
-          author_name?: string | null
-          category?: string | null
-          content?: string | null
-          created_at?: string
+          content?: string
+          created_at?: string | null
+          field_visit_id?: string | null
           id?: string
-          region?: string | null
+          request_id?: string | null
           status?: string
           title?: string
-          type?: string | null
-          updated_at?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_field_visit_id_fkey"
+            columns: ["field_visit_id"]
+            isOneToOne: false
+            referencedRelation: "field_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      request_types: {
+        Row: {
+          active: boolean | null
+          color: string | null
+          created_at: string | null
+          description: string | null
+          display_name: string
+          icon: string | null
+          id: string
+          key: string
+          requires_approval: boolean | null
+          requires_field_visit: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          icon?: string | null
+          id?: string
+          key: string
+          requires_approval?: boolean | null
+          requires_field_visit?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          icon?: string | null
+          id?: string
+          key?: string
+          requires_approval?: boolean | null
+          requires_field_visit?: boolean | null
+          updated_at?: string | null
         }
         Relationships: []
       }
       requests: {
         Row: {
-          created_at: string
+          created_at: string | null
           description: string
+          due_date: string | null
           field_officer_id: string | null
           id: string
+          is_enquiry: boolean | null
           notes: string | null
+          priority: string | null
           program_manager_id: string | null
+          region: string | null
           status: string
           ticket_number: string
           title: string
           type: string
-          updated_at: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           description: string
+          due_date?: string | null
           field_officer_id?: string | null
           id?: string
+          is_enquiry?: boolean | null
           notes?: string | null
+          priority?: string | null
           program_manager_id?: string | null
+          region?: string | null
           status?: string
           ticket_number: string
           title: string
           type: string
-          updated_at?: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           description?: string
+          due_date?: string | null
           field_officer_id?: string | null
           id?: string
+          is_enquiry?: boolean | null
           notes?: string | null
+          priority?: string | null
           program_manager_id?: string | null
+          region?: string | null
           status?: string
           ticket_number?: string
           title?: string
           type?: string
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
+      }
+      responsible_parties: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          role: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          role?: string
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_global: boolean | null
+          key: string
+          updated_at: string | null
+          user_id: string | null
+          value: Json
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_global?: boolean | null
+          key: string
+          updated_at?: string | null
+          user_id?: string | null
+          value: Json
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_global?: boolean | null
+          key?: string
+          updated_at?: string | null
+          user_id?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       staff_roles: {
         Row: {
@@ -307,43 +838,13 @@ export type Database = {
         }
         Relationships: []
       }
-      staff_verification_codes: {
-        Row: {
-          code: string
-          created_at: string | null
-          expires_at: string
-          id: string
-          used: boolean | null
-          used_at: string | null
-          user_id: string
-        }
-        Insert: {
-          code: string
-          created_at?: string | null
-          expires_at: string
-          id?: string
-          used?: boolean | null
-          used_at?: string | null
-          user_id: string
-        }
-        Update: {
-          code?: string
-          created_at?: string | null
-          expires_at?: string
-          id?: string
-          used?: boolean | null
-          used_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       status_updates: {
         Row: {
           id: string
           notes: string | null
           request_id: string
           status: string
-          timestamp: string
+          timestamp: string | null
           updated_by: string
         }
         Insert: {
@@ -351,7 +852,7 @@ export type Database = {
           notes?: string | null
           request_id: string
           status: string
-          timestamp?: string
+          timestamp?: string | null
           updated_by: string
         }
         Update: {
@@ -359,7 +860,7 @@ export type Database = {
           notes?: string | null
           request_id?: string
           status?: string
-          timestamp?: string
+          timestamp?: string | null
           updated_by?: string
         }
         Relationships: [
@@ -372,82 +873,192 @@ export type Database = {
           },
         ]
       }
+      system_status: {
+        Row: {
+          component: string
+          created_at: string | null
+          id: string
+          last_checked: string | null
+          message: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          component: string
+          created_at?: string | null
+          id?: string
+          last_checked?: string | null
+          message?: string | null
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          component?: string
+          created_at?: string | null
+          id?: string
+          last_checked?: string | null
+          message?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
-          created_at: string
+          created_at: string | null
           email: string
+          first_name: string | null
           id: string
-          name: string
+          last_name: string | null
           region: string | null
           role: string
           staff_number: number | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
-          created_at?: string
+          created_at?: string | null
           email: string
+          first_name?: string | null
           id: string
-          name: string
+          last_name?: string | null
           region?: string | null
           role?: string
           staff_number?: number | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
-          created_at?: string
+          created_at?: string | null
           email?: string
+          first_name?: string | null
           id?: string
-          name?: string
+          last_name?: string | null
           region?: string | null
           role?: string
           staff_number?: number | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: []
+      }
+      workflow_statuses: {
+        Row: {
+          approver_role: string | null
+          color: string | null
+          created_at: string | null
+          description: string | null
+          display_name: string
+          icon: string | null
+          id: string
+          is_final: boolean | null
+          key: string
+          order_index: number
+          requires_approval: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          approver_role?: string | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          icon?: string | null
+          id?: string
+          is_final?: boolean | null
+          key: string
+          order_index: number
+          requires_approval?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          approver_role?: string | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          icon?: string | null
+          id?: string
+          is_final?: boolean | null
+          key?: string
+          order_index?: number
+          requires_approval?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      workflow_transitions: {
+        Row: {
+          allowed_roles: string[]
+          created_at: string | null
+          from_status: string
+          id: string
+          requires_approval: boolean | null
+          requires_comment: boolean | null
+          to_status: string
+          updated_at: string | null
+        }
+        Insert: {
+          allowed_roles: string[]
+          created_at?: string | null
+          from_status: string
+          id?: string
+          requires_approval?: boolean | null
+          requires_comment?: boolean | null
+          to_status: string
+          updated_at?: string | null
+        }
+        Update: {
+          allowed_roles?: string[]
+          created_at?: string | null
+          from_status?: string
+          id?: string
+          requires_approval?: boolean | null
+          requires_comment?: boolean | null
+          to_status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_transitions_from_status_fkey"
+            columns: ["from_status"]
+            isOneToOne: false
+            referencedRelation: "workflow_statuses"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "workflow_transitions_to_status_fkey"
+            columns: ["to_status"]
+            isOneToOne: false
+            referencedRelation: "workflow_statuses"
+            referencedColumns: ["key"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      can_manage_staff: {
-        Args: {
-          user_id: string
-        }
-        Returns: boolean
-      }
-      get_available_staff_roles: {
+      create_default_admin: {
         Args: Record<PropertyKey, never>
-        Returns: {
-          role_key: string
-          display_name: string
-          description: string
-        }[]
-      }
-      get_user_profile_role: {
-        Args: {
-          user_id: string
-        }
-        Returns: string
-      }
-      get_user_region: {
-        Args: {
-          user_id: string
-        }
-        Returns: string
-      }
-      get_user_role: {
-        Args: {
-          user_id: string
-        }
-        Returns: string
+        Returns: undefined
       }
     }
     Enums: {
-      [_ in never]: never
+      status_type:
+        | "On Track"
+        | "At Risk"
+        | "Delayed"
+        | "Completed"
+        | "Not Started"
+      thematic_area:
+        | "Health and Wellness"
+        | "Food & Nutrition Security"
+        | "Education"
+        | "WASH"
+        | "Empowerment"
+        | "Disaster Risk Reduction"
     }
     CompositeTypes: {
       [_ in never]: never
