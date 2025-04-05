@@ -46,25 +46,30 @@ export const AvatarUpload = ({ avatarUrl, userInitials, userId, onAvatarUpdate }
 
       // Create a unique file name to prevent collisions
       const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}-${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
-      
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+      const filePath = fileName;
+
       // Upload the file to Supabase Storage
-      const { error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: true
         });
-      
+
       if (uploadError) {
-        throw uploadError;
+        console.error('Avatar upload error details:', uploadError);
+        throw new Error(`Upload failed: ${uploadError.message}`);
       }
-      
+
+      console.log('Upload successful:', uploadData);
+
       // Get the public URL for the uploaded file
       const { data } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
+
+      console.log('Public URL:', data.publicUrl);
 
       if (!data.publicUrl) {
         throw new Error("Failed to get public URL for uploaded avatar");
@@ -72,11 +77,11 @@ export const AvatarUpload = ({ avatarUrl, userInitials, userId, onAvatarUpdate }
 
       // Update user profile with the new avatar URL
       const result = await onAvatarUpdate(data.publicUrl);
-      
+
       if (result.error) {
         throw result.error;
       }
-      
+
       toast({
         title: "Avatar updated",
         description: "Your profile picture has been successfully updated",
@@ -99,11 +104,11 @@ export const AvatarUpload = ({ avatarUrl, userInitials, userId, onAvatarUpdate }
         <AvatarImage src={avatarUrl || ""} alt="Profile" />
         <AvatarFallback className="text-xl">{userInitials}</AvatarFallback>
       </Avatar>
-      
+
       <div className="relative">
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           className="flex items-center gap-2"
           disabled={isUploading}
           onClick={() => document.getElementById('avatar-upload')?.click()}
@@ -120,10 +125,10 @@ export const AvatarUpload = ({ avatarUrl, userInitials, userId, onAvatarUpdate }
             </>
           )}
         </Button>
-        <input 
-          id="avatar-upload" 
-          type="file" 
-          accept="image/*" 
+        <input
+          id="avatar-upload"
+          type="file"
+          accept="image/*"
           className="hidden"
           onChange={handleFileChange}
           disabled={isUploading}
