@@ -1,5 +1,5 @@
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
 import {
@@ -20,6 +20,7 @@ interface RoleMenuProps {
 
 const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
   const { userProfile } = useAuth();
+  const location = useLocation();
   const { 
     isAdmin,
     isRegularUser,
@@ -31,6 +32,9 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
     isCEO,
     isPatron
   } = useRoles(userProfile);
+  
+  // Debug user role
+  console.log("RoleMenu - Current user role:", userProfile?.role);
   
   const linkClasses = variant === "sidebar" 
     ? "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground"
@@ -51,13 +55,18 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
   const isFieldStaff = () => {
     return isFieldOfficer() || isProjectOfficer() || isAssistantProjectOfficer();
   };
+  
+  // Helper to determine if current path is active
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
 
   return (
     <nav className="space-y-1">
       {/* Dashboard - shown to all users */}
       <Link 
         to="/dashboard" 
-        className={`${linkClasses} ${window.location.pathname === '/dashboard' ? activeLinkClasses : ''}`}
+        className={`${linkClasses} ${isActive('/dashboard') ? activeLinkClasses : ''}`}
         onClick={handleLinkClick}
       >
         <Home className="h-4 w-4" />
@@ -67,7 +76,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       {/* Requests - shown to all staff */}
       <Link 
         to="/requests" 
-        className={`${linkClasses} ${window.location.pathname === '/requests' ? activeLinkClasses : ''}`}
+        className={`${linkClasses} ${isActive('/requests') ? activeLinkClasses : ''}`}
         onClick={handleLinkClick}
       >
         <ClipboardCheck className="h-4 w-4" />
@@ -78,7 +87,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       {(isFieldStaff() || isHeadOfPrograms() || isDirector() || isCEO() || isPatron() || isAdmin()) && (
         <Link 
           to="/field-work" 
-          className={`${linkClasses} ${window.location.pathname === '/field-work' ? activeLinkClasses : ''}`}
+          className={`${linkClasses} ${isActive('/field-work') ? activeLinkClasses : ''}`}
           onClick={handleLinkClick}
         >
           <FileText className="h-4 w-4" />
@@ -90,7 +99,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       {(isFieldStaff() || isHeadOfPrograms() || isDirector() || isCEO() || isPatron() || isAdmin()) && (
         <Link 
           to="/reports" 
-          className={`${linkClasses} ${window.location.pathname === '/reports' ? activeLinkClasses : ''}`}
+          className={`${linkClasses} ${isActive('/reports') ? activeLinkClasses : ''}`}
           onClick={handleLinkClick}
         >
           <FileText className="h-4 w-4" />
@@ -102,7 +111,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       {(isHeadOfPrograms() || isDirector() || isCEO() || isPatron() || isAdmin()) && (
         <Link 
           to="/analytics" 
-          className={`${linkClasses} ${window.location.pathname === '/analytics' ? activeLinkClasses : ''}`}
+          className={`${linkClasses} ${isActive('/analytics') ? activeLinkClasses : ''}`}
           onClick={handleLinkClick}
         >
           <BarChart3 className="h-4 w-4" />
@@ -114,7 +123,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       {(isDirector() || isCEO() || isPatron() || isAdmin()) && (
         <Link 
           to="/approvals" 
-          className={`${linkClasses} ${window.location.pathname === '/approvals' ? activeLinkClasses : ''}`}
+          className={`${linkClasses} ${isActive('/approvals') ? activeLinkClasses : ''}`}
           onClick={handleLinkClick}
         >
           <UserCheck className="h-4 w-4" />
@@ -126,7 +135,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       {(isDirector() || isCEO() || isAdmin()) && (
         <Link 
           to="/admin/users" 
-          className={`${linkClasses} ${window.location.pathname === '/admin/users' ? activeLinkClasses : ''}`}
+          className={`${linkClasses} ${isActive('/admin/users') ? activeLinkClasses : ''}`}
           onClick={handleLinkClick}
         >
           <UserCheck className="h-4 w-4" />
@@ -139,7 +148,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
         <>
           <Link 
             to="/admin/dashboard" 
-            className={`${linkClasses} ${window.location.pathname === '/admin/dashboard' ? activeLinkClasses : ''}`}
+            className={`${linkClasses} ${isActive('/admin/dashboard') ? activeLinkClasses : ''}`}
             onClick={handleLinkClick}
           >
             <Shield className="h-4 w-4" />
@@ -148,7 +157,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
           
           <Link 
             to="/admin/roles" 
-            className={`${linkClasses} ${window.location.pathname === '/admin/roles' ? activeLinkClasses : ''}`}
+            className={`${linkClasses} ${isActive('/admin/roles') ? activeLinkClasses : ''}`}
             onClick={handleLinkClick}
           >
             <Shield className="h-4 w-4" />
@@ -157,7 +166,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
           
           <Link 
             to="/admin/system" 
-            className={`${linkClasses} ${window.location.pathname === '/admin/system' ? activeLinkClasses : ''}`}
+            className={`${linkClasses} ${isActive('/admin/system') ? activeLinkClasses : ''}`}
             onClick={handleLinkClick}
           >
             <Settings className="h-4 w-4" />
@@ -169,7 +178,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       {/* My Profile - shown to all users */}
       <Link 
         to="/profile" 
-        className={`${linkClasses} ${window.location.pathname === '/profile' ? activeLinkClasses : ''}`}
+        className={`${linkClasses} ${isActive('/profile') ? activeLinkClasses : ''}`}
         onClick={handleLinkClick}
       >
         <UserCog className="h-4 w-4" />
@@ -179,7 +188,7 @@ const RoleMenu = ({ variant = "sidebar", onItemClick }: RoleMenuProps) => {
       {/* Settings - shown to all users */}
       <Link 
         to="/settings" 
-        className={`${linkClasses} ${window.location.pathname === '/settings' ? activeLinkClasses : ''}`}
+        className={`${linkClasses} ${isActive('/settings') ? activeLinkClasses : ''}`}
         onClick={handleLinkClick}
       >
         <Settings className="h-4 w-4" />

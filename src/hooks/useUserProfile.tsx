@@ -32,15 +32,7 @@ export function useUserProfile(userId: string | null) {
         setProfileLoading(true);
         setProfileError(null);
         
-        // Check if we have cached profile data
-        const cachedProfile = sessionStorage.getItem(`userProfile:${userId}`);
-        if (cachedProfile) {
-          console.log("Using cached profile data for user:", userId);
-          setUserProfile(JSON.parse(cachedProfile));
-          setProfileLoading(false);
-          
-          // Still fetch fresh data in the background
-        }
+        console.log("Fetching profile for user ID:", userId);
         
         // Query the user_profiles table
         const { data, error } = await supabase
@@ -50,6 +42,7 @@ export function useUserProfile(userId: string | null) {
           .maybeSingle();
         
         if (error) {
+          console.error("Error fetching profile:", error);
           throw error;
         }
         
@@ -71,11 +64,22 @@ export function useUserProfile(userId: string | null) {
           
           // Update state
           setUserProfile(profileData);
-          console.log("Fetched user profile:", profileData);
+          console.log("Fetched user profile successfully:", profileData);
         } else {
           console.warn("No user profile found for user:", userId);
           // Clear cached data if no profile found
           sessionStorage.removeItem(`userProfile:${userId}`);
+          
+          // Create a default profile with just the ID
+          // This prevents "No profile data available" when profile exists in auth but not in database
+          if (userId) {
+            setUserProfile({
+              id: userId,
+              first_name: "User",
+              email: "",
+              role: "user"
+            });
+          }
         }
       } catch (error: any) {
         setProfileError(error);

@@ -93,6 +93,19 @@ export const useRoles = (userProfile: UserProfile | null) => {
           "Engage with major donors and key stakeholders",
           "Provide guidance on organizational vision and direction"
         ]
+      },
+      admin: {
+        title: "Administrator",
+        description: "System administrator with full access",
+        badgeClass: "bg-slate-800 hover:bg-slate-900",
+        permissions: ["full_system_access", "manage_users", "manage_settings"],
+        responsibilities: [
+          "Manage user accounts and access control",
+          "Configure system settings and parameters",
+          "Monitor system performance and security",
+          "Troubleshoot technical issues",
+          "Deploy system updates and improvements"
+        ]
       }
     });
   }, []);
@@ -116,6 +129,7 @@ export const useRoles = (userProfile: UserProfile | null) => {
 
     // Map the database role value to our frontend role key
     const roleKey = userProfile.role.toLowerCase();
+    console.log("Getting role info for role key:", roleKey);
     
     // Return the role info or a default if not found
     return roleData[roleKey] || roleData.user || {

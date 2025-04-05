@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAuthenticated, getRoleHomePage } = useAuth();
+  const { isAuthenticated, getRoleHomePage, userProfile } = useAuth();
   
   const [formData, setFormData] = useState({
     email: "",
@@ -25,7 +25,9 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(getRoleHomePage());
+      const homePage = getRoleHomePage();
+      console.log("Redirecting to role-specific page:", homePage);
+      navigate(homePage);
     }
   }, [isAuthenticated, navigate, getRoleHomePage]);
 
@@ -56,15 +58,21 @@ const Login = () => {
           variant: "destructive"
         });
       } else {
-        console.log("Sign in successful, role:", data.user?.user_metadata?.role);
+        console.log("Sign in successful, user:", data.user);
+        console.log("Sign in successful, session:", data.session);
         
         toast({
           title: "Login successful",
           description: "Welcome back to BGF Zimbabwe support portal."
         });
         
-        // Use role-specific redirect
-        navigate(getRoleHomePage());
+        // Wait a moment for user profile to be loaded before redirecting
+        setTimeout(() => {
+          // Use role-specific redirect
+          const homePage = getRoleHomePage();
+          console.log("Redirecting to role-specific page:", homePage);
+          navigate(homePage);
+        }, 500);
       }
     } catch (err: any) {
       setError(err.message || "An error occurred during login");
