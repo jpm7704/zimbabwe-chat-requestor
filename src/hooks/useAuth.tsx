@@ -1,20 +1,19 @@
 
 import { useAuthState } from "./useAuthState";
-import { useUserProfile, UserProfile } from "./useUserProfile";
+import { useUserProfile } from "./useUserProfile";
 import { useState, useEffect } from "react";
-
-export type { UserProfile };
+import { UserProfile } from "@/types";
 
 export function useAuth() {
   const { isAuthenticated, userId, loading: authLoading, handleLogout, session, user } = useAuthState();
-  const { 
-    userProfile, 
-    profileLoading, 
-    formatRole, 
+  const {
+    userProfile,
+    profileLoading,
+    formatRole,
     updateUserProfile,
-    updateAvatar 
+    updateAvatar
   } = useUserProfile(userId);
-  
+
   // For role selection during login
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
@@ -34,22 +33,22 @@ export function useAuth() {
   const getRoleHomePage = () => {
     // First check session metadata for role
     const metadataRole = session?.user?.user_metadata?.role;
-    
+
     // Then check profile role
     const profileRole = userProfile?.role;
-    
+
     // Use the most authoritative source (profile takes precedence)
     const role = profileRole || metadataRole;
-    
+
     if (!role) {
       console.warn("No role found, defaulting to dashboard");
       return '/dashboard';
     }
-    
+
     console.log("Getting home page for role:", role);
     return getRouteForRole(role.toLowerCase());
   };
-  
+
   // Extract the role-based routing logic to a separate function
   const getRouteForRole = (role: string) => {
     switch (role.toLowerCase()) {

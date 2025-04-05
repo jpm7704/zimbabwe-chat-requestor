@@ -1,17 +1,15 @@
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, handleSupabaseError } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { UserProfile } from "@/types";
 
-export type UserProfile = {
-  id: string;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  role?: string;
-  avatar_url?: string;
-  region?: string;
-  staff_number?: number;
+// Helper function to compute full name
+const getFullName = (firstName: string, lastName?: string): string => {
+  if (!firstName && !lastName) return 'Unknown User';
+  if (!lastName) return firstName;
+  if (!firstName) return lastName;
+  return `${firstName} ${lastName}`;
 };
 
 export function useUserProfile(userId: string | null) {
@@ -22,24 +20,35 @@ export function useUserProfile(userId: string | null) {
 
   // Fetch the user profile from the database
   useEffect(() => {
+    // Use a mounted flag to prevent state updates after unmount
+    let isMounted = true;
+
     const fetchProfile = async () => {
       if (!userId) {
-        setProfileLoading(false);
+        if (isMounted) setProfileLoading(false);
         return;
       }
 
       try {
-        setProfileLoading(true);
-        setProfileError(null);
+        if (isMounted) {
+          setProfileLoading(true);
+          setProfileError(null);
+        }
 
         console.log("Fetching profile for user ID:", userId);
 
         // First, try to get from session storage for quicker loading
         const cachedProfile = sessionStorage.getItem(`userProfile:${userId}`);
-        if (cachedProfile) {
-          const parsedProfile = JSON.parse(cachedProfile);
-          setUserProfile(parsedProfile);
-          console.log("Using cached profile:", parsedProfile);
+        if (cachedProfile && isMounted) {
+          try {
+            const parsedProfile = JSON.parse(cachedProfile);
+            setUserProfile(parsedProfile);
+            console.log("Using cached profile:", parsedProfile);
+          } catch (parseError) {
+            console.error("Error parsing cached profile:", parseError);
+            // Clear invalid cache
+            sessionStorage.removeItem(`userProfile:${userId}`);
+          }
         }
 
         // Then still try to fetch fresh data (but don't block UI)
@@ -52,9 +61,11 @@ export function useUserProfile(userId: string | null) {
             // Try fetching profile directly as a fallback (bypassing RLS)
             const { data: directData, error: directError } = await supabase
               .from('user_profiles')
-              .select('id, name, email, role, avatar_url, region, staff_number')
+              .select('id, first_name, last_name, email, role, avatar_url, region, staff_number, created_at, updated_at')
               .eq('id', userId)
               .maybeSingle();
+
+            console.log('Profile query result:', { data: directData, error: directError });
 
             if (directError) {
               console.warn("Direct profile query error:", directError);
@@ -77,10 +88,12 @@ export function useUserProfile(userId: string | null) {
               console.log("Created fallback profile from auth data:", fallbackProfile);
             } else if (directData) {
               // Map the database fields to our UserProfile type
+              console.log('Raw profile data from database:', directData);
+
               const profileData = {
                 id: directData.id,
-                first_name: directData.name || '',  // Use 'name' field as 'first_name'
-                last_name: '',  // Initialize as empty since it's not in the database yet
+                first_name: directData.first_name || '',
+                last_name: directData.last_name || '',
                 email: directData.email,
                 role: directData.role,
                 avatar_url: directData.avatar_url,
@@ -88,12 +101,16 @@ export function useUserProfile(userId: string | null) {
                 staff_number: directData.staff_number
               };
 
+              console.log('Mapped profile data:', profileData);
+
               // Cache the profile data
               sessionStorage.setItem(`userProfile:${userId}`, JSON.stringify(profileData));
 
-              // Update state
-              setUserProfile(profileData);
-              console.log("Fetched user profile successfully:", profileData);
+              // Update state if component is still mounted
+              if (isMounted) {
+                setUserProfile(profileData);
+                console.log("Fetched user profile successfully:", profileData);
+              }
             }
           }
         } catch (fetchError) {
@@ -102,36 +119,49 @@ export function useUserProfile(userId: string | null) {
           // We'll use cached or fallback profile instead
         }
       } catch (error: any) {
-        setProfileError(error);
         console.error("Failed to load user profile:", error);
 
-        // Create a default profile as fallback
-        if (userId) {
-          const fallbackProfile = {
-            id: userId,
-            first_name: "User",
-            email: "",
-            role: "user"
-          };
-          setUserProfile(fallbackProfile);
-          console.log("Using fallback profile due to error:", fallbackProfile);
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setProfileError(error);
+
+          // Create a default profile as fallback
+          if (userId) {
+            const fallbackProfile = {
+              id: userId,
+              first_name: "User",
+              email: "",
+              role: "user"
+            };
+            setUserProfile(fallbackProfile);
+            console.log("Using fallback profile due to error:", fallbackProfile);
+          }
+
+          setProfileLoading(false);
         }
-      } finally {
-        setProfileLoading(false);
       }
     };
 
     fetchProfile();
+
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+      console.log("Profile hook cleanup - preventing further state updates");
+    };
   }, [userId]);
 
   // Update the user profile
   const updateUserProfile = async (updatedProfile: Partial<UserProfile>) => {
-    if (!userProfile?.id) return { error: new Error("No user profile found") };
+    if (!userProfile?.id) {
+      console.error("Cannot update profile: No user profile found");
+      return { error: new Error("No user profile found") };
+    }
 
     try {
       setProfileLoading(true);
 
-      // Format the data for the database
+      // Format the data for the database - ensure we're using the correct field names
       const formattedData = {
         first_name: updatedProfile.first_name || userProfile.first_name,
         last_name: updatedProfile.last_name || userProfile.last_name,
@@ -139,28 +169,39 @@ export function useUserProfile(userId: string | null) {
         region: updatedProfile.region || userProfile.region,
         avatar_url: updatedProfile.avatar_url || userProfile.avatar_url,
         role: updatedProfile.role || userProfile.role,
-        staff_number: updatedProfile.staff_number || userProfile.staff_number
+        staff_number: updatedProfile.staff_number || userProfile.staff_number,
+        updated_at: new Date().toISOString() // Add updated timestamp
       };
 
       console.log('Updating profile with data:', formattedData);
+      console.log('User ID for update:', userProfile.id);
 
       // First try to update
       console.log('Executing Supabase update for user ID:', userProfile.id);
-      let { data: updateData, error } = await supabase
+      let { data: updateData, error, status, statusText } = await supabase
         .from('user_profiles')
         .update(formattedData)
         .eq('id', userProfile.id)
         .select();
 
-      console.log('Update response:', { data: updateData, error });
+      console.log('Update response:', { data: updateData, error, status, statusText });
 
       // If update fails due to no existing row, try to insert instead
       if (error) {
         console.error('Update error:', error);
 
-        if (error.code === '23502') { // "null value in column violates not-null constraint"
+        // Try to get more information about the error
+        const errorDetails = {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        };
+        console.error('Error details:', errorDetails);
+
+        if (error.code === '23502' || error.message?.includes("violates not-null constraint")) {
           console.log("Profile doesn't exist yet, creating new profile...");
-          const { data: insertData, error: insertError } = await supabase
+          const { data: insertData, error: insertError, status: insertStatus } = await supabase
             .from('user_profiles')
             .insert({
               id: userProfile.id,
@@ -168,22 +209,42 @@ export function useUserProfile(userId: string | null) {
             })
             .select();
 
-          console.log('Insert response:', { data: insertData, error: insertError });
+          console.log('Insert response:', { data: insertData, error: insertError, status: insertStatus });
 
           if (insertError) {
             console.error('Insert error:', insertError);
             throw insertError;
+          }
+
+          // Use the inserted data if available
+          if (insertData && insertData.length > 0) {
+            updateData = insertData;
           }
         } else {
           throw error;
         }
       }
 
-      // Update the local state
+      // If we have update data, use it to update the local state
+      if (updateData && updateData.length > 0) {
+        console.log('Successfully updated profile, received data:', updateData[0]);
+      }
+
+      // Update the local state with the response data if available, otherwise use the input data
       const updatedUserProfile = {
         ...userProfile,
-        ...updatedProfile
+        ...(updateData && updateData.length > 0 ? {
+          first_name: updateData[0].first_name,
+          last_name: updateData[0].last_name,
+          email: updateData[0].email,
+          region: updateData[0].region,
+          avatar_url: updateData[0].avatar_url,
+          role: updateData[0].role,
+          staff_number: updateData[0].staff_number
+        } : updatedProfile)
       };
+
+      console.log('Final updated profile:', updatedUserProfile);
 
       setUserProfile(updatedUserProfile);
 
@@ -196,7 +257,7 @@ export function useUserProfile(userId: string | null) {
         description: "Your profile information has been successfully updated.",
       });
 
-      return { success: true };
+      return { success: true, data: updatedUserProfile };
     } catch (error: any) {
       console.error("Failed to update profile:", error);
 
@@ -207,7 +268,7 @@ export function useUserProfile(userId: string | null) {
         variant: "destructive",
       });
 
-      return { error };
+      return { error, message: error.message || "Failed to update profile" };
     } finally {
       setProfileLoading(false);
     }

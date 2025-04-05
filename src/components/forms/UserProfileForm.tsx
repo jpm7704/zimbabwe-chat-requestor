@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserProfile } from "@/hooks/useUserProfile";
+import { UserProfile } from "@/types";
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -42,7 +42,7 @@ export interface UserProfileFormProps {
 export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -69,11 +69,11 @@ export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps)
 
   async function handleSubmit(values: FormValues) {
     setIsSubmitting(true);
-    
+
     try {
       if (onSubmit) {
         const result = await onSubmit(values);
-        
+
         if (result.error) {
           console.error("Form submission error:", result.error);
           toast({
@@ -126,7 +126,7 @@ export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps)
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="lastName"
@@ -141,7 +141,7 @@ export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps)
             )}
           />
         </div>
-        
+
         <FormField
           control={form.control}
           name="email"
@@ -155,7 +155,7 @@ export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps)
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="region"
@@ -188,9 +188,9 @@ export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps)
             <FormItem>
               <FormLabel>Staff Number</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="Enter your staff number" 
-                  type="number" 
+                <Input
+                  placeholder="Enter your staff number"
+                  type="number"
                   {...field}
                   value={field.value || ''}
                   onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
@@ -200,7 +200,7 @@ export function UserProfileForm({ initialData, onSubmit }: UserProfileFormProps)
             </FormItem>
           )}
         />
-        
+
         <Button
           type="submit"
           disabled={isSubmitting}

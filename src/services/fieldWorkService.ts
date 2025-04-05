@@ -19,6 +19,7 @@ export interface FieldVisit {
 }
 
 export const createFieldVisit = async (visitData: Omit<FieldVisit, 'id' | 'created_at' | 'report_submitted'>) => {
+  console.log("[fieldWorkService] createFieldVisit called", { visitData });
   try {
     // Use any type to bypass TypeScript errors until Supabase types are updated
     const { data, error } = await (supabase as any)
@@ -29,6 +30,7 @@ export const createFieldVisit = async (visitData: Omit<FieldVisit, 'id' | 'creat
     
     if (error) throw error;
     
+    console.log("[fieldWorkService] createFieldVisit success", data);
     return data;
   } catch (error) {
     console.error("Error creating field visit:", error);
@@ -37,6 +39,7 @@ export const createFieldVisit = async (visitData: Omit<FieldVisit, 'id' | 'creat
 };
 
 export const getFieldVisitById = async (visitId: string) => {
+  console.log("[fieldWorkService] getFieldVisitById called", { visitId });
   try {
     // Use any type to bypass TypeScript errors until Supabase types are updated
     const { data, error } = await (supabase as any)
@@ -47,6 +50,7 @@ export const getFieldVisitById = async (visitId: string) => {
     
     if (error) throw error;
     
+    console.log("[fieldWorkService] getFieldVisitById success", data);
     return data;
   } catch (error) {
     console.error(`Error fetching field visit ${visitId}:`, error);
@@ -55,6 +59,7 @@ export const getFieldVisitById = async (visitId: string) => {
 };
 
 export const updateFieldVisit = async (visitId: string, updates: Partial<FieldVisit>) => {
+  console.log("[fieldWorkService] updateFieldVisit called", { visitId, updates });
   try {
     // Use any type to bypass TypeScript errors until Supabase types are updated
     const { data, error } = await (supabase as any)
@@ -65,6 +70,7 @@ export const updateFieldVisit = async (visitId: string, updates: Partial<FieldVi
     
     if (error) throw error;
     
+    console.log("[fieldWorkService] updateFieldVisit success", data);
     return data;
   } catch (error) {
     console.error("Error updating field visit:", error);
@@ -73,6 +79,7 @@ export const updateFieldVisit = async (visitId: string, updates: Partial<FieldVi
 };
 
 export const deleteFieldVisit = async (visitId: string) => {
+  console.log("[fieldWorkService] deleteFieldVisit called", { visitId });
   try {
     // Use any type to bypass TypeScript errors until Supabase types are updated
     const { error } = await (supabase as any)
@@ -82,6 +89,7 @@ export const deleteFieldVisit = async (visitId: string) => {
     
     if (error) throw error;
     
+    console.log("[fieldWorkService] deleteFieldVisit success");
     return true;
   } catch (error) {
     console.error("Error deleting field visit:", error);
@@ -90,6 +98,7 @@ export const deleteFieldVisit = async (visitId: string) => {
 };
 
 export const submitFieldVisitReport = async (visitId: string, reportContent: string) => {
+  console.log("[fieldWorkService] submitFieldVisitReport called", { visitId, reportContent });
   try {
     // First create the report
     // Use any type to bypass TypeScript errors until Supabase types are updated
@@ -105,12 +114,13 @@ export const submitFieldVisitReport = async (visitId: string, reportContent: str
       .single();
     
     if (reportError) throw reportError;
+    console.log("[fieldWorkService] submitFieldVisitReport created report", report);
     
     // Then update the field visit with the report ID and mark as submitted
     // Use any type to bypass TypeScript errors until Supabase types are updated
     const { error: visitError } = await (supabase as any)
       .from('field_visits')
-      .update({ 
+      .update({
         report_id: report.id,
         report_submitted: true,
         status: 'completed'
@@ -119,6 +129,7 @@ export const submitFieldVisitReport = async (visitId: string, reportContent: str
     
     if (visitError) throw visitError;
     
+    console.log("[fieldWorkService] submitFieldVisitReport updated field visit");
     return report;
   } catch (error) {
     console.error("Error submitting field visit report:", error);

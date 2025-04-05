@@ -21,5 +21,23 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
       'x-application-name': import.meta.env.VITE_APP_NAME || 'Zimbabwe Chat Requestor',
       'x-application-version': import.meta.env.VITE_APP_VERSION || '1.0.0'
     }
-  }
+  },
+  db: {
+    schema: 'public'
+  },
+  // Add debug mode in development
+  debug: import.meta.env.DEV
 });
+
+// Helper function to handle Supabase errors consistently
+export const handleSupabaseError = (error: any, context: string = 'Supabase operation') => {
+  console.error(`${context} failed:`, error);
+
+  // Return a standardized error object
+  return {
+    message: error.message || 'An unexpected error occurred',
+    code: error.code || 'unknown',
+    details: error.details || null,
+    context
+  };
+};
