@@ -17,15 +17,15 @@ export const getRequestById = async (requestId: string): Promise<Request | null>
       `)
       .eq('id', requestId)
       .single();
-    
+
     if (error) {
       throw error;
     }
-    
+
     if (!data) {
       return null;
     }
-    
+
     // Helper function to safely access profile properties
     const mapProfile = (profile: any) => {
       if (!profile || typeof profile !== 'object' || 'error' in profile) {
@@ -38,18 +38,20 @@ export const getRequestById = async (requestId: string): Promise<Request | null>
         role: profile.role,
       };
     };
-    
+
     // Convert database format to our app's Request type
     return {
       id: data.id,
-      ticketNumber: data.ticket_number,
-      userId: data.user_id,
+      ticket_number: data.ticket_number,
+      user_id: data.user_id,
       type: data.type as RequestType,
       title: data.title,
       description: data.description,
       status: data.status as RequestStatus,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      field_officer_id: data.field_officer_id,
+      program_manager_id: data.program_manager_id,
       fieldOfficer: mapProfile(data.field_officer),
       programManager: mapProfile(data.program_manager),
       notes: [], // These will be loaded separately when needed
@@ -97,14 +99,14 @@ export const getUserRequests = async (): Promise<Request[]> => {
     // Map the Supabase data to our Request type format
     const requests: Request[] = data.map(request => ({
       id: request.id,
-      ticketNumber: request.ticket_number,
-      userId: request.user_id,
+      ticket_number: request.ticket_number,
+      user_id: request.user_id,
       type: request.type as RequestType,
       title: request.title,
       description: request.description,
       status: request.status as RequestStatus,
-      createdAt: request.created_at,
-      updatedAt: request.updated_at,
+      created_at: request.created_at,
+      updated_at: request.updated_at,
       documents: [],  // We'll fetch these separately if needed
       notes: [],      // We'll fetch these separately if needed
       timeline: []    // We'll fetch these separately if needed
@@ -129,14 +131,14 @@ export const searchRequests = async (searchTerm: string): Promise<Request[]> => 
     }
 
     const userId = session.session.user.id;
-    
+
     // If no search term, return all requests for the user
     if (!searchTerm.trim()) {
       return await getUserRequests();
     }
 
     const normalizedTerm = searchTerm.toLowerCase().trim();
-    
+
     // Search for requests matching the term
     const { data, error } = await supabase
       .from('requests')
@@ -162,14 +164,14 @@ export const searchRequests = async (searchTerm: string): Promise<Request[]> => 
     // Map the Supabase data to our Request type format
     const requests: Request[] = data.map(request => ({
       id: request.id,
-      ticketNumber: request.ticket_number,
-      userId: request.user_id,
+      ticket_number: request.ticket_number,
+      user_id: request.user_id,
       type: request.type as RequestType,
       title: request.title,
       description: request.description,
       status: request.status as RequestStatus,
-      createdAt: request.created_at,
-      updatedAt: request.updated_at,
+      created_at: request.created_at,
+      updated_at: request.updated_at,
       documents: [],  // We'll fetch these separately if needed
       notes: [],      // We'll fetch these separately if needed
       timeline: []    // We'll fetch these separately if needed

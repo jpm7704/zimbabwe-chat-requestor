@@ -62,7 +62,7 @@ const RequestCard = ({ request }: RequestCardProps) => {
       <CardHeader className="p-4 pb-2">
         <div className="flex justify-between items-start">
           <Badge variant="outline" className="mb-2 font-normal">
-            Ticket: {request.ticketNumber}
+            Ticket: {request.ticket_number}
           </Badge>
           <Badge className={`${getStatusColor(request.status)} border`}>
             <div className="flex items-center gap-1.5">
@@ -86,7 +86,7 @@ const RequestCard = ({ request }: RequestCardProps) => {
       </CardContent>
       <CardFooter className="px-4 pb-4 pt-2 flex justify-between items-center">
         <div className="text-sm text-muted-foreground">
-          Updated: {new Date(request.updatedAt).toLocaleDateString()}
+          Updated: {new Date(request.updated_at).toLocaleDateString()}
         </div>
         <Button asChild size="sm">
           <Link to={`/requests/${request.id}`}>View Details</Link>

@@ -12,12 +12,12 @@ interface RequestTimelineProps {
 const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchTimeline = async () => {
       try {
         setLoading(true);
-        
+
         // Get status updates
         const { data: statusUpdates, error: statusError } = await supabase
           .from('status_updates')
@@ -31,12 +31,12 @@ const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
           `)
           .eq('request_id', requestId)
           .order('timestamp', { ascending: false });
-          
+
         if (statusError) throw statusError;
-        
+
         // Transform into timeline events
         const timelineEvents: TimelineEvent[] = [];
-        
+
         for (const update of statusUpdates) {
           // Get user info for each update
           const { data: updater } = await supabase
@@ -44,13 +44,13 @@ const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
             .select('name, role')
             .eq('id', update.updated_by)
             .single();
-          
+
           timelineEvents.push({
             id: update.id,
             type: 'status_change',
             description: `Status changed to ${update.status.replace('_', ' ')}`,
-            createdAt: update.timestamp,
-            requestId: update.request_id,
+            created_at: update.timestamp,
+            request_id: update.request_id,
             createdBy: {
               id: update.updated_by,
               name: updater?.name || 'Unknown User',
@@ -62,7 +62,7 @@ const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
             }
           });
         }
-        
+
         setEvents(timelineEvents);
       } catch (error) {
         console.error('Error loading timeline:', error);
@@ -70,10 +70,10 @@ const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
         setLoading(false);
       }
     };
-    
+
     fetchTimeline();
   }, [requestId]);
-  
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -89,11 +89,11 @@ const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
       </div>
     );
   }
-  
+
   if (events.length === 0) {
     return <div className="text-center py-6 text-muted-foreground">No timeline events found.</div>;
   }
-  
+
   return (
     <div className="space-y-6">
       {events.map((event, index) => (
@@ -112,9 +112,9 @@ const RequestTimeline = ({ requestId }: RequestTimelineProps) => {
             <div>
               <p className="font-medium">{event.description}</p>
               <p className="text-sm text-muted-foreground mb-2">
-                {format(new Date(event.createdAt), 'PPpp')} by {event.createdBy?.name || 'Unknown'} ({event.createdBy?.role || 'user'})
+                {format(new Date(event.created_at), 'PPpp')} by {event.createdBy?.name || 'Unknown'} ({event.createdBy?.role || 'user'})
               </p>
-              
+
               {event.metadata?.notes && (
                 <div className="bg-secondary/20 p-3 rounded-md text-sm mt-2 whitespace-pre-wrap">
                   {event.metadata.notes}

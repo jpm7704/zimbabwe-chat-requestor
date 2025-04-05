@@ -19,7 +19,7 @@ import RequestTimeline from '@/components/requests/RequestTimeline';
 import RequestDocuments from '@/components/requests/RequestDocuments';
 import RequestMessages from '@/components/requests/RequestMessages';
 import RequestAssignmentPanel from '@/components/requests/RequestAssignmentPanel';
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -36,7 +36,7 @@ const RequestDetail = () => {
   const [note, setNote] = useState('');
   const [newStatus, setNewStatus] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const { data: request, isLoading, error, refetch } = useQuery({
     queryKey: ['request', id],
     queryFn: () => getRequestById(id as string),
@@ -55,7 +55,7 @@ const RequestDetail = () => {
 
   const handleAddNote = async () => {
     if (!note.trim() || !id) return;
-    
+
     try {
       setIsSubmitting(true);
       await addNote(id, note);
@@ -79,7 +79,7 @@ const RequestDetail = () => {
 
   const handleStatusChange = async () => {
     if (!newStatus || !id) return;
-    
+
     try {
       setIsSubmitting(true);
       await updateRequestStatus(id, newStatus, note);
@@ -124,7 +124,7 @@ const RequestDetail = () => {
 
   const statusOptions = getNextStatusOptions(request.status, userProfile?.role);
   const canUpdateStatus = statusOptions.length > 0;
-  const createdAtFormatted = formatDistanceToNow(new Date(request.createdAt), { addSuffix: true });
+  const createdAtFormatted = formatDistanceToNow(new Date(request.created_at), { addSuffix: true });
 
   return (
     <div className="container mx-auto p-4">
@@ -133,13 +133,13 @@ const RequestDetail = () => {
           <h1 className="text-2xl font-bold">{request.title}</h1>
           <div className="flex items-center gap-2 mt-1">
             <Badge variant="outline">{request.type}</Badge>
-            <span className="text-sm text-muted-foreground">#{request.ticketNumber}</span>
+            <span className="text-sm text-muted-foreground">#{request.ticket_number}</span>
             <span className="text-sm text-muted-foreground">Created {createdAtFormatted}</span>
           </div>
         </div>
         <RequestStatusBadge status={request.status} />
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card>
@@ -150,7 +150,7 @@ const RequestDetail = () => {
               <p className="whitespace-pre-wrap">{request.description}</p>
             </CardContent>
           </Card>
-          
+
           <Tabs defaultValue="timeline">
             <TabsList className="grid grid-cols-3 mb-4">
               <TabsTrigger value="timeline" className="flex items-center gap-2">
@@ -166,7 +166,7 @@ const RequestDetail = () => {
                 Messages
               </TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="timeline">
               <Card>
                 <CardContent className="pt-6">
@@ -174,7 +174,7 @@ const RequestDetail = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="documents">
               <Card>
                 <CardContent className="pt-6">
@@ -182,7 +182,7 @@ const RequestDetail = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="messages">
               <Card>
                 <CardContent className="pt-6">
@@ -192,13 +192,13 @@ const RequestDetail = () => {
             </TabsContent>
           </Tabs>
         </div>
-        
+
         <div className="space-y-6">
-          <RequestAssignmentPanel 
-            request={request} 
-            onAssignmentChange={refetch} 
+          <RequestAssignmentPanel
+            request={request}
+            onAssignmentChange={refetch}
           />
-          
+
           {canUpdateStatus && (
             <Card>
               <CardHeader>
@@ -218,16 +218,16 @@ const RequestDetail = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                  
+
                   <Textarea
                     placeholder="Add a note about this status change..."
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     className="min-h-[100px]"
                   />
-                  
-                  <Button 
-                    className="w-full" 
+
+                  <Button
+                    className="w-full"
                     onClick={handleStatusChange}
                     disabled={!newStatus || isSubmitting}
                   >
@@ -238,7 +238,7 @@ const RequestDetail = () => {
               </CardContent>
             </Card>
           )}
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Add Note</CardTitle>
@@ -251,9 +251,9 @@ const RequestDetail = () => {
                   onChange={(e) => setNote(e.target.value)}
                   className="min-h-[100px]"
                 />
-                
-                <Button 
-                  className="w-full" 
+
+                <Button
+                  className="w-full"
                   onClick={handleAddNote}
                   disabled={!note.trim() || isSubmitting}
                 >

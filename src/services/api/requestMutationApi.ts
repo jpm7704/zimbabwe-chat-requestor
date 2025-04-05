@@ -34,7 +34,7 @@ export const createRequest = async (params: RequestParams): Promise<RequestResul
       type: params.type,
       status: 'submitted' as RequestStatus // Default status
     };
-    
+
     // Only add is_enquiry field if it's explicitly set
     if (params.isEnquiry !== undefined) {
       requestData.is_enquiry = params.isEnquiry;
@@ -50,9 +50,9 @@ export const createRequest = async (params: RequestParams): Promise<RequestResul
       throw error;
     }
 
-    return { 
-      requestId: data.id, 
-      ticketNumber: data.ticket_number 
+    return {
+      requestId: data.id,
+      ticket_number: data.ticket_number
     };
   } catch (error: any) {
     console.error("Error creating request:", error);
@@ -102,16 +102,18 @@ export const updateRequest = async (
     // Convert the data from DB format to our application's Request type
     return {
       id: data.id,
-      ticketNumber: data.ticket_number,
-      userId: data.user_id,
+      ticket_number: data.ticket_number,
+      user_id: data.user_id,
       title: data.title,
       description: data.description,
       type: data.type as RequestType,
       status: data.status as RequestStatus,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      field_officer_id: data.field_officer_id,
+      program_manager_id: data.program_manager_id,
       // Initialize with empty arrays - these would typically be loaded separately
-      notes: [], 
+      notes: [],
       documents: [],
       timeline: []
     };
@@ -142,7 +144,7 @@ export const deleteRequest = async (id: string): Promise<void> => {
  */
 export const updateRequestStatus = async (
   requestId: string,
-  status: string, 
+  status: string,
   notes?: string
 ): Promise<void> => {
   try {
@@ -173,7 +175,7 @@ export const updateRequestStatus = async (
       .from('requests')
       .update({ status })
       .eq('id', requestId);
-      
+
     if (requestError) {
       throw requestError;
     }
@@ -235,7 +237,7 @@ export const uploadDocument = async (
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.floor(Math.random() * 10000)}.${fileExt}`;
     const filePath = `${requestId}/${fileName}`;
-    
+
     // Upload the file to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('requests')
@@ -243,12 +245,12 @@ export const uploadDocument = async (
         cacheControl: '3600',
         upsert: false
       });
-    
+
     if (uploadError) {
       console.error("Error uploading file:", uploadError);
       throw uploadError;
     }
-    
+
     // Get the public URL for the uploaded file
     const { data: publicUrlData } = supabase.storage
       .from('requests')
@@ -266,12 +268,12 @@ export const uploadDocument = async (
       })
       .select()
       .single();
-    
+
     if (attachmentError) {
       console.error("Error recording attachment:", attachmentError);
       throw attachmentError;
     }
-    
+
     return {
       id: attachmentData.id,
       requestId: attachmentData.request_id,
@@ -295,12 +297,12 @@ export const getRequestDocuments = async (requestId: string): Promise<Document[]
       .from('attachments')
       .select('*')
       .eq('request_id', requestId);
-    
+
     if (error) {
       console.error("Error fetching documents:", error);
       throw error;
     }
-    
+
     return data.map(doc => ({
       id: doc.id,
       requestId: doc.request_id,
@@ -325,12 +327,12 @@ export const deleteDocument = async (documentId: string): Promise<boolean> => {
       .from('attachments')
       .delete()
       .eq('id', documentId);
-    
+
     if (dbError) {
       console.error("Error deleting attachment record:", dbError);
       return false;
     }
-    
+
     return true;
   } catch (error) {
     console.error("Error in deleteDocument:", error);
