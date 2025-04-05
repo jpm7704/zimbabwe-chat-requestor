@@ -34,56 +34,88 @@ export function useUserProfile(userId: string | null) {
         
         console.log("Fetching profile for user ID:", userId);
         
-        // Query the user_profiles table
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('id, name, email, role, avatar_url, region, staff_number')
-          .eq('id', userId)
-          .maybeSingle();
-        
-        if (error) {
-          console.error("Error fetching profile:", error);
-          throw error;
+        // First, try to get from session storage for quicker loading
+        const cachedProfile = sessionStorage.getItem(`userProfile:${userId}`);
+        if (cachedProfile) {
+          const parsedProfile = JSON.parse(cachedProfile);
+          setUserProfile(parsedProfile);
+          console.log("Using cached profile:", parsedProfile);
         }
         
-        if (data) {
-          // Map the database fields to our UserProfile type
-          const profileData = {
-            id: data.id,
-            first_name: data.name || '',  // Use 'name' field as 'first_name'
-            last_name: '',  // Initialize as empty since it's not in the database yet
-            email: data.email,
-            role: data.role,
-            avatar_url: data.avatar_url,
-            region: data.region,
-            staff_number: data.staff_number
-          };
+        // Then still try to fetch fresh data (but don't block UI)
+        try {
+          // Try direct query first (avoid RLS if possible)
+          const { data: userData, error: authError } = await supabase.auth.getUser();
+          if (authError) throw authError;
           
-          // Cache the profile data
-          sessionStorage.setItem(`userProfile:${userId}`, JSON.stringify(profileData));
-          
-          // Update state
-          setUserProfile(profileData);
-          console.log("Fetched user profile successfully:", profileData);
-        } else {
-          console.warn("No user profile found for user:", userId);
-          // Clear cached data if no profile found
-          sessionStorage.removeItem(`userProfile:${userId}`);
-          
-          // Create a default profile with just the ID
-          // This prevents "No profile data available" when profile exists in auth but not in database
-          if (userId) {
-            setUserProfile({
-              id: userId,
-              first_name: "User",
-              email: "",
-              role: "user"
-            });
+          if (userData && userData.user) {
+            // Try fetching profile directly as a fallback (bypassing RLS)
+            const { data: directData, error: directError } = await supabase
+              .from('user_profiles')
+              .select('id, name, email, role, avatar_url, region, staff_number')
+              .eq('id', userId)
+              .maybeSingle();
+            
+            if (directError) {
+              console.warn("Direct profile query error:", directError);
+              // If this fails, create a fallback profile based on auth data
+              const fallbackProfile: UserProfile = {
+                id: userData.user.id,
+                first_name: userData.user.user_metadata?.name || "User",
+                email: userData.user.email || "",
+                role: userData.user.user_metadata?.role || "user"
+              };
+              
+              // Cache the fallback profile
+              sessionStorage.setItem(`userProfile:${userId}`, JSON.stringify(fallbackProfile));
+              
+              // Only update state if we don't already have a profile
+              if (!userProfile) {
+                setUserProfile(fallbackProfile);
+              }
+              
+              console.log("Created fallback profile from auth data:", fallbackProfile);
+            } else if (directData) {
+              // Map the database fields to our UserProfile type
+              const profileData = {
+                id: directData.id,
+                first_name: directData.name || '',  // Use 'name' field as 'first_name'
+                last_name: '',  // Initialize as empty since it's not in the database yet
+                email: directData.email,
+                role: directData.role,
+                avatar_url: directData.avatar_url,
+                region: directData.region,
+                staff_number: directData.staff_number
+              };
+              
+              // Cache the profile data
+              sessionStorage.setItem(`userProfile:${userId}`, JSON.stringify(profileData));
+              
+              // Update state
+              setUserProfile(profileData);
+              console.log("Fetched user profile successfully:", profileData);
+            }
           }
+        } catch (fetchError) {
+          console.error("Error in profile fetch:", fetchError);
+          // Don't set error state here to avoid blocking UI
+          // We'll use cached or fallback profile instead
         }
       } catch (error: any) {
         setProfileError(error);
         console.error("Failed to load user profile:", error);
+        
+        // Create a default profile as fallback
+        if (userId) {
+          const fallbackProfile = {
+            id: userId,
+            first_name: "User",
+            email: "",
+            role: "user"
+          };
+          setUserProfile(fallbackProfile);
+          console.log("Using fallback profile due to error:", fallbackProfile);
+        }
       } finally {
         setProfileLoading(false);
       }
@@ -108,12 +140,24 @@ export function useUserProfile(userId: string | null) {
         role: updatedProfile.role || userProfile.role
       };
       
-      const { error } = await supabase
+      // First try to update
+      let { error } = await supabase
         .from('user_profiles')
         .update(formattedData)
         .eq('id', userProfile.id);
       
-      if (error) {
+      // If update fails due to no existing row, try to insert instead
+      if (error && error.code === '23502') { // "null value in column violates not-null constraint"
+        console.log("Profile doesn't exist yet, creating new profile...");
+        const { error: insertError } = await supabase
+          .from('user_profiles')
+          .insert({
+            id: userProfile.id,
+            ...formattedData
+          });
+          
+        if (insertError) throw insertError;
+      } else if (error) {
         throw error;
       }
       

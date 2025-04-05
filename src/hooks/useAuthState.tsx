@@ -17,16 +17,17 @@ export function useAuthState() {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        console.log("Auth state changed:", event, "User:", currentSession?.user?.id);
+        
         setSession(currentSession);
         setIsAuthenticated(!!currentSession);
         setUserId(currentSession?.user?.id || null);
         setUser(currentSession?.user || null);
         
-        // Store the complete session in localStorage for persistence
-        if (currentSession) {
-          // We don't need to manually store the session as Supabase handles this
-          // Just update our local state
-          console.log("Auth state changed:", event, "User:", currentSession?.user?.id);
+        // For debugging
+        if (currentSession?.user) {
+          console.log("User metadata:", currentSession.user.user_metadata);
+          console.log("User role from metadata:", currentSession.user.user_metadata?.role);
         }
       }
     );
@@ -36,6 +37,7 @@ export function useAuthState() {
       setLoading(true);
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
         setSession(currentSession);
         setIsAuthenticated(!!currentSession);
         setUserId(currentSession?.user?.id || null);
@@ -43,6 +45,9 @@ export function useAuthState() {
         
         if (currentSession) {
           console.log("Retrieved existing session for user:", currentSession?.user?.id);
+          // For debugging
+          console.log("User metadata:", currentSession.user.user_metadata);
+          console.log("User role from metadata:", currentSession.user.user_metadata?.role);
         }
       } catch (error) {
         console.error("Error checking auth session:", error);
@@ -63,6 +68,8 @@ export function useAuthState() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
+      // Clear any cached profile data
+      sessionStorage.clear();
       navigate("/login");
     } catch (error) {
       console.error("Error signing out:", error);

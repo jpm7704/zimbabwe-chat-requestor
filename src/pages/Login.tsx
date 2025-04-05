@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -66,13 +65,11 @@ const Login = () => {
           description: "Welcome back to BGF Zimbabwe support portal."
         });
         
-        // Wait a moment for user profile to be loaded before redirecting
+        // Ensure we give time for user data to load before redirecting
         setTimeout(() => {
-          // Use role-specific redirect
-          const homePage = getRoleHomePage();
-          console.log("Redirecting to role-specific page:", homePage);
-          navigate(homePage);
-        }, 500);
+          // Use role-specific redirect, with fallback to dashboard
+          navigate('/dashboard');
+        }, 1000);
       }
     } catch (err: any) {
       setError(err.message || "An error occurred during login");

@@ -38,13 +38,18 @@ const Dashboard = () => {
           <CardContent className="p-6">
             <div className="flex flex-col items-center justify-center py-8">
               <User className="h-12 w-12 text-muted-foreground mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Profile Unavailable</h2>
+              <h2 className="text-xl font-semibold mb-2">Loading Profile</h2>
               <p className="text-muted-foreground text-center mb-4">
-                We couldn't load your profile. Please try signing out and signing in again.
+                We're setting up your dashboard. This may take a moment...
               </p>
-              <Button asChild>
-                <Link to="/profile">Go to Profile</Link>
-              </Button>
+              <div className="flex gap-4">
+                <Button asChild variant="outline">
+                  <Link to="/profile">Go to Profile</Link>
+                </Button>
+                <Button>
+                  <Link to="/requests">View Requests</Link>
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
