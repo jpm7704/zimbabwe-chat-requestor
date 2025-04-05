@@ -208,3 +208,6 @@ export interface Notification {
   // Computed properties (not in the database)
   formattedDate?: string;
 }
+
+// Export field visit types
+export * from './fieldVisit';

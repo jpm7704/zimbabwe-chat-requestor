@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Report } from "@/services/reportService";
+import { ClientReport } from "@/services/reportService";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Download, Printer, Share, Filter, FileBarChart } from "lucide-react";
 import { format } from "date-fns";
@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
 interface ReportsListProps {
-  reports: Report[];
+  reports: ClientReport[];
   isLoading: boolean;
   onRefresh: () => void;
 }
@@ -37,7 +37,7 @@ const ReportsList: React.FC<ReportsListProps> = ({ reports, isLoading, onRefresh
       description: "Report sharing will be available in a future update."
     });
   };
-  
+
   const handleAdvancedFilter = () => {
     toast({
       title: "Feature coming soon",
@@ -74,7 +74,7 @@ const ReportsList: React.FC<ReportsListProps> = ({ reports, isLoading, onRefresh
           Advanced Filters
         </Button>
       </div>
-      
+
       <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
